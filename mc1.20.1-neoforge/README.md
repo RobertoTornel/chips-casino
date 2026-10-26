@@ -21,7 +21,7 @@ gradlew.bat build
 
 ## Layout
 
-- `src/main/java/dev/emccasino/EmcCasino.java` — `@Mod` 主类 + 事件总线注册骨架
+- `src/main/java/dev/casino/Casino.java` — `@Mod` 主类 + 事件总线注册骨架
 - `src/main/resources/META-INF/mods.toml` — javafml 形态（modLoader/loaderVersion 必填）
 - `src/main/resources/pack.mcmeta` — pack_format 15
 - `build.gradle` — legacyforge 2.0.91 + Parchment + Java 17 toolchain

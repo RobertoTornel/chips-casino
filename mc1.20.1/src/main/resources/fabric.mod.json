@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "emc_casino",
+  "id": "casino",
   "version": "${version}",
-  "name": "EMC Casino",
-  "description": "EMC-based casino and gambling machines with a ProjectE-style economy (0.8x deposit / 1.2x withdraw), six game tables, a sprite-driven themable UI, multiplayer Texas Hold'em seating and server-side bots.",
+  "name": "Casino",
+  "description": "Casino and gambling machines for your server: real money, six games, a themable UI, and server-side bots so the tables are never empty.",
   "authors": [
     "Antigravity"
   ],
@@ -11,10 +11,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "dev.emccasino.EmcCasino"
+      "dev.casino.Casino"
     ],
     "client": [
-      "dev.emccasino.EmcCasinoClient"
+      "dev.casino.CasinoClient"
     ]
   },
   "depends": {

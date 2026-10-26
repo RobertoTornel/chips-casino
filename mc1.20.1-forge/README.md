@@ -20,7 +20,7 @@ gradlew.bat build
 
 ## Layout
 
-- `src/main/java/dev/emccasino/EmcCasino.java` — `@Mod` 主类 + mod bus / game bus 注册点
+- `src/main/java/dev/casino/Casino.java` — `@Mod` 主类 + mod bus / game bus 注册点
 - `src/main/resources/META-INF/mods.toml` — mods.toml（`${mod_id}` 等由 Gradle expand 替换）
 - `src/main/resources/pack.mcmeta` — pack_format 15
 - `build.gradle` — ForgeGradle 6（坐标 `net.minecraftforge.gradle:ForgeGradle:6.0.54`）+ official 映射 + Java 17 toolchain + reobfJar

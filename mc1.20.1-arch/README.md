@@ -1,6 +1,6 @@
-# EMC Casino — 1.20.1 Architectury multiloader
+# Chips Casino — 1.20.1 Architectury multiloader
 
-Canonical Minecraft **1.20.1** deliverable of the EMC Casino mod, built once from a shared
+Canonical Minecraft **1.20.1** deliverable of the Chips Casino mod, built once from a shared
 `common` module and packaged independently for **Fabric**, **Forge** and **NeoForge**.
 
 ```
@@ -29,34 +29,34 @@ Artifacts:
 | `forge` | `forge/build/libs/emc-casino-0.1.0.jar` | all common classes (remapped to SRG) + assets |
 | `neoforge` | `neoforge/build/libs/emc-casino-0.1.0.jar` | same content, NeoForge-flavoured metadata |
 
-`mod_id = emc_casino`, name **EMC Casino**, version **0.1.0**.
+`mod_id = casino`, name **Casino**, version **0.1.0**.
 
 ## Architecture
 
 **`common/`** holds everything platform-neutral:
 
-- `dev.emccasino.EmcCasino` — the mod core. Registration goes through Architectury's
+- `dev.casino.Casino` — the mod core. Registration goes through Architectury's
   `DeferredRegister` / `RegistrySupplier` (works on all three loaders), plus
   `CommandRegistrationEvent` and `LifecycleEvent` for the `/casino` command and world-scoped
   account persistence.
-- `dev.emccasino.network.CasinoNetwork` — one cross-loader packet layer built on Architectury's
+- `dev.casino.network.CasinoNetwork` — one cross-loader packet layer built on Architectury's
   `NetworkManager` with a `FriendlyByteBuf` + `ResourceLocation` wire format:
   `action` (C2S), `sync` (S2C), `open_screen` (S2C). **No `net.minecraft.client.*` reference** —
   see *Dedicated-server safety* below.
-- `dev.emccasino.client.CasinoClientInit` / `CasinoClientNetwork` — client-only: registers the
+- `dev.casino.client.CasinoClientInit` / `CasinoClientNetwork` — client-only: registers the
   S2C receivers and opens the matching screen. Only ever loaded from a client entrypoint.
-- `dev.emccasino.client.gui.*` — six screens + `CasinoSprites` (sprite-driven, themable UI).
-- `dev.emccasino.game.*` — the nine pure-Java engines (roulette, blackjack, baccarat, video poker,
+- `dev.casino.client.gui.*` — six screens + `CasinoSprites` (sprite-driven, themable UI).
+- `dev.casino.game.*` — the nine pure-Java engines (roulette, blackjack, baccarat, video poker,
   pachinko, Texas Hold'em + cards/deck/hand evaluator).
-- `dev.emccasino.api.*` — `EmcRegistry` (0.8× deposit / 1.2× withdraw), `EmcDataLoader`
-  (datapack-driven `data/emc_casino/emc/*.json`, re-applied on `/reload`), `EmcKubeJsBridge`.
-- `dev.emccasino.economy.CasinoAccountManager`, `dev.emccasino.command.CasinoCommand`.
+- `dev.casino.api.*` — `PriceTable` (0.8× deposit / 1.2× withdraw), `PriceDataLoader`
+  (datapack-driven `data/casino/prices/*.json`, re-applied on `/reload`), `PriceKubeJsBridge`.
+- `dev.casino.economy.CasinoAccountManager`, `dev.casino.command.CasinoCommand`.
 
 **Platform modules** contain only the loader glue:
 
 | Concern | `fabric/` | `forge/` + `neoforge/` |
 |---|---|---|
-| Entrypoint | `EmcCasinoFabric` (`main`), `EmcCasinoFabricClient` (`client`) | `@Mod(EmcCasino.MOD_ID) EmcCasinoForge` |
+| Entrypoint | `CasinoFabric` (`main`), `CasinoFabricClient` (`client`) | `@Mod(Casino.MOD_ID) CasinoForge` |
 | Client setup | `ClientModInitializer` | `FMLClientSetupEvent` + `DistExecutor` |
 | `/reload` hook | `SimpleSynchronousResourceReloadListener` | `AddReloadListenerEvent` |
 | Dark-mode pack | `ResourceManagerHelper.registerBuiltinResourcePack` | shipped as `resourcepacks/dark_mode/` in the jar |
@@ -78,11 +78,11 @@ pass, so every artifact is self-contained:
 
 ### Dedicated-server safety
 
-`net.minecraft.client.*` is referenced **only** from `dev.emccasino.client`. Verify anytime with:
+`net.minecraft.client.*` is referenced **only** from `dev.casino.client`. Verify anytime with:
 
 ```bash
 # forge/neoforge jars
-unzip -p forge/build/libs/emc-casino-0.1.0.jar dev/emccasino/network/CasinoNetwork.class \
+unzip -p forge/build/libs/emc-casino-0.1.0.jar dev/casino/network/CasinoNetwork.class \
   | grep -c "net/minecraft/client/"     # => 0
 ```
 

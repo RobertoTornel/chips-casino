@@ -7,7 +7,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = "emc-casino-arch"
+rootProject.name = "casino-arch"
 
 include("common")
 include("fabric")

@@ -1,181 +1,204 @@
-# EMC Casino
+# Casino
 
-An EMC-based casino and gambling mod for Minecraft. Custom Minecraft-styled sprite-driven
-UIs, six game machine blocks, multiplayer poker tables with server-side bots, and a
-standalone ProjectE-style economy with the 0.8× / 1.2× exchange spread.
+A casino and gambling mod for Minecraft: six playable machines, a real money system, and
+server-side bots so the tables are never empty.
+
+The house takes a cut in both directions — **it buys your items at 80% of base value and
+sells them back at 120%**. That spread is the whole game design: no trade loop can come out
+ahead, so money enters the world only by winning it.
 
 ---
 
 ## Downloads
 
-### Architectury multiloader build (canonical 1.20.1)
+### Architectury multiloader build (the recommended 1.20.1 artifact)
 
 | Minecraft | Loader | Java | Artifact |
 |---|---|---|---|
-| **1.20.1** | Fabric ≥ 0.14.21 | 17 | [`architectury/…-arch-fabric-0.1.0.jar`](dist/architectury/emc-casino-1.20.1-arch-fabric-0.1.0.jar) |
-| **1.20.1** | Forge 47.x | 17 | [`architectury/…-arch-forge-0.1.0.jar`](dist/architectury/emc-casino-1.20.1-arch-forge-0.1.0.jar) |
-| **1.20.1** | NeoForge 47.1.x | 17 | [`architectury/…-arch-neoforge-0.1.0.jar`](dist/architectury/emc-casino-1.20.1-arch-neoforge-0.1.0.jar) |
+| **1.20.1** | Fabric ≥ 0.14.21 | 17 | [`architectury/casino-1.20.1-arch-fabric-0.1.0.jar`](dist/architectury/casino-1.20.1-arch-fabric-0.1.0.jar) |
+| **1.20.1** | Forge 47.x | 17 | [`architectury/casino-1.20.1-arch-forge-0.1.0.jar`](dist/architectury/casino-1.20.1-arch-forge-0.1.0.jar) |
+| **1.20.1** | NeoForge 47.1.x | 17 | [`architectury/casino-1.20.1-arch-neoforge-0.1.0.jar`](dist/architectury/casino-1.20.1-arch-neoforge-0.1.0.jar) |
 
-Built from one `common` source tree in [`mc1.20.1-arch/`](mc1.20.1-arch/) and packaged
-per platform. See its [README](mc1.20.1-arch/README.md) for the module layout and the
-NeoForge 1.20.1 packaging note.
+One `common` source tree in [`mc1.20.1-arch/`](mc1.20.1-arch/), packaged per platform.
 
 ### Standalone per-version builds
 
 | Minecraft | Loader | Java | Artifact |
 |---|---|---|---|
-| **26.3** | Fabric ≥ 0.19.5 | 25 | [`emc-casino-26.3-fabric-0.1.0.jar`](dist/emc-casino-26.3-fabric-0.1.0.jar) |
-| **1.20.1** | Fabric ≥ 0.14.21 | 17 | [`emc-casino-1.20.1-fabric-0.1.0.jar`](dist/emc-casino-1.20.1-fabric-0.1.0.jar) |
-| **1.20.1** | Forge 47.3.0 | 17 | [`emc-casino-1.20.1-forge-0.1.0.jar`](dist/emc-casino-1.20.1-forge-0.1.0.jar) |
-| **1.20.1** | NeoForge 47.1.3 | 17 | [`emc-casino-1.20.1-neoforge-0.1.0.jar`](dist/emc-casino-1.20.1-neoforge-0.1.0.jar) |
+| **26.3** | Fabric ≥ 0.19.5 | 25 | [`casino-26.3-fabric-0.1.0.jar`](dist/casino-26.3-fabric-0.1.0.jar) |
+| **1.20.1** | Fabric ≥ 0.14.21 | 17 | [`casino-1.20.1-fabric-0.1.0.jar`](dist/casino-1.20.1-fabric-0.1.0.jar) |
+| **1.20.1** | Forge 47.3.0 | 17 | [`casino-1.20.1-forge-0.1.0.jar`](dist/casino-1.20.1-forge-0.1.0.jar) |
+| **1.20.1** | NeoForge 47.1.3 | 17 | [`casino-1.20.1-neoforge-0.1.0.jar`](dist/casino-1.20.1-neoforge-0.1.0.jar) |
 
-Built jars live in [`dist/`](dist/). Drop the matching one into `mods/` — either the
-Architectury or the standalone artifact works; they carry the same features.
+Either set works — the Architectury and standalone jars carry the same features.
 
 ---
 
-## The economy
+## Money
 
-The mod does **not** require ProjectE. It ships its own hardcoded EMC table and applies
-ProjectE's asymmetric exchange rate:
+The mod ships its own wallet. No economy mod or plugin is required, and nothing here
+depends on one — the balance is a plain long per player, saved in the world at
+`<world>/casino/wallets.json`.
 
-| Direction | Multiplier | Formula |
-|---|---|---|
-| **Deposit** (cash items in) | **0.8×** | `floor(base × 0.8)` |
-| **Withdraw** (buy items out) | **1.2×** | `ceil(base × 1.2)` |
+The API is intentionally shaped like the economy services server owners already know, so
+it reads familiarly and can be bridged to an external economy later without touching any
+call sites:
 
-So a diamond priced at 8192 EMC deposits for 6553 and costs 9831 to buy back — a
-consistent 4:6 spread that keeps the table solvent no matter which way players trade.
-
-### Editing values
-
-Three ways, all live:
-
-**1. Commands**
-
-```
-/casino balance [player]        view an EMC balance
-/casino give <player> <amount>  grant EMC            (op 2)
-/casino setemc <item> <value>   set a base EMC value (op 2)
-/casino getemc <item>           inspect base / 0.8× / 1.2×
+```java
+Wallet.getBalance(uuid)            // current balance
+Wallet.has(uuid, amount)           // can they afford it
+Wallet.deposit(uuid, amount)       // add money
+Wallet.withdraw(uuid, amount)      // take money; false and no change if short
+Wallet.transfer(from, to, amount)  // atomic player-to-player
+Wallet.setBalance(uuid, amount)    // admin
+Wallet.createAccount(uuid)         // explicit account creation
 ```
 
-**2. Data pack** — durable, survives restarts, re-applied on every `/reload`:
+Currency name (`Chips`) and symbol (`◈`) are constants on `Wallet`, so rebranding is a
+one-line change.
+
+### Commands
 
 ```
-data/<your_namespace>/emc/prices.json
+/casino balance [player]         your balance, or someone else's
+/casino wallet set <p> <n>       set a balance          (op 2)
+/casino wallet take <p> <n>      remove money           (op 2)
+/casino wallet reset <p>         wipe a wallet          (op 2)
+/casino give <player> <amount>   grant money            (op 2)
+/casino sell hand                sell what you're holding
+/casino buy <item> [count]       buy from the house
+/casino price <item>             inspect base / buy / sell
+/casino setprice <item> <n>      set a base price       (op 2)
+/casino reload                   reload prices from disk
 ```
+
+---
+
+## The house exchange
+
+Two rates, both derived from the same base price:
+
+| Direction | Multiplier | Formula | On an 8192-base item |
+|---|---|---|---|
+| **House buys** (you sell) | **0.8×** | `floor(base × 0.8)` | 6553 |
+| **House sells** (you buy) | **1.2×** | `ceil(base × 1.2)` | 9831 |
+
+Sell-then-buy and buy-then-sell both lose money at every base value — there is no
+arbitrage. The 33.3% edge is what makes the machines matter: you cannot grind items into
+profit, only win it.
+
+The **Exchange block** (`casino:exchange`) is the physical shop. It shows both columns side
+by side so the spread is visible at a glance.
+
+### Editing base prices
+
+Three ways, all live, none of them require restarting:
+
+**1. Command** — `/casino setprice minecraft:diamond 12000`
+
+**2. Datapack** — drop a file at `data/<your_pack>/prices/values.json`:
+
 ```json
-{ "minecraft:diamond": 9000, "minecraft:emerald": 20000 }
+{
+  "values": {
+    "minecraft:diamond": 8192,
+    "minecraft:emerald": 16384,
+    "mymod:custom_thing": 500
+  }
+}
 ```
 
-Every `data/*/emc/*.json` is merged over the built-in defaults, so a pack only lists
-what it wants to change.
+Re-applied on every `/reload`, and it persists across restarts.
 
-**3. KubeJS** — dynamic, for scripted servers:
+**3. KubeJS** — see [`examples/kubejs/`](examples/kubejs/):
 
 ```js
-const EmcCasino = Java.loadClass('dev.emccasino.api.EmcKubeJsBridge')
-EmcCasino.set('minecraft:diamond', 9000)
-EmcCasino.remove('minecraft:dirt')
-console.info(EmcCasino.deposit('minecraft:diamond'))  // 7200
+const Casino = Java.loadClass('dev.casino.api.PriceKubeJsBridge')
+Casino.set('minecraft:diamond', 12000)
 ```
 
-Full method table and a working example script live in
-[`examples/kubejs/`](examples/kubejs/).
+KubeJS values last for the session; use a datapack for anything permanent.
 
 ---
 
-## The games
+## The machines
 
-Six placeable machine blocks, each with its own block entity:
-
-| Block | Game | Notes |
+| Block | Game | Players |
 |---|---|---|
-| `emc_casino:roulette_table` | European Roulette | 0–36, straights, colours, dozens, odd/even |
-| `emc_casino:blackjack_table` | Blackjack | Hit / stand / double, 3:2 naturals |
-| `emc_casino:baccarat_table` | Punto Banco | Player / Banker (5% commission) / Tie at 8:1 |
-| `emc_casino:poker_machine` | Video Poker | Jacks or Better draw, Royal Flush 800:1 |
-| `emc_casino:pachinko_cabinet` | Pachinko | Simulated pegboard, multipliers to 100× |
-| `emc_casino:texas_holdem_floor` | Texas Hold'em | 6 seats, blinds, side pots, bots |
+| `casino:roulette_table` | Roulette — number, colour and split bets | 1 |
+| `casino:blackjack_table` | Blackjack — hit, stand, double | 1 |
+| `casino:baccarat_table` | Baccarat — player, banker, tie | 1 |
+| `casino:poker_machine` | Video poker — hold/draw, Jacks or Better | 1 |
+| `casino:pachinko_cabinet` | Pachinko — drop a ball, physics decides | 1 |
+| `casino:texas_holdem_floor` | Texas Hold'em — full table, seats up to 6 | 1–6 |
+| `casino:exchange` | The house exchange — sell and buy items | — |
 
-### Multiplayer seating
+### Multiplayer
 
-The Texas Hold'em floor is a real server-side table. Players open the block, pick a
-seat and buy in from their EMC balance; the buy-in is deducted on join and the
-remaining stack refunded on leave. Seat state, turn order, pot and cards are broadcast
-to every viewer of that block, so several players at one table stay in sync.
+Texas Hold'em seats up to six. A buy-in is deducted when you sit and refunded if you leave
+before the hand resolves. Every viewer of a table is kept in sync, so spectators see the
+same state as the players.
 
 ### Bots
 
-Empty seats can be filled by server-side bots with distinct strategies:
-
-| Personality | Behaviour |
-|---|---|
-| `TIGHT` | Folds marginal hands pre-flop, only continues with premium holdings |
-| `BLUFF` | High pre-flop aggression, bets into perceived weakness |
-| `CALLING_STATION` | Rarely folds, calls down to the river |
-| `MANIAC` | Constant raises and all-ins |
-| `BALANCED` | Mixed strategy weighting pot odds against hand strength |
+Empty tables are filled by server-side bots with five personalities — **TIGHT**, **BLUFF**,
+**CALLING_STATION**, **MANIAC** and **BALANCED** — each pacing its decisions so the table
+feels occupied rather than instant. Bots run on the server, so they work in singleplayer
+and on a dedicated server alike, and they never need a client mod.
 
 ---
 
-## The UI
+## Theming
 
-Every screen is drawn from **PNG sprites**, not hardcoded fills, so a resource pack can
-completely reskin the mod without touching code:
+Every element of every GUI is a texture under `assets/casino/textures/gui/`, so a resource
+pack can restyle the entire mod without touching code.
 
-```
-assets/emc_casino/textures/gui/
-├── casino_frame.png     256×256  cabinet body
-├── header_bar.png       256×32   title strip
-├── balance_bar.png      256×16   EMC balance strip
-├── button.png           64×20    button normal
-├── button_hover.png     64×20    button hover
-├── chip.png             16×16    betting chip
-├── roulette_wheel.png   64×64    wheel face
-├── pachinko_board.png   128×128  pegboard
-└── cards/
-    ├── card_front.png   20×28
-    └── card_back.png    20×28
-```
+| Sprite | Size | Used for |
+|---|---|---|
+| `casino_frame.png` | 256×256 | the cabinet panel frame |
+| `header_bar.png` | 256×32 | title strip |
+| `button.png` / `button_hover.png` | 64×20 | buttons |
+| `balance_bar.png` | 256×16 | the money strip |
+| `chip.png` | 16×16 | poker chip |
+| `roulette_wheel.png` | 64×64 | the wheel |
+| `pachinko_board.png` | 128×128 | the pin board |
+| `cards/card_front.png` / `card_back.png` | 20×28 | playing cards |
 
-### Dark mode
+Block faces live in `assets/casino/textures/block/`.
 
-A built-in resource pack, **EMC Casino Dark Mode**, ships with the mod and can be
-enabled in *Options → Resource Packs*. It overrides the same ten sprite paths with a
-charcoal / obsidian / violet palette, so enabling it re-themes the whole mod with no
-restart beyond the normal pack reload.
+A **dark mode** pack ships built in (enable it in Options → Resource Packs) and overrides
+the same filenames under the same paths. See [`ART_PIPELINE.md`](ART_PIPELINE.md) for the
+palette and how to regenerate the set.
 
 ---
 
-## Building from source
+## Building
 
-Each version directory is a standalone Gradle project with its own wrapper:
-
-```
-mc26.3/              Fabric, Minecraft 26.3, Java 25
-mc1.20.1/            Fabric,  Minecraft 1.20.1, Java 17
-mc1.20.1-forge/      Forge,   Minecraft 1.20.1, Java 17
-mc1.20.1-neoforge/   NeoForge, Minecraft 1.20.1, Java 17
-mc1.20.1-arch/       Architectury multiloader, Minecraft 1.20.1
-```
+Each project is self-contained:
 
 ```bash
-cd mc1.20.1 && ./gradlew build
-# -> build/libs/emc-casino-0.1.0.jar
+cd mc26.3            && ./gradlew build   # 26.3, Fabric, Java 25
+cd mc1.20.1          && ./gradlew build   # 1.20.1, Fabric, Java 17
+cd mc1.20.1-forge    && ./gradlew build   # 1.20.1, Forge, Java 17
+cd mc1.20.1-neoforge && ./gradlew build   # 1.20.1, NeoForge, Java 17
+cd mc1.20.1-arch     && ./gradlew build   # 1.20.1, all three loaders at once
 ```
 
-`dist/` holds the assembled release jars for all four standalone targets.
+Jars land in `<project>/build/libs/`.
+
+### Version notes
+
+- **26.x** is unobfuscated (mojmap). `ResourceLocation` is `Identifier`,
+  `BuiltInRegistries.ITEM.getValue(id)` replaces `.get(id)`, screens render through
+  `GuiGraphicsExtractor`, and blocks/items require an explicit id on their properties
+  (`Properties.setId(...)`) before construction — omitting it throws at class-load.
+- **1.20.1** uses `ResourceLocation`, `GuiGraphics.drawString(..., false)`, native-size
+  `blit` regions, and `source.hasPermission(2)`.
+- **NeoForge 1.20.1** ships as `net.neoforged:forge` for that era; the NeoForge module
+  compiles the Forge API sources and is loaded natively by NeoForge 47.1.x.
 
 ---
 
-## Notes on version specifics
+## License
 
-- **26.3** is fully unobfuscated; the mod uses official Mojang names, so
-  `ResourceLocation` is `Identifier` and screens implement
-  `extractRenderState(GuiGraphicsExtractor, …)`.
-- **1.20.1** still uses `ResourceLocation`, `GuiGraphics`, and the MCP-era
-  ForgeGradle 6 toolchain for the Forge module.
-- 26.3 resource packs declare `pack_format` 97 (with a `supported_formats` range);
-  1.20.1 packs declare `pack_format` 15.
+MIT.

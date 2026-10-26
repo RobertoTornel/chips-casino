@@ -1,0 +1,10 @@
+{
+  "block.casino.roulette_table": "Roulette Table",
+  "block.casino.blackjack_table": "Blackjack Table",
+  "block.casino.baccarat_table": "Baccarat Table",
+  "block.casino.poker_machine": "Video Poker Machine",
+  "block.casino.pachinko_cabinet": "Pachinko Cabinet",
+  "block.casino.texas_holdem_floor": "Texas Hold'em Table",
+  "block.casino.exchange": "The Exchange",
+  "item.casino.chip": "Casino Chip"
+}

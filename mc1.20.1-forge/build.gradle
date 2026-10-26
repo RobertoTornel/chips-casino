@@ -7,8 +7,8 @@ plugins {
 }
 
 version = "0.1.0"
-group = "dev.emccasino"
-archivesBaseName = "emc-casino"
+group = "dev.casino"
+archivesBaseName = "casino"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
@@ -43,8 +43,8 @@ dependencies {
 // mods.toml / pack.mcmeta 里的 ${mod_id} 等由 Gradle expand 替换（与 scaffold 的 {{}} 不冲突）。
 def replaceProperties = [
     minecraft_version: "1.20.1", forge_version: "47.3.0",
-    mod_id: "emc_casino", mod_name: "EMC Casino", mod_license: "MIT",
-    mod_version: version, mod_authors: "Antigravity", mod_description: "EMC Casino mod",
+    mod_id: "casino", mod_name: "Casino", mod_license: "MIT",
+    mod_version: version, mod_authors: "Antigravity", mod_description: "Casino mod",
     loader_version_range: "[47,)", forge_version_range: "[47,)", minecraft_version_range: "[1.20.1,1.21)"
 ]
 

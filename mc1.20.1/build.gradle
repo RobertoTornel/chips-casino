@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
 }
 
-group = "dev.emccasino"
+group = "dev.casino"
 version = "0.1.0"
 
 dependencies {

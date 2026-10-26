@@ -22,6 +22,6 @@ Copy `build/libs/emc-casino-0.1.0.jar` into your Fabric server's `mods/` directo
 
 ## Layout
 
-- `src/main/java/dev/emccasino/EmcCasino.java` — mod entry point (ModInitializer.onInitialize + ClientModInitializer.onInitializeClient)
+- `src/main/java/dev/casino/Casino.java` — mod entry point (ModInitializer.onInitialize + ClientModInitializer.onInitializeClient)
 - `src/main/resources/fabric.mod.json` — mod metadata (`id`, `entrypoints`, `depends`)
 - `build.gradle` — fabric-loom (1.17.19) + fabric-loader (0.19.3) + Fabric API build

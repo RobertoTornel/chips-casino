@@ -8,8 +8,8 @@
   "license": "${mod_license}",
   "environment": "*",
   "entrypoints": {
-    "main": ["dev.emccasino.fabric.EmcCasinoFabric"],
-    "client": ["dev.emccasino.fabric.EmcCasinoFabricClient"]
+    "main": ["dev.casino.fabric.CasinoFabric"],
+    "client": ["dev.casino.fabric.CasinoFabricClient"]
   },
   "depends": {
     "fabricloader": ">=0.14.21",
