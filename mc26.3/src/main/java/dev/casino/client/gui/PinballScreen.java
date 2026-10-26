@@ -70,10 +70,10 @@ public class PinballScreen extends BaseCasinoScreen {
 
     @Override
     protected void initGameWidgets() {
-        int rowY = topPos + 132;
+        int rowY = contentY() + 96;
 
         // Launch: only meaningful when no ball is in play.
-        addRenderableWidget(SpriteButton.primary(leftPos + 10, rowY, 96, 20, "LAUNCH", b -> {
+        addRenderableWidget(SpriteButton.primary(contentX(), rowY, 92, 20, "LAUNCH", b -> {
             JsonObject json = new JsonObject();
             json.addProperty("bet", 100L);
             sendAction("PINBALL_LAUNCH", json.toString());
@@ -81,12 +81,12 @@ public class PinballScreen extends BaseCasinoScreen {
 
         // Left / right flipper. Power is taken from the charge meter, so the player is
         // rewarded for holding and releasing rather than mashing.
-        addRenderableWidget(SpriteButton.of(leftPos + 112, rowY, 52, 20, "L FLIP",
+        addRenderableWidget(SpriteButton.of(contentX() + 96, rowY, 56, 20, "L FLIP",
                 b -> sendFlip()));
-        addRenderableWidget(SpriteButton.of(leftPos + 168, rowY, 52, 20, "R FLIP",
+        addRenderableWidget(SpriteButton.of(contentX() + 156, rowY, 56, 20, "R FLIP",
                 b -> sendFlip()));
 
-        addRenderableWidget(SpriteButton.of(leftPos + 226, rowY, 100, 20, "Drain", b -> {
+        addRenderableWidget(SpriteButton.of(contentX() + 216, rowY, 76, 20, "Drain", b -> {
             if (inPlay) sendAction("PINBALL_DRAIN", "{}");
         }));
     }
@@ -132,13 +132,13 @@ public class PinballScreen extends BaseCasinoScreen {
     @Override
     protected void renderGameContent(GuiGraphicsExtractor ex, int mouseX, int mouseY, float partialTick) {
         // ---- readouts -------------------------------------------------------
-        ex.text(this.font, "Stake: §e" + bet + " Chips", leftPos + 10, topPos + 38, COLOR_TEXT_WHITE);
-        ex.text(this.font, "Score: §e" + score, leftPos + 120, topPos + 38, COLOR_TEXT_WHITE);
+        ex.text(this.font, "Stake: §e" + bet + " Chips", contentX(), contentY() + 2, COLOR_TEXT_WHITE);
+        ex.text(this.font, "Score: §e" + score, contentX() + 110, contentY() + 2, COLOR_TEXT_WHITE);
         String st = inPlay ? "§aBALL IN PLAY" : "§7" + stateName;
-        ex.text(this.font, st, leftPos + 220, topPos + 38, COLOR_TEXT_GOLD);
+        ex.text(this.font, st, contentX() + 210, contentY() + 2, COLOR_TEXT_GOLD);
 
         // ---- playfield ------------------------------------------------------
-        int px0 = leftPos + 10;
+        int px0 = contentX();
         int pw = bgWidth - 20;
         ex.fill(px0, topPos + PLAYFIELD_TOP - 2, px0 + pw, topPos + PLAYFIELD_TOP + PLAYFIELD_HEIGHT + 2,
                 0xFF0A0807);
@@ -171,9 +171,9 @@ public class PinballScreen extends BaseCasinoScreen {
         }
 
         // ---- timing meter ---------------------------------------------------
-        int meterY = topPos + 116;
-        ex.text(this.font, "TIMING", leftPos + 10, meterY, COLOR_TEXT_GOLD);
-        int mx0 = leftPos + 56;
+        int meterY = contentY() + 80;
+        ex.text(this.font, "TIMING", contentX(), meterY, COLOR_TEXT_GOLD);
+        int mx0 = contentX() + 46;
         int mw = 150;
         ex.fill(mx0, meterY, mx0 + mw, meterY + 6, 0xFF1A1410);
         int filled = (int) (mw * charge);
@@ -189,11 +189,11 @@ public class PinballScreen extends BaseCasinoScreen {
         String last = lastPayout > 0
                 ? "§aLast: +" + lastPayout + " Chips §7(" + lastBumpers + " bumpers)"
                 : "§7No completed ball yet";
-        ex.text(this.font, last, leftPos + 10, topPos + 156, COLOR_TEXT_WHITE);
+        ex.text(this.font, last, contentX(), contentY() + 120, COLOR_TEXT_WHITE);
 
         // The machine's tuned return, shown honestly rather than hidden.
         String odds = String.format("§7Return: §e%.0f%%§7 at perfect timing, §e%.0f%%§7 casual",
                 rtpSkilled * 100, rtpCasual * 100);
-        ex.text(this.font, odds, leftPos + 10, topPos + 168, 0xFFAAAAAA);
+        ex.text(this.font, odds, contentX(), contentY() + 132, 0xFFAAAAAA);
     }
 }

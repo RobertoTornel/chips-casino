@@ -3,7 +3,6 @@ package dev.casino;
 import dev.casino.api.PriceDataLoader;
 import dev.casino.api.PriceTable;
 import dev.casino.block.*;
-import dev.casino.item.ChipItem;
 import dev.casino.block.entity.*;
 import dev.casino.command.CasinoCommand;
 import dev.casino.economy.CasinoAccountManager;
@@ -75,10 +74,6 @@ public class Casino implements ModInitializer {
         registerBlock("pinball_machine", PINBALL_BLOCK);
         registerBlock("texas_holdem_floor", TEXAS_HOLDEM_BLOCK);
         registerBlock("exchange", EXCHANGE_BLOCK);
-
-        ResourceKey<Item> chipKey = ResourceKey.create(Registries.ITEM, id("chip"));
-        Item.Properties chipProps = new Item.Properties().setId(chipKey);
-        Registry.register(BuiltInRegistries.ITEM, id("chip"), new ChipItem(chipProps));
 
         // 2. Register Block Entity Types
         ROULETTE_BE_TYPE = Registry.register(

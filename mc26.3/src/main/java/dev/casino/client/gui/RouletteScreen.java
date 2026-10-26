@@ -42,44 +42,44 @@ public class RouletteScreen extends BaseCasinoScreen {
         // footer (sell/buy + balance bar) is owned by the base class
         // -------------------------------------------------------------------------
 
-        int chipY = topPos + 36;
-        addRenderableWidget(SpriteButton.of(leftPos + 10, chipY, 34, 16, "10", b -> selectedChip = 10));
-        addRenderableWidget(SpriteButton.of(leftPos + 48, chipY, 34, 16, "50", b -> selectedChip = 50));
-        addRenderableWidget(SpriteButton.of(leftPos + 86, chipY, 40, 16, "100", b -> selectedChip = 100));
-        addRenderableWidget(SpriteButton.of(leftPos + 130, chipY, 40, 16, "500", b -> selectedChip = 500));
+        int chipY = contentY();
+        addRenderableWidget(SpriteButton.of(contentX(), chipY, 34, 16, "10", b -> selectedChip = 10));
+        addRenderableWidget(SpriteButton.of(contentX() + 38, chipY, 34, 16, "50", b -> selectedChip = 50));
+        addRenderableWidget(SpriteButton.of(contentX() + 76, chipY, 40, 16, "100", b -> selectedChip = 100));
+        addRenderableWidget(SpriteButton.of(contentX() + 120, chipY, 40, 16, "500", b -> selectedChip = 500));
 
-        int betY = topPos + 54;
-        addRenderableWidget(SpriteButton.of(leftPos + 10, betY, 92, 17, "Red 1:1", SpriteButton.LABEL_RED, b -> addBet(RouletteEngine.BetType.RED, 0)));
-        addRenderableWidget(SpriteButton.of(leftPos + 106, betY, 92, 17, "Black 1:1", SpriteButton.LABEL_BLACK, b -> addBet(RouletteEngine.BetType.BLACK, 0)));
-        addRenderableWidget(SpriteButton.of(leftPos + 202, betY, 92, 17, "Even 1:1", b -> addBet(RouletteEngine.BetType.EVEN, 0)));
-        addRenderableWidget(SpriteButton.of(leftPos + 298, betY, 92, 17, "Odd 1:1", b -> addBet(RouletteEngine.BetType.ODD, 0)));
+        int betY = contentY() + 18;
+        addRenderableWidget(SpriteButton.of(contentX(), betY, 85, 17, "Red 1:1", SpriteButton.LABEL_RED, b -> addBet(RouletteEngine.BetType.RED, 0)));
+        addRenderableWidget(SpriteButton.of(contentX() + 89, betY, 85, 17, "Black 1:1", SpriteButton.LABEL_BLACK, b -> addBet(RouletteEngine.BetType.BLACK, 0)));
+        addRenderableWidget(SpriteButton.of(contentX() + 178, betY, 85, 17, "Even 1:1", b -> addBet(RouletteEngine.BetType.EVEN, 0)));
+        addRenderableWidget(SpriteButton.of(contentX() + 267, betY, 85, 17, "Odd 1:1", b -> addBet(RouletteEngine.BetType.ODD, 0)));
 
-        int betY2 = topPos + 72;
-        addRenderableWidget(SpriteButton.of(leftPos + 10, betY2, 92, 17, "1-18 1:1", b -> addBet(RouletteEngine.BetType.LOW, 0)));
-        addRenderableWidget(SpriteButton.of(leftPos + 106, betY2, 92, 17, "19-36 1:1", b -> addBet(RouletteEngine.BetType.HIGH, 0)));
-        addRenderableWidget(SpriteButton.of(leftPos + 202, betY2, 92, 17, "1st 12 2:1", b -> addBet(RouletteEngine.BetType.DOZEN_1, 0)));
-        addRenderableWidget(SpriteButton.of(leftPos + 298, betY2, 92, 17, "2nd 12 2:1", b -> addBet(RouletteEngine.BetType.DOZEN_2, 0)));
+        int betY2 = contentY() + 36;
+        addRenderableWidget(SpriteButton.of(contentX(), betY2, 85, 17, "1-18 1:1", b -> addBet(RouletteEngine.BetType.LOW, 0)));
+        addRenderableWidget(SpriteButton.of(contentX() + 89, betY2, 85, 17, "19-36 1:1", b -> addBet(RouletteEngine.BetType.HIGH, 0)));
+        addRenderableWidget(SpriteButton.of(contentX() + 178, betY2, 85, 17, "1st 12 2:1", b -> addBet(RouletteEngine.BetType.DOZEN_1, 0)));
+        addRenderableWidget(SpriteButton.of(contentX() + 267, betY2, 85, 17, "2nd 12 2:1", b -> addBet(RouletteEngine.BetType.DOZEN_2, 0)));
 
         // The cloth: 0 down the left rail, then three rows of twelve.
-        int numY = topPos + 92;
-        addRenderableWidget(SpriteButton.colored(leftPos + 10, numY, 30, 49, "0",
+        int numY = contentY() + 56;
+        addRenderableWidget(SpriteButton.colored(contentX(), numY, 24, 49, "0",
                 SpriteButton.LABEL_GREEN, b -> addBet(RouletteEngine.BetType.STRAIGHT, 0)));
 
-        int gridX = leftPos + 44;
+        int gridX = contentX() + 26;
         for (int num = 1; num <= 36; num++) {
             final int n = num;
             int col = (num - 1) % 12;
             int row = (num - 1) / 12;
             boolean red = RouletteEngine.RED_NUMBERS.contains(num);
             addRenderableWidget(SpriteButton.colored(
-                    gridX + col * 29, numY + row * 16, 27, 15,
+                    gridX + col * 27, numY + row * 16, 25, 15,
                     String.valueOf(num), red ? SpriteButton.LABEL_RED : SpriteButton.LABEL_NORMAL,
                     b -> addBet(RouletteEngine.BetType.STRAIGHT, n)));
         }
 
-        int actY = topPos + 148;
-        addRenderableWidget(SpriteButton.of(leftPos + 10, actY, 100, 20, "Clear Bets", b -> pendingBets.clear()));
-        addRenderableWidget(SpriteButton.primary(leftPos + 116, actY, 140, 20, "SPIN WHEEL", b -> doSpin()));
+        int actY = contentY() + 112;
+        addRenderableWidget(SpriteButton.of(contentX(), actY, 100, 20, "Clear Bets", b -> pendingBets.clear()));
+        addRenderableWidget(SpriteButton.primary(contentX() + 106, actY, 140, 20, "SPIN WHEEL", b -> doSpin()));
     }
 
     private void addBet(RouletteEngine.BetType type, int number) {
@@ -121,18 +121,18 @@ public class RouletteScreen extends BaseCasinoScreen {
 
     @Override
     protected void renderGameContent(GuiGraphicsExtractor extractor, int mouseX, int mouseY, float partialTick) {
-        extractor.text(this.font, "Chip: §e" + selectedChip, leftPos + 180, topPos + 42, COLOR_TEXT_WHITE);
+        extractor.text(this.font, "Chip: §e" + selectedChip, contentX() + 170, contentY() + 6, COLOR_TEXT_WHITE);
 
         long totalBet = pendingBets.stream().mapToLong(b -> b.amount).sum();
-        extractor.text(this.font, "Total Bet: §e" + totalBet + " Chips §7(" + pendingBets.size() + " bets)", leftPos + 10, topPos + 140, COLOR_TEXT_GOLD);
+        extractor.text(this.font, "Total Bet: §e" + totalBet + " Chips §7(" + pendingBets.size() + " bets)", contentX(), contentY() + 104, COLOR_TEXT_GOLD);
 
         // Roulette wheel sprite, parked in the free right-hand header space so it
         // never sits underneath the bet buttons.
-        extractor.blit(CasinoSprites.ROULETTE_WHEEL, leftPos + 318, topPos + 36, 56, 56, 0f, 0f, 1f, 1f);
+        extractor.blit(CasinoSprites.ROULETTE_WHEEL, contentX() + 308, contentY(), 56, 56, 0f, 0f, 1f, 1f);
 
         // Roulette Wheel winning result box
-        int resBoxX = leftPos + 262;
-        int resBoxY = topPos + 146;
+        int resBoxX = contentX() + 252;
+        int resBoxY = contentY() + 110;
         extractor.fill(resBoxX, resBoxY, resBoxX + 128, resBoxY + 36, 0xFF111111);
         extractor.fill(resBoxX + 1, resBoxY + 1, resBoxX + 127, resBoxY + 35, 0xFF222222);
 

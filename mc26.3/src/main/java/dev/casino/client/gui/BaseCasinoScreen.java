@@ -29,6 +29,38 @@ public abstract class BaseCasinoScreen extends Screen {
     protected int leftPos;
     protected int topPos;
 
+    /**
+     * Content origin: the top-left of the usable interior, inside the ornate border.
+     *
+     * <p>The frame is nine-sliced with {@link #FRAME_INSET}-wide destination corners that
+     * overhang the panel by 4px, so the decorative border physically occupies
+     * {@code leftPos-4 .. leftPos+FRAME_INSET-4} on the left (and the same on the other
+     * three sides). Screens used to draw from {@code leftPos+10}, which put every label and
+     * button on top of the gold scrollwork — legible text over a bright pattern, which is
+     * what made the panels look broken.
+     *
+     * <p>These are the coordinates screens should position against.
+     */
+    protected int contentX() {
+        return leftPos + FRAME_INSET - 4 + CONTENT_PAD;
+    }
+
+    protected int contentY() {
+        return topPos + 32 + CONTENT_PAD;
+    }
+
+    protected int contentW() {
+        return bgWidth - 2 * (FRAME_INSET - 4 + CONTENT_PAD);
+    }
+
+    /** Bottom of the usable interior, above the balance bar. */
+    protected int contentBottom() {
+        return topPos + bgHeight - 24 - CONTENT_PAD;
+    }
+
+    /** Breathing room between the border and the first pixel of content. */
+    protected static final int CONTENT_PAD = 4;
+
     // Text color constants (kept for text overlay — these are not backgrounds)
     public static int COLOR_TEXT_GOLD    = 0xFFFFD700;
     public static int COLOR_TEXT_WHITE   = 0xFFEEEEEE;
@@ -48,23 +80,11 @@ public abstract class BaseCasinoScreen extends Screen {
         this.topPos = (this.height - this.bgHeight) / 2;
         clearWidgets();
 
-        // Common sell / buy controls
-        // Footer stack, bottom-up: balance bar hugs the bottom edge, the sell/buy pair
-        // sits directly above it. Previously both were drawn on the same row and overlapped.
-        addRenderableWidget(SpriteButton.of(leftPos + 10, topPos + bgHeight - 44, 110, 18,
-                "Sell Hand", b -> sendAction("DEPOSIT_MAIN_HAND", "{}")));
-
-        addRenderableWidget(SpriteButton.of(leftPos + 124, topPos + bgHeight - 44, 110, 18,
-                "Buy Diamond", b -> {
-                    JsonObject json = new JsonObject();
-                    json.addProperty("itemId", "minecraft:diamond");
-                    json.addProperty("count", 1);
-                    sendAction("WITHDRAW_ITEM", GSON.toJson(json));
-                }));
-
-        addRenderableWidget(SpriteButton.of(leftPos + bgWidth - 24, topPos + 4, 18, 16,
-                "\u00a7c\u2715", b -> this.onClose()));
-
+        // Close button only. The base deliberately adds no other controls: a shared
+        // footer row used to sit here on every screen and collided with each screen's own
+        // footer, and its actions were not handled by any block entity. A screen's controls
+        // belong to that screen.
+        addCloseButton();
         initGameWidgets();
     }
 
@@ -74,6 +94,36 @@ public abstract class BaseCasinoScreen extends Screen {
         this.lastStateJson = stateJson;
         this.playerBalance = balance;
         onStateUpdated();
+
+        // Rebuild the widget strip after the state changes.
+        //
+        // Without this, a screen kept the buttons it created on its first render: after
+        // dealing a hand the "Deal" button stayed and "Hit"/"Stand" never appeared,
+        // because the widgets were only ever built once from init(). The state fields
+        // themselves updated, which is why the text looked right while the controls did
+        // not — the exact "menus are broken when changing anything" symptom.
+        rebuildWidgets();
+    }
+
+    /**
+     * Tears the widget strip down and recreates it from the current state.
+     *
+     * <p>Called on every state packet. Cheap enough to run per packet (a handful of
+     * buttons), and far more reliable than trying to diff controls in place.
+     */
+    protected void rebuildWidgets() {
+        if (this.minecraft == null) {
+            return; // not yet added to a screen stack; init() will build them
+        }
+        clearWidgets();
+        initGameWidgets();
+        addCloseButton();
+    }
+
+    /** Extracted so both {@code init()} and {@link #rebuildWidgets()} add it exactly once. */
+    protected void addCloseButton() {
+        addRenderableWidget(SpriteButton.of(leftPos + bgWidth - 26, topPos + 6, 20, 18,
+                "\u00a7c\u2715", b -> this.onClose()));
     }
 
     protected void onStateUpdated() {
@@ -101,9 +151,9 @@ public abstract class BaseCasinoScreen extends Screen {
         extractor.blit(CasinoSprites.BALANCE_BAR, leftPos, topPos + bgHeight - 20, bgWidth, 16, 0f, 0f, 1f, 1f);
 
         // Title & Balance text (over sprites)
-        extractor.text(this.font, this.title.getString(), leftPos + 10, topPos + 8, COLOR_TEXT_GOLD);
+        extractor.text(this.font, this.title.getString(), contentX(), topPos + 8, COLOR_TEXT_GOLD);
         String balStr = "Chips: §e" + playerBalance + " §7(sell 0.8x / buy 1.2x)";
-        extractor.text(this.font, balStr, leftPos + 10, topPos + 20, COLOR_TEXT_WHITE);
+        extractor.text(this.font, balStr, contentX(), topPos + 20, COLOR_TEXT_WHITE);
 
         // Game-specific content
         renderGameContent(extractor, mouseX, mouseY, partialTick);
@@ -160,7 +210,16 @@ public abstract class BaseCasinoScreen extends Screen {
      * backing is drawn first to guarantee content is always readable.
      */
     protected void drawPanelBacking(GuiGraphicsExtractor extractor, int x, int y, int w, int h) {
-        extractor.fill(x + FRAME_INSET - 2, y + 32, x + w - FRAME_INSET + 2, y + h - 22, 0xF00D0A09);
+        // Covers the true interior (inside the border, below the header, above the balance
+        // bar) so no text ever lands on the frame's own pattern.
+        extractor.fill(x + FRAME_INSET - 4, y + 30, x + w - FRAME_INSET + 4, y + h - 22, 0xF00D0A09);
+        // A subtle inner hairline reads as an inlaid panel rather than a flat black hole.
+        int hx0 = x + FRAME_INSET - 4, hy0 = y + 30;
+        int hx1 = x + w - FRAME_INSET + 4, hy1 = y + h - 22;
+        extractor.fill(hx0, hy0, hx1, hy0 + 1, 0x40FFD86B);
+        extractor.fill(hx0, hy1 - 1, hx1, hy1, 0x30FFD86B);
+        extractor.fill(hx0, hy0, hx0 + 1, hy1, 0x30FFD86B);
+        extractor.fill(hx1 - 1, hy0, hx1, hy1, 0x30FFD86B);
     }
 
     /**

@@ -6,7 +6,6 @@ import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import dev.casino.api.PriceDataLoader;
 import dev.casino.block.*;
-import dev.casino.item.ChipItem;
 import dev.casino.block.entity.*;
 import dev.casino.command.CasinoCommand;
 import dev.casino.economy.CasinoAccountManager;
@@ -104,8 +103,6 @@ public final class Casino {
             ITEMS.register("texas_holdem_floor", () -> new BlockItem(TEXAS_HOLDEM_BLOCK.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> EXCHANGE_ITEM =
             ITEMS.register("exchange", () -> new BlockItem(EXCHANGE_BLOCK.get(), new Item.Properties()));
-    public static final RegistrySupplier<Item> CHIP_ITEM =
-            ITEMS.register("chip", () -> new ChipItem(new Item.Properties()));
 
     private static boolean initialized;
 

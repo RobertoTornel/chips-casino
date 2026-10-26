@@ -1,7 +1,6 @@
 package dev.casino;
 
 import dev.casino.block.*;
-import dev.casino.item.ChipItem;
 import dev.casino.block.entity.*;
 import dev.casino.command.CasinoCommand;
 import dev.casino.economy.CasinoAccountManager;
@@ -54,7 +53,6 @@ public class Casino {
     public static final RegistryObject<Item> PINBALL_ITEM = ITEMS.register("pinball_machine", () -> new BlockItem(PINBALL_BLOCK.get(), new Item.Properties()));
     public static final RegistryObject<Item> TEXAS_HOLDEM_ITEM = ITEMS.register("texas_holdem_floor", () -> new BlockItem(TEXAS_HOLDEM_BLOCK.get(), new Item.Properties()));
     public static final RegistryObject<Item> EXCHANGE_ITEM = ITEMS.register("exchange", () -> new BlockItem(EXCHANGE_BLOCK.get(), new Item.Properties()));
-    public static final RegistryObject<Item> CHIP_ITEM = ITEMS.register("chip", () -> new ChipItem(new Item.Properties()));
 
     // Block Entities
     public static final RegistryObject<BlockEntityType<RouletteBlockEntity>> ROULETTE_BE_TYPE = BLOCK_ENTITIES.register("roulette_table",

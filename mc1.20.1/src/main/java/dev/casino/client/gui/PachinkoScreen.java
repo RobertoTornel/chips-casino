@@ -28,15 +28,15 @@ public class PachinkoScreen extends BaseCasinoScreen {
         onStateUpdated();
 
         // Bet selectors
-        int betY = topPos + 36;
-        addRenderableWidget(SpriteButton.of(leftPos + 10, betY, 26, 16, "10", b -> betAmount = 10));
-        addRenderableWidget(SpriteButton.of(leftPos + 40, betY, 26, 16, "20", b -> betAmount = 20));
-        addRenderableWidget(SpriteButton.of(leftPos + 70, betY, 26, 16, "50", b -> betAmount = 50));
-        addRenderableWidget(SpriteButton.of(leftPos + 100, betY, 32, 16, "100", b -> betAmount = 100));
+        int betY = contentY();
+        addRenderableWidget(SpriteButton.of(contentX(), betY, 26, 16, "10", b -> betAmount = 10));
+        addRenderableWidget(SpriteButton.of(contentX() + 30, betY, 26, 16, "20", b -> betAmount = 20));
+        addRenderableWidget(SpriteButton.of(contentX() + 60, betY, 26, 16, "50", b -> betAmount = 50));
+        addRenderableWidget(SpriteButton.of(contentX() + 90, betY, 32, 16, "100", b -> betAmount = 100));
 
         // Drop Ball Action Button
-        int actY = topPos + 60;
-        addRenderableWidget(SpriteButton.of(leftPos + 10, actY, 110, 24, "LAUNCH BALL", b -> {
+        int actY = contentY() + 24;
+        addRenderableWidget(SpriteButton.of(contentX(), actY, 110, 24, "LAUNCH BALL", b -> {
             JsonObject json = new JsonObject();
             json.addProperty("bet", betAmount);
             sendAction("DROP", GSON.toJson(json));
@@ -65,25 +65,25 @@ public class PachinkoScreen extends BaseCasinoScreen {
 
     @Override
     protected void renderGameContent(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        graphics.drawString(this.font, "Ball Bet: §e" + betAmount + " Chips", leftPos + 10, topPos + 90, COLOR_TEXT_WHITE, false);
+        graphics.drawString(this.font, "Ball Bet: §e" + betAmount + " Chips", contentX(), contentY() + 54, COLOR_TEXT_WHITE, false);
 
         // Payout table info
-        graphics.drawString(this.font, "§6[Payouts]", leftPos + 10, topPos + 110, COLOR_TEXT_GOLD, false);
-        graphics.drawString(this.font, "★ Center: §e100x Fever", leftPos + 10, topPos + 122, COLOR_TEXT_GOLD, false);
-        graphics.drawString(this.font, "♦ Tulips: §a15x Pockets", leftPos + 10, topPos + 134, COLOR_TEXT_GREEN, false);
-        graphics.drawString(this.font, "• Outer: §b5x Pins", leftPos + 10, topPos + 146, COLOR_TEXT_WHITE, false);
-        graphics.drawString(this.font, "✕ Gutters: §70x (Lost)", leftPos + 10, topPos + 158, COLOR_TEXT_WHITE, false);
+        graphics.drawString(this.font, "§6[Payouts]", contentX(), contentY() + 74, COLOR_TEXT_GOLD, false);
+        graphics.drawString(this.font, "★ Center: §e100x Fever", contentX(), contentY() + 86, COLOR_TEXT_GOLD, false);
+        graphics.drawString(this.font, "♦ Tulips: §a15x Pockets", contentX(), contentY() + 98, COLOR_TEXT_GREEN, false);
+        graphics.drawString(this.font, "• Outer: §b5x Pins", contentX(), contentY() + 110, COLOR_TEXT_WHITE, false);
+        graphics.drawString(this.font, "✕ Gutters: §70x (Lost)", contentX(), contentY() + 122, COLOR_TEXT_WHITE, false);
 
         // Result text
         if (!label.isEmpty()) {
             int color = (payout > 0) ? COLOR_TEXT_GREEN : COLOR_TEXT_RED;
             String res = (payout > 0) ? "§a" + label + " - Won +" + payout + " Chips!" : "§c" + label;
-            graphics.drawString(this.font, res, leftPos + 10, topPos + 176, color, false);
+            graphics.drawString(this.font, res, contentX(), contentY() + 140, color, false);
         }
 
         // Draw Pachinko Board Cabinet Frame (right half)
-        int boardX = leftPos + 145;
-        int boardY = topPos + 36;
+        int boardX = contentX() + 135;
+        int boardY = contentY();
         int boardW = PachinkoEngine.BOARD_WIDTH;
         int boardH = 150;
 

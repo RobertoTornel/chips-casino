@@ -26,8 +26,9 @@ public class PriceTable {
     static final Logger LOGGER = LoggerFactory.getLogger("PriceTable");
     private static final Map<String, Long> PRICES = new ConcurrentHashMap<>();
 
-    public static final double SELL_MULTIPLIER = 0.8;
-    public static final double BUY_MULTIPLIER = 1.2;
+    /** Re-exported so existing call sites keep working; the values live in PricingRules. */
+    public static final double SELL_MULTIPLIER = PricingRules.SELL_MULTIPLIER;
+    public static final double BUY_MULTIPLIER = PricingRules.BUY_MULTIPLIER;
 
     static {
         registerDefaults();
@@ -162,14 +163,13 @@ public class PriceTable {
      * Putting items in gives 80% of their base Chips value.
      */
     public static long sellPrice(long basePrice) {
-        if (basePrice <= 0) return 0L;
-        return Math.max(1L, (long) Math.floor(basePrice * SELL_MULTIPLIER));
+        return PricingRules.sell(basePrice);
     }
 
     public static long sellPrice(ItemStack stack) {
         long base = getPrice(stack);
         if (base <= 0) return 0L;
-        return sellPrice(base) * stack.getCount();
+        return PricingRules.sell(base, stack.getCount());
     }
 
     /**
@@ -177,14 +177,13 @@ public class PriceTable {
      * Withdrawing items costs 120% of their base Chips value.
      */
     public static long buyPrice(long basePrice) {
-        if (basePrice <= 0) return 0L;
-        return Math.max(1L, (long) Math.ceil(basePrice * BUY_MULTIPLIER));
+        return PricingRules.buy(basePrice);
     }
 
     public static long buyPrice(ItemStack stack) {
         long base = getPrice(stack);
         if (base <= 0) return 0L;
-        return buyPrice(base) * stack.getCount();
+        return PricingRules.buy(base, stack.getCount());
     }
 
     public static Map<String, Long> getAllPrices() {

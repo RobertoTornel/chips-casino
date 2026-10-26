@@ -29,14 +29,14 @@ public class VideoPokerScreen extends BaseCasinoScreen {
         onStateUpdated();
 
         // Bet selectors
-        int betY = topPos + 36;
-        addRenderableWidget(SpriteButton.of(leftPos + 10, betY, 26, 16, "10", b -> betAmount = 10));
-        addRenderableWidget(SpriteButton.of(leftPos + 40, betY, 26, 16, "50", b -> betAmount = 50));
-        addRenderableWidget(SpriteButton.of(leftPos + 70, betY, 32, 16, "100", b -> betAmount = 100));
+        int betY = contentY();
+        addRenderableWidget(SpriteButton.of(contentX(), betY, 26, 16, "10", b -> betAmount = 10));
+        addRenderableWidget(SpriteButton.of(contentX() + 30, betY, 26, 16, "50", b -> betAmount = 50));
+        addRenderableWidget(SpriteButton.of(contentX() + 60, betY, 32, 16, "100", b -> betAmount = 100));
 
         // HOLD toggle buttons for 5 cards
-        int cardX = leftPos + 35;
-        int cardY = topPos + 90;
+        int cardX = contentX() + 25;
+        int cardY = contentY() + 54;
         for (int i = 0; i < 5; i++) {
             final int idx = i;
             addRenderableWidget(Button.builder(Component.literal("HOLD"), b -> {
@@ -47,16 +47,16 @@ public class VideoPokerScreen extends BaseCasinoScreen {
         }
 
         // Deal / Draw action buttons
-        int actY = topPos + 168;
+        int actY = contentY() + 132;
         addRenderableWidget(Button.builder(Component.literal("§aDEAL"), b -> {
             JsonObject json = new JsonObject();
             json.addProperty("bet", betAmount);
             sendAction("DEAL", GSON.toJson(json));
-        }).bounds(leftPos + 80, actY, 80, 20).build());
+        }).bounds(contentX() + 70, actY, 80, 20).build());
 
         addRenderableWidget(Button.builder(Component.literal("§eDRAW"), b -> {
             sendAction("DRAW", "{}");
-        }).bounds(leftPos + 180, actY, 80, 20).build());
+        }).bounds(contentX() + 170, actY, 80, 20).build());
     }
 
     @Override
@@ -83,17 +83,17 @@ public class VideoPokerScreen extends BaseCasinoScreen {
 
     @Override
     protected void renderGameContent(GuiGraphicsExtractor extractor, int mouseX, int mouseY, float partialTick) {
-        extractor.text(this.font, "Bet: §e" + betAmount + " Chips", leftPos + 115, topPos + 40, COLOR_TEXT_WHITE);
+        extractor.text(this.font, "Bet: §e" + betAmount + " Chips", contentX() + 105, contentY() + 4, COLOR_TEXT_WHITE);
 
         // Paytable summary banner
-        int ptY = topPos + 56;
-        extractor.fill(leftPos + 10, ptY, leftPos + bgWidth - 10, ptY + 28, 0xFF081A0B);
-        extractor.text(this.font, "§eRoyal Flush: 800x  §fStr Flush: 50x  §e4 of a Kind: 25x", leftPos + 16, ptY + 4, COLOR_TEXT_WHITE);
-        extractor.text(this.font, "§fFull House: 9x  §eFlush: 6x  §fStraight: 4x  §e3 of a Kind: 3x  §fJacks+: 1x", leftPos + 16, ptY + 16, COLOR_TEXT_WHITE);
+        int ptY = contentY() + 20;
+        extractor.fill(contentX(), ptY, leftPos + bgWidth - 10, ptY + 28, 0xFF081A0B);
+        extractor.text(this.font, "§eRoyal Flush: 800x  §fStr Flush: 50x  §e4 of a Kind: 25x", contentX() + 6, ptY + 4, COLOR_TEXT_WHITE);
+        extractor.text(this.font, "§fFull House: 9x  §eFlush: 6x  §fStraight: 4x  §e3 of a Kind: 3x  §fJacks+: 1x", contentX() + 6, ptY + 16, COLOR_TEXT_WHITE);
 
         // 5 cards
-        int cardX = leftPos + 35;
-        int cardY = topPos + 90;
+        int cardX = contentX() + 25;
+        int cardY = contentY() + 54;
         for (int i = 0; i < 5; i++) {
             int cx = cardX + (i * 56);
             if (i < cards.size()) {
@@ -109,7 +109,7 @@ public class VideoPokerScreen extends BaseCasinoScreen {
         // Result text
         if (!handName.isEmpty()) {
             String res = (payout > 0) ? "§a" + handName + " (" + multiplier + "x) - Won +" + payout + " Chips!" : "§7" + handName + " - No Win";
-            extractor.centeredText(this.font, res, leftPos + bgWidth / 2, topPos + 150, COLOR_TEXT_WHITE);
+            extractor.centeredText(this.font, res, leftPos + bgWidth / 2, contentY() + 114, COLOR_TEXT_WHITE);
         }
     }
 }

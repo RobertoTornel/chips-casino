@@ -51,15 +51,15 @@ public class TexasHoldemScreen extends BaseCasinoScreen {
         onStateUpdated();
 
         // Player Table Actions (Fold / Check / Call / Raise)
-        int actY = topPos + 188;
-        addRenderableWidget(SpriteButton.of(leftPos + 10, actY, 44, 20, "Fold", b -> sendAction("FOLD", "{}")));
-        addRenderableWidget(SpriteButton.of(leftPos + 58, actY, 46, 20, "Check", b -> sendAction("CHECK", "{}")));
-        addRenderableWidget(SpriteButton.of(leftPos + 108, actY, 46, 20, "Call", b -> sendAction("CALL", "{}")));
+        int actY = contentY() + 118;
+        addRenderableWidget(SpriteButton.of(contentX(), actY, 52, 20, "Fold", b -> sendAction("FOLD", "{}")));
+        addRenderableWidget(SpriteButton.of(contentX() + 56, actY, 56, 20, "Check", b -> sendAction("CHECK", "{}")));
+        addRenderableWidget(SpriteButton.of(contentX() + 116, actY, 56, 20, "Call", b -> sendAction("CALL", "{}")));
         addRenderableWidget(Button.builder(Component.literal("Raise +50"), b -> {
             JsonObject json = new JsonObject();
             json.addProperty("raise", 50);
             sendAction("RAISE", GSON.toJson(json));
-        }).bounds(leftPos + 158, actY, 64, 20).build());
+        }).bounds(contentX() + 176, actY, 64, 20).build());
 
         // Join / Leave seat buttons
         addRenderableWidget(Button.builder(Component.literal("§aSit (500 Chips)"), b -> {
@@ -72,14 +72,14 @@ public class TexasHoldemScreen extends BaseCasinoScreen {
                     break;
                 }
             }
-        }).bounds(leftPos + 226, actY, 82, 20).build());
+        }).bounds(contentX() + 244, actY, 88, 20).build());
 
-        addRenderableWidget(SpriteButton.of(leftPos + 312, actY, 56, 20, "Leave", b -> sendAction("LEAVE", "{}")));
+        addRenderableWidget(SpriteButton.of(contentX() + 60, actY - 22, 56, 18, "Leave", b -> sendAction("LEAVE", "{}")));
 
         // Table Owner Host controls: Toggle bots
         if (isOwner) {
             String botLabel = autoFillBots ? "§aBots: ON" : "§cBots: OFF";
-            addRenderableWidget(Button.builder(Component.literal(botLabel), b -> sendAction("TOGGLE_BOTS", "{}")).bounds(leftPos + 270, topPos + 6, 75, 16).build());
+            addRenderableWidget(Button.builder(Component.literal(botLabel), b -> sendAction("TOGGLE_BOTS", "{}")).bounds(contentX() + 260, topPos + 6, 75, 16).build());
         }
     }
 
@@ -136,29 +136,29 @@ public class TexasHoldemScreen extends BaseCasinoScreen {
     protected void renderGameContent(GuiGraphicsExtractor extractor, int mouseX, int mouseY, float partialTick) {
         // Table center info: Pot & Phase
         int centerX = leftPos + bgWidth / 2;
-        int centerY = topPos + 105;
+        int centerY = contentY() + 69;
 
         // Poker table oval felt
-        extractor.fill(leftPos + 40, topPos + 45, leftPos + bgWidth - 40, topPos + 165, 0xFF0D421E);
+        extractor.fill(contentX() + 30, contentY() + 9, leftPos + bgWidth - 40, contentY() + 129, 0xFF0D421E);
 
-        extractor.centeredText(this.font, "POT: §e" + pot + " Chips §7(Call: " + currentHighestBet + ")", centerX, topPos + 52, COLOR_TEXT_GOLD);
-        extractor.centeredText(this.font, "§7[§f" + phase + "§7]", centerX, topPos + 64, COLOR_TEXT_WHITE);
+        extractor.centeredText(this.font, "POT: §e" + pot + " Chips §7(Call: " + currentHighestBet + ")", centerX, contentY() + 16, COLOR_TEXT_GOLD);
+        extractor.centeredText(this.font, "§7[§f" + phase + "§7]", centerX, contentY() + 28, COLOR_TEXT_WHITE);
 
         // Community cards in center
         int ccX = centerX - (communityCards.size() * 13);
         for (int i = 0; i < communityCards.size(); i++) {
-            drawCard(extractor, ccX + (i * 26), topPos + 76, communityCards.get(i));
+            drawCard(extractor, ccX + (i * 26), contentY() + 40, communityCards.get(i));
         }
 
         // Render 6 seats around the table
         // 0: Top-Left, 1: Top-Center, 2: Top-Right, 3: Bot-Right, 4: Bot-Center, 5: Bot-Left
         int[][] seatPositions = {
-                {leftPos + 12, topPos + 40},
+                {contentX(), contentY() + 4},
                 {centerX - 35, topPos + 34},
-                {leftPos + bgWidth - 85, topPos + 40},
-                {leftPos + bgWidth - 85, topPos + 130},
-                {centerX - 35, topPos + 140},
-                {leftPos + 12, topPos + 130}
+                {leftPos + bgWidth - 85, contentY() + 4},
+                {leftPos + bgWidth - 85, contentY() + 94},
+                {centerX - 35, contentY() + 104},
+                {contentX(), contentY() + 94}
         };
 
         for (int i = 0; i < TexasHoldemTable.MAX_SEATS; i++) {
@@ -195,7 +195,7 @@ public class TexasHoldemScreen extends BaseCasinoScreen {
 
         // Summary banner at bottom
         if (!summary.isEmpty()) {
-            extractor.centeredText(this.font, "§e" + summary, centerX, topPos + 172, COLOR_TEXT_GOLD);
+            extractor.centeredText(this.font, "§e" + summary, centerX, contentY() + 136, COLOR_TEXT_GOLD);
         }
     }
 }

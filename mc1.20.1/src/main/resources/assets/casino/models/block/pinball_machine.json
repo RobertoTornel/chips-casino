@@ -1,6 +1,269 @@
 {
-  "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "casino:block/pinball_machine"
-  }
+    "particle": "casino:block/pinball_machine",
+    "face": "casino:block/pinball_machine",
+    "screen": "casino:block/pinball_machine",
+    "wood": "casino:block/casino_body_side",
+    "trim": "casino:block/casino_body_top"
+  },
+  "elements": [
+    {
+      "name": "body",
+      "from": [
+        1,
+        0,
+        1
+      ],
+      "to": [
+        15,
+        13,
+        15
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            14,
+            14
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            14,
+            14
+          ],
+          "texture": "casino:block/casino_body_side"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            14,
+            13
+          ],
+          "texture": "casino:block/pinball_machine"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            14,
+            13
+          ],
+          "texture": "casino:block/casino_body_side"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            14,
+            13
+          ],
+          "texture": "casino:block/casino_body_side"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            14,
+            13
+          ],
+          "texture": "casino:block/casino_body_side"
+        }
+      }
+    },
+    {
+      "name": "marquee",
+      "from": [
+        0,
+        13,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ],
+          "texture": "casino:block/casino_body_top"
+        }
+      }
+    },
+    {
+      "name": "screen",
+      "from": [
+        3,
+        4,
+        -0.01
+      ],
+      "to": [
+        13,
+        11,
+        1.01
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            10,
+            7
+          ],
+          "texture": "casino:block/pinball_machine"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            10,
+            7
+          ],
+          "texture": "casino:block/pinball_machine"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            10,
+            1
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            10,
+            1
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            1,
+            7
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            1,
+            7
+          ],
+          "texture": "casino:block/casino_body_top"
+        }
+      }
+    },
+    {
+      "name": "controls",
+      "from": [
+        2,
+        1,
+        -1.5
+      ],
+      "to": [
+        14,
+        3,
+        1
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            12,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            12,
+            2
+          ],
+          "texture": "casino:block/casino_body_side"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            12,
+            2
+          ],
+          "texture": "casino:block/pinball_machine"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_side"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_side"
+        }
+      }
+    }
+  ]
 }

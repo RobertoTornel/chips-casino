@@ -27,7 +27,7 @@ FRAME_INSET = 24
 MIN_WINDOW_W = 427      # 854 physical / 2 at gui scale 2
 MIN_WINDOW_H = 240
 # Reserved at the bottom of every panel: Sell/Buy row (18) + gap (6) + balance bar (16)
-FOOTER_H = 44
+FOOTER_H = 24    # reserved bottom band: balance bar (16) + margin
 
 
 @dataclass
@@ -105,9 +105,27 @@ def eval_int(expr, consts):
     if isinstance(expr, int):
         return expr
     e = str(expr).strip()
+    # The base screen exposes contentX()/contentY() etc. as the interior origin. Resolve
+    # them against the same L/T origin so expressions using them stay checkable.
+    # Resolve the interior accessors the base screen exposes. These mirror the real
+    # implementations in BaseCasinoScreen:
+    #   contentX()      = leftPos + FRAME_INSET - 4 + CONTENT_PAD = leftPos + 24
+    #   contentY()      = topPos  + 32 + CONTENT_PAD             = topPos  + 36
+    #   contentW()      = bgWidth  - 2 * (FRAME_INSET - 4 + CONTENT_PAD) = bgWidth - 48
+    #   contentBottom() = topPos + bgHeight - 24 - CONTENT_PAD   = topPos + bgHeight - 28
+    bgh = consts.get("bgHeight")
+    bgw = consts.get("bgWidth")
+    if bgh is not None:
+        e = e.replace("contentBottom()", f"T+{bgh - 28}")
+    if bgw is not None:
+        e = e.replace("contentW()", str(bgw - 48))
+    e = e.replace("contentX()", "L+24").replace("contentY()", "T+36")
     e = e.replace("leftPos", "L").replace("topPos", "T")
-    for k, v in consts.items():
-        e = e.replace(k, str(v))
+    # Substitute identifiers on word boundaries. A plain str.replace turned `betY2` into
+    # `542` (betY -> 54, then the trailing 2 concatenated), which silently produced a
+    # plausible-looking but wrong coordinate.
+    for k, v in sorted(consts.items(), key=lambda kv: -len(kv[0])):
+        e = re.sub(rf"(?<![A-Za-z0-9_]){re.escape(k)}(?![A-Za-z0-9_])", str(v), e)
     if not re.fullmatch(r"[0-9LT+\-*/() ]+", e):
         return None
     try:
@@ -133,6 +151,30 @@ def parse_screen(path):
         m = re.search(r"protected int bgHeight = (\d+)", bsrc)
         bgh = int(m.group(1))
 
+    consts = {}
+    # Panel size first: every `contentY() + N` local depends on it.
+    for name in ("bgWidth", "bgHeight"):
+        m = re.search(rf"(?:this\.)?{name}\s*=\s*(\d+)\s*;", src)
+        if m:
+            consts[name] = int(m.group(1))
+    # Then every local layout variable, which may reference contentX()/contentY().
+    # Discovered from the source rather than kept as a hand-maintained list: a new local
+    # (tgtY, rowY, ...) used to be silently unresolvable, which dropped its widgets from
+    # the check entirely.
+    for m in re.finditer(r"^\s*int\s+(\w+)\s*=\s*([^;]+);", src, re.M):
+        name, expr = m.group(1), m.group(2)
+        if name in consts:
+            continue
+        v = eval_int(expr, consts)
+        if v is not None:
+            consts[name] = v
+    # Panel size drives the interior accessors, so it must be known before parsing widgets.
+    # Assigned as `this.bgWidth = 340;` in the constructor, hence the optional prefix.
+    for name in ("bgWidth", "bgHeight"):
+        m = re.search(rf"(?:this\.)?{name}\s*=\s*(\d+)\s*;", src)
+        if m:
+            consts[name] = int(m.group(1))
+
     rects = []
 
     # --- subclass widgets: SpriteButton.of/primary/colored(x, y, w, h, ...) ---
@@ -141,33 +183,59 @@ def parse_screen(path):
         src,
     ):
         xs, ys, ws, hs = (g.strip() for g in m.groups())
-        if re.fullmatch(r"\d+", ws) and re.fullmatch(r"\d+", hs):
-            rects.append(Rect(xs, ys, ws, hs, f"{cls} widget"))
+        # Loop-positioned calls are expanded separately below; evaluating them here would
+        # bind neither `col` nor `row` and produce a bogus position.
+        if re.search(r"\b(col|row|i)\b", xs) or re.search(r"\b(col|row|i)\b", ys):
+            continue
+        # widths may now be expressions (contentW() - 20); evaluate, don't require digits
+        wv = eval_int(ws, consts)
+        hv = eval_int(hs, consts)
+        if wv is not None and hv is not None:
+            rects.append(Rect(xs, ys, wv, hv, f"{cls} widget"))
 
-    # --- kept in loop element form: gridX + col * N, numY + row * N ---
-    if re.search(r"gridX\s*=\s*leftPos\s*\+\s*(\d+)", src):
-        gx = int(re.search(r"gridX\s*=\s*leftPos\s*\+\s*(\d+)", src).group(1))
-        numy = int(re.search(r"numY\s*=\s*topPos\s*\+\s*(\d+)", src).group(1))
-        mult = int(re.search(r"col\s*\*\s*(\d+)", src).group(1))
-        vmult = int(re.search(r"row\s*\*\s*(\d+)", src).group(1))
-        # the loop body's own w/h: the call positioned by gridX + col*N / numY + row*N
-        body = re.search(
-            r"gridX\s*\+\s*col\s*\*\s*\d+,\s*numY\s*\+\s*row\s*\*\s*\d+,\s*(\d+),\s*(\d+),", src)
-        if body:
-            bw, bh = int(body.group(1)), int(body.group(2))
-            for r in range(3):
-                for c in range(12):
-                    rects.append(Rect(gx + c * mult, numy + r * vmult, bw, bh, f"{cls} grid cell"))
+    # --- loop-expanded widgets: `gridX + col * N, numY + row * N` ---
+    #
+    # These cannot be evaluated as scalar expressions (col/row are loop variables), so the
+    # loop is expanded here across its real bounds. A grid cell that overlaps its neighbour
+    # is a real layout bug, so it must be checked per cell rather than skipped.
+    loop_pat = re.compile(
+        r"SpriteButton\.(?:of|primary|colored)\(\s*([A-Za-z_]\w*)\s*\+\s*col\s*\*\s*(\d+)"
+        r"\s*,\s*([A-Za-z_]\w*)\s*\+\s*row\s*\*\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,")
+    for m in loop_pat.finditer(src):
+        xname, xmult, yname, ymult, bw, bh = m.groups()
+        xbase = consts.get(xname)
+        ybase = consts.get(yname)
+        if xbase is None or ybase is None:
+            continue
+        xmult, ymult, bw, bh = int(xmult), int(ymult), int(bw), int(bh)
+        # Read the loop bounds from `for (int num = A; num <= B; ...)`.
+        lm = re.search(r"for\s*\(\s*int\s+\w+\s*=\s*(\d+)\s*;\s*\w+\s*<=\s*(\d+)", src)
+        lo, hi = (int(lm.group(1)), int(lm.group(2))) if lm else (1, 36)
+        ncols = int(re.search(r"%\s*(\d+)\)", src).group(1)) if re.search(r"%\s*(\d+)\)", src) else 12
+        for num in range(lo, hi + 1):
+            col = (num - lo) % ncols
+            row = (num - lo) // ncols
+            rects.append(Rect(str(xbase + col * xmult), str(ybase + row * ymult),
+                              str(bw), str(bh), f"{cls} cell {num}"))
 
-    consts = {}
-    for name in ("resBoxX", "resBoxY", "gridX", "numY", "actY", "chipY", "betY", "betY2", "cardY"):
-        m = re.search(rf"int\s+{name}\s*=\s*([^;]+);", src)
-        if m:
-            consts[name] = eval_int(m.group(1), {})
 
-    # --- text calls: must land inside the panel content box ---
-    # Splitting on top-level commas (string literals can contain commas) gives us the
-    # real argument list: <font> or <text>, x, y, ...
+    # Parenthesised loop form: `cardX + (i * 56), cardY + 34`.
+    paren_pat = re.compile(
+        r"SpriteButton\.(?:of|primary|colored)\(\s*([A-Za-z_]\w*)\s*\+\s*\(\s*\w+\s*\*\s*(\d+)\s*\)"
+        r"\s*,\s*([A-Za-z_]\w*)\s*\+\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,")
+    for m in paren_pat.finditer(src):
+        xname, xmult, yname, yconst, bw, bh = m.groups()
+        xbase, ybase = consts.get(xname), consts.get(yname)
+        if xbase is None or ybase is None:
+            continue
+        xmult, yconst, bw, bh = int(xmult), int(yconst), int(bw), int(bh)
+        # number of iterations: the enclosing `for (int i = A; i < B ...)`
+        lm = re.search(r"for\s*\(\s*int\s+\w+\s*=\s*(\d+)\s*;\s*\w+\s*<\s*(\d+)", src)
+        lo, hi = (int(lm.group(1)), int(lm.group(2))) if lm else (0, 5)
+        for i in range(lo, hi):
+            rects.append(Rect(str(xbase + i * xmult), str(ybase + yconst),
+                              str(bw), str(bh), f"{cls} card {i}"))
+
     text_rects = []
     for m in re.finditer(r"(?:extractor|graphics)\.(?:text|centeredText|drawString|drawCenteredString)\(", src):
         args = split_args(src, m.end())
@@ -177,16 +245,23 @@ def parse_screen(path):
             if xs is not None:
                 text_rects.append((xs, ys, consts))
 
-    # Resolve to ints
+    # Resolve to ints. The local layout variables (betY, actY, ...) are needed here, so the
+    # resolved consts must be passed in — previously this used an empty dict, which silently
+    # dropped every widget whose position was expressed with a named variable.
     resolved = []
+    unresolved = []
     for r in rects:
-        x = eval_int(r.x, {})
-        y = eval_int(r.y, {})
-        w = eval_int(r.w, {})
-        h = eval_int(r.h, {})
+        x = eval_int(r.x, consts)
+        y = eval_int(r.y, consts)
+        w = eval_int(r.w, consts)
+        h = eval_int(r.h, consts)
         if None in (x, y, w, h):
+            unresolved.append((r.label, r.x, r.y, r.w, r.h))
             continue
         resolved.append(Rect(x, y, w, h, r.label))
+    # A widget we cannot resolve is a gap in the check, not a pass: surface it.
+    for label, rx, ry, rw, rh in unresolved:
+        print(f"   ! unresolved widget: {label} x={rx!r} y={ry!r} {rw!r}x{rh!r}")
 
     return cls, bgw, bgh, resolved, text_rects
 
@@ -204,10 +279,13 @@ def check(path):
         errs.append(f"panel height {bgh}+{FRAME_OVERHANG} exceeds min window height {MIN_WINDOW_H} "
                     f"(content {bgh - FOOTER_H}px + footer {FOOTER_H}px)")
 
-    # Widgets must sit inside the content box.
-    inner_left = 6
-    inner_right = bgw - 6
-    content_bottom = bgh - FOOTER_H
+    # Widgets must sit inside the content box. The frame is nine-sliced with 24px corners
+    # that overhang by 4px, so the drawable interior is inset FRAME_INSET on all sides —
+    # checking against 6px would have passed content drawn on top of the border, which is
+    # exactly the bug this exists to catch.
+    inner_left = FRAME_INSET - 4
+    inner_right = bgw - (FRAME_INSET - 4)
+    content_bottom = bgh - 24
     for r in rects:
         if r.x < inner_left:
             errs.append(f"{r.label} at x={r.x} pokes into left frame")

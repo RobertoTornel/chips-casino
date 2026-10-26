@@ -31,23 +31,23 @@ public class BlackjackScreen extends BaseCasinoScreen {
         onStateUpdated();
 
         // Bet selectors
-        int betY = topPos + 38;
-        addRenderableWidget(SpriteButton.of(leftPos + 10, betY, 26, 16, "10", b -> betAmount = 10));
-        addRenderableWidget(SpriteButton.of(leftPos + 40, betY, 26, 16, "50", b -> betAmount = 50));
-        addRenderableWidget(SpriteButton.of(leftPos + 70, betY, 32, 16, "100", b -> betAmount = 100));
-        addRenderableWidget(SpriteButton.of(leftPos + 106, betY, 32, 16, "500", b -> betAmount = 500));
+        int betY = contentY() + 2;
+        addRenderableWidget(SpriteButton.of(contentX(), betY, 26, 16, "10", b -> betAmount = 10));
+        addRenderableWidget(SpriteButton.of(contentX() + 30, betY, 26, 16, "50", b -> betAmount = 50));
+        addRenderableWidget(SpriteButton.of(contentX() + 60, betY, 32, 16, "100", b -> betAmount = 100));
+        addRenderableWidget(SpriteButton.of(contentX() + 96, betY, 32, 16, "500", b -> betAmount = 500));
 
         // Game actions
-        int actY = topPos + 160;
+        int actY = contentY() + 112;
         addRenderableWidget(Button.builder(Component.literal("§aDeal"), b -> {
             JsonObject json = new JsonObject();
             json.addProperty("bet", betAmount);
             sendAction("DEAL", GSON.toJson(json));
-        }).bounds(leftPos + 10, actY, 55, 20).build());
+        }).bounds(contentX(), actY, 55, 20).build());
 
-        addRenderableWidget(SpriteButton.of(leftPos + 70, actY, 50, 20, "Hit", b -> sendAction("HIT", "{}")));
-        addRenderableWidget(SpriteButton.of(leftPos + 125, actY, 55, 20, "Stand", b -> sendAction("STAND", "{}")));
-        addRenderableWidget(SpriteButton.of(leftPos + 185, actY, 60, 20, "Double", b -> sendAction("DOUBLE", "{}")));
+        addRenderableWidget(SpriteButton.of(contentX() + 60, actY, 50, 20, "Hit", b -> sendAction("HIT", "{}")));
+        addRenderableWidget(SpriteButton.of(contentX() + 115, actY, 55, 20, "Stand", b -> sendAction("STAND", "{}")));
+        addRenderableWidget(SpriteButton.of(contentX() + 175, actY, 60, 20, "Double", b -> sendAction("DOUBLE", "{}")));
     }
 
     @Override
@@ -75,20 +75,20 @@ public class BlackjackScreen extends BaseCasinoScreen {
 
     @Override
     protected void renderGameContent(GuiGraphicsExtractor extractor, int mouseX, int mouseY, float partialTick) {
-        extractor.text(this.font, "Current Bet: §e" + betAmount + " Chips", leftPos + 150, topPos + 42, COLOR_TEXT_WHITE);
+        extractor.text(this.font, "Current Bet: §e" + betAmount + " Chips", contentX() + 140, contentY() + 6, COLOR_TEXT_WHITE);
 
         // Dealer Section
-        int dY = topPos + 60;
-        extractor.text(this.font, "Dealer (" + dealerTotal + "):", leftPos + 12, dY + 8, COLOR_TEXT_GOLD);
+        int dY = contentY() + 24;
+        extractor.text(this.font, "Dealer (" + dealerTotal + "):", contentX(), dY + 8, COLOR_TEXT_GOLD);
         for (int i = 0; i < dealerCards.size(); i++) {
-            drawCard(extractor, leftPos + 90 + (i * 26), dY, dealerCards.get(i));
+            drawCard(extractor, contentX() + 80 + (i * 26), dY, dealerCards.get(i));
         }
 
         // Player Section
-        int pY = topPos + 105;
-        extractor.text(this.font, "Player (" + playerTotal + "):", leftPos + 12, pY + 8, COLOR_TEXT_GOLD);
+        int pY = contentY() + 69;
+        extractor.text(this.font, "Player (" + playerTotal + "):", contentX(), pY + 8, COLOR_TEXT_GOLD);
         for (int i = 0; i < playerCards.size(); i++) {
-            drawCard(extractor, leftPos + 90 + (i * 26), pY, playerCards.get(i));
+            drawCard(extractor, contentX() + 80 + (i * 26), pY, playerCards.get(i));
         }
 
         // Result Banner
@@ -102,7 +102,7 @@ public class BlackjackScreen extends BaseCasinoScreen {
                 case "PLAYER_BUST" -> { banner = "BUSTED! Lost bet"; color = COLOR_TEXT_RED; }
                 default -> { banner = "Dealer Wins"; color = COLOR_TEXT_RED; }
             }
-            extractor.centeredText(this.font, banner, leftPos + bgWidth / 2, topPos + 144, color);
+            extractor.centeredText(this.font, banner, leftPos + bgWidth / 2, contentY() + 108, color);
         }
     }
 }

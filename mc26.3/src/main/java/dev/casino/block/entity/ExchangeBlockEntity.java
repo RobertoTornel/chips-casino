@@ -29,6 +29,11 @@ public class ExchangeBlockEntity extends BaseCasinoBlockEntity {
     /** How many entries the client is shown at once. */
     private static final int SHOWCASE = 12;
 
+    /** Actions this block entity owns outright; the base class must not intercept them. */
+    private static final java.util.Set<String> EXCHANGE_ACTIONS = java.util.Set.of(
+            "EXCHANGE_SELL_SLOT", "SELL_MAIN_HAND", "SELL_ALL_TRADABLE",
+            "EXCHANGE_BUY", "EXCHANGE_REFRESH");
+
     public ExchangeBlockEntity(BlockPos pos, BlockState state) {
         super(Casino.EXCHANGE_BE_TYPE, pos, state);
     }
@@ -67,6 +72,16 @@ public class ExchangeBlockEntity extends BaseCasinoBlockEntity {
         return GSON.toJson(obj);
     }
 
+    /**
+     * Claims the Exchange's own actions so the base class's generic item fallbacks do not
+     * consume them first. Without this the screen's buttons were swallowed upstream and the
+     * Exchange appeared completely inert.
+     */
+    @Override
+    protected boolean handlesAction(String action) {
+        return EXCHANGE_ACTIONS.contains(action.toUpperCase(java.util.Locale.ROOT));
+    }
+
     @Override
     protected void handleGameAction(ServerPlayer player, String action, String data) {
         switch (action.toUpperCase()) {
@@ -90,7 +105,26 @@ public class ExchangeBlockEntity extends BaseCasinoBlockEntity {
                 broadcastSync();
             }
 
+            // ---- sell every tradable stack the player is carrying ----------------
+            //
+            // Walks the inventory once and sells each stack in place. Doing it here rather
+            // than in the GUI is what keeps the client honest: it only ever asks for the
+            // operation, never names the items or the amounts.
+            case "SELL_ALL_TRADABLE" -> {
+                var inventory = player.getInventory();
+                for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+                    ItemStack stack = inventory.getItem(slot);
+                    if (Exchange.isTradable(stack)) {
+                        Exchange.sellStack(player, stack, stack.getCount());
+                    }
+                }
+                broadcastSync();
+            }
+
             // ---- buy a specific item ----------------------------------------------
+            // Just re-push the showcase; the screen asked for a redraw after a trade.
+            case "EXCHANGE_REFRESH" -> broadcastSync();
+
             case "EXCHANGE_BUY" -> {
                 try {
                     JsonObject json = GSON.fromJson(data, JsonObject.class);

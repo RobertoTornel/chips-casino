@@ -32,6 +32,34 @@ public abstract class BaseCasinoScreen extends Screen {
     /** Inset of the ornate corners in casino_frame.png, shared with ART_PIPELINE.md. */
     public static final int FRAME_INSET = 24;
 
+    /** Breathing room between the frame border and the first pixel of content. */
+    protected static final int CONTENT_PAD = 4;
+
+    /**
+     * Content origin: the top-left of the usable interior, inside the ornate border.
+     *
+     * <p>The frame is nine-sliced with {@link #FRAME_INSET}-wide corners that overhang the
+     * panel by 4px, so the decorative border physically occupies
+     * {@code leftPos-4 .. leftPos+FRAME_INSET-4}. Screens used to draw from
+     * {@code leftPos+10}, putting every label and button on top of the gold scrollwork.
+     */
+    protected int contentX() {
+        return leftPos + FRAME_INSET - 4 + CONTENT_PAD;
+    }
+
+    protected int contentY() {
+        return topPos + 32 + CONTENT_PAD;
+    }
+
+    protected int contentW() {
+        return bgWidth - 2 * (FRAME_INSET - 4 + CONTENT_PAD);
+    }
+
+    /** Bottom of the usable interior, above the balance bar. */
+    protected int contentBottom() {
+        return topPos + bgHeight - 24 - CONTENT_PAD;
+    }
+
     // Text color constants (kept for text overlay — these are not backgrounds)
     public static int COLOR_TEXT_GOLD    = 0xFFFFD700;
     public static int COLOR_TEXT_WHITE   = 0xFFEEEEEE;
@@ -75,6 +103,28 @@ public abstract class BaseCasinoScreen extends Screen {
         this.lastStateJson = stateJson;
         this.playerBalance = balance;
         onStateUpdated();
+
+        // Rebuild the widget strip after the state changes. Without this a screen kept the
+        // buttons it made on its first render: after dealing a hand "Deal" stayed and
+        // "Hit"/"Stand" never appeared. The state fields updated, so the text looked right
+        // while the controls did not.
+        rebuildWidgets();
+    }
+
+    /** Tears down and recreates the widget strip from the current state. */
+    protected void rebuildWidgets() {
+        if (this.minecraft == null) {
+            return; // not on a screen stack yet; init() will build them
+        }
+        clearWidgets();
+        initGameWidgets();
+        addCloseButton();
+    }
+
+    /** Extracted so init() and rebuildWidgets() add it exactly once. */
+    protected void addCloseButton() {
+        addRenderableWidget(SpriteButton.of(leftPos + bgWidth - 26, topPos + 6, 20, 18,
+                "\u00a7c\u2715", b -> this.onClose()));
     }
 
     protected void onStateUpdated() {
@@ -103,9 +153,9 @@ public abstract class BaseCasinoScreen extends Screen {
                 CasinoSprites.BALANCE_BAR_W, CasinoSprites.BALANCE_BAR_H);
 
         // Title & Balance text (over sprites)
-        graphics.drawString(this.font, this.title.getString(), leftPos + 10, topPos + 8, COLOR_TEXT_GOLD, false);
+        graphics.drawString(this.font, this.title.getString(), contentX(), topPos + 8, COLOR_TEXT_GOLD, false);
         String balStr = "Chips: §e" + playerBalance + " §7(sell 0.8x / buy 1.2x)";
-        graphics.drawString(this.font, balStr, leftPos + 10, topPos + 20, COLOR_TEXT_WHITE, false);
+        graphics.drawString(this.font, balStr, contentX(), topPos + 20, COLOR_TEXT_WHITE, false);
 
         // Game contents
         renderGameContent(graphics, mouseX, mouseY, partialTick);
@@ -153,7 +203,16 @@ public abstract class BaseCasinoScreen extends Screen {
      * matter what a resource pack ships in the frame's centre tile.
      */
     protected void drawPanelBacking(GuiGraphics graphics, int x, int y, int w, int h) {
-        graphics.fill(x + FRAME_INSET - 2, y + 32, x + w - FRAME_INSET + 2, y + h - 22, 0xF00D0A09);
+        // Covers the true interior (inside the border, below the header, above the balance
+        // bar) so no text ever lands on the frame's own pattern.
+        graphics.fill(x + FRAME_INSET - 4, y + 30, x + w - FRAME_INSET + 4, y + h - 22, 0xF00D0A09);
+        // A subtle inner hairline reads as an inlaid panel rather than a flat black hole.
+        int hx0 = x + FRAME_INSET - 4, hy0 = y + 30;
+        int hx1 = x + w - FRAME_INSET + 4, hy1 = y + h - 22;
+        graphics.fill(hx0, hy0, hx1, hy0 + 1, 0x40FFD86B);
+        graphics.fill(hx0, hy1 - 1, hx1, hy1, 0x30FFD86B);
+        graphics.fill(hx0, hy0, hx0 + 1, hy1, 0x30FFD86B);
+        graphics.fill(hx1 - 1, hy0, hx1, hy1, 0x30FFD86B);
     }
 
     /**

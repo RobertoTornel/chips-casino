@@ -2,7 +2,6 @@ package dev.casino.block.entity;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import dev.casino.api.PriceTable;
 import dev.casino.economy.CasinoAccountManager;
 import dev.casino.network.CasinoNetwork;
 import net.minecraft.core.BlockPos;
@@ -54,20 +53,27 @@ public abstract class BaseCasinoBlockEntity extends BlockEntity {
     }
 
     public void handleAction(ServerPlayer player, String action, String data) {
-        if ("DEPOSIT_MAIN_HAND".equalsIgnoreCase(action)) {
-            ItemStack stack = player.getMainHandItem();
-            if (!stack.isEmpty()) {
-                long depositValue = PriceTable.sellPrice(stack);
-                if (depositValue > 0) {
-                    CasinoAccountManager.addBalance(player.getUUID(), depositValue);
-                    stack.setCount(0);
-                    syncTo(player);
-                }
-            }
+        // The subclass gets first refusal on every action. This matters for the Exchange,
+        // which has its own showcase logic: intercepting the generic item actions here
+        // before delegating made the Exchange screen's buttons do nothing.
+        if (handlesAction(action)) {
+            handleGameAction(player, action, data);
             return;
         }
 
-        if ("WITHDRAW_ITEM".equalsIgnoreCase(action)) {
+        // Item <-> Chips conversion belongs to Exchange, so these legacy aliases delegate
+        // there instead of re-implementing the price rules. Two copies is how the sell rate
+        // drifted between a table's footer and the Exchange screen.
+        if ("DEPOSIT_MAIN_HAND".equalsIgnoreCase(action)
+                || "SELL_MAIN_HAND".equalsIgnoreCase(action)) {
+            ItemStack stack = player.getMainHandItem();
+            dev.casino.economy.Exchange.sellStack(player, stack, stack.getCount());
+            syncTo(player);
+            return;
+        }
+
+        if ("WITHDRAW_ITEM".equalsIgnoreCase(action)
+                || "EXCHANGE_BUY".equalsIgnoreCase(action)) {
             try {
                 JsonObject json = GSON.fromJson(data, JsonObject.class);
                 String itemId = json.get("itemId").getAsString();
@@ -75,20 +81,26 @@ public abstract class BaseCasinoBlockEntity extends BlockEntity {
 
                 Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(itemId));
                 if (item != null) {
-                    ItemStack out = new ItemStack(item, count);
-                    long cost = PriceTable.buyPrice(out);
-                    if (cost > 0 && CasinoAccountManager.deductBalance(player.getUUID(), cost)) {
-                        if (!player.getInventory().add(out)) {
-                            player.drop(out, false, false);
-                        }
-                        syncTo(player);
-                    }
+                    dev.casino.economy.Exchange.buyFor(player, item, count);
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+                // a malformed payload must not take the block entity down
+            }
+            syncTo(player);
             return;
         }
 
         handleGameAction(player, action, data);
+    }
+
+    /**
+     * Whether this block entity implements {@code action} itself.
+     *
+     * <p>Defaults to false so the generic item fallbacks apply. Subclasses owning a richer
+     * implementation (the Exchange) override this to stop the fallbacks short-circuiting.
+     */
+    protected boolean handlesAction(String action) {
+        return false;
     }
 
     protected abstract void handleGameAction(ServerPlayer player, String action, String data);

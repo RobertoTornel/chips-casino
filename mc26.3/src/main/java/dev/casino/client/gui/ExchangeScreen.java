@@ -45,23 +45,24 @@ public class ExchangeScreen extends BaseCasinoScreen {
 
     @Override
     protected void initGameWidgets() {
+        // Sits in the footer band, clear of the base's balance bar (bgHeight-20).
         int bottom = topPos + bgHeight - 42;
 
         addRenderableWidget(Button.builder(Component.literal("\u00a7aSell Hand"), b ->
                         sendAction("SELL_MAIN_HAND", "{}"))
-                .bounds(leftPos + 10, bottom, 80, 18).build());
+                .bounds(contentX(), bottom, 84, 18).build());
 
-        addRenderableWidget(Button.builder(Component.literal("\u00a7bBuy x1"), b ->
+        addRenderableWidget(Button.builder(Component.literal("\u00a7aSell All"), b ->
+                        sendAction("SELL_ALL_TRADABLE", "{}"))
+                .bounds(contentX() + 88, bottom, 72, 18).build());
+
+        addRenderableWidget(Button.builder(Component.literal("\u00a7bDiamond"), b ->
                         buy("minecraft:diamond", 1))
-                .bounds(leftPos + 94, bottom, 60, 18).build());
+                .bounds(contentX() + 164, bottom, 78, 18).build());
 
-        addRenderableWidget(Button.builder(Component.literal("\u00a7bBuy x16"), b ->
-                        buy("minecraft:diamond", 16))
-                .bounds(leftPos + 158, bottom, 62, 18).build());
-
-        addRenderableWidget(Button.builder(Component.literal("\u00a7eRefresh"), b ->
-                        sendAction("EXCHANGE_REFRESH", "{}"))
-                .bounds(leftPos + 224, bottom, 60, 18).build());
+        addRenderableWidget(Button.builder(Component.literal("\u00a7bEmerald"), b ->
+                        buy("minecraft:emerald", 1))
+                .bounds(contentX() + 246, bottom, 74, 18).build());
     }
 
     private void buy(String itemId, int count) {
@@ -115,8 +116,8 @@ public class ExchangeScreen extends BaseCasinoScreen {
         int contentTop = topPos + 34;
 
         // --- column headings, and the spread explained right on the panel ---
-        ex.text(this.font, "\u00a7aTHE HOUSE BUYS", leftPos + 12, contentTop, COLOR_TEXT_GREEN);
-        ex.text(this.font, "\u00a7cTHE HOUSE SELLS", leftPos + 12 + COL_W + 8, contentTop, COLOR_TEXT_RED);
+        ex.text(this.font, "\u00a7aTHE HOUSE BUYS", contentX(), contentTop, COLOR_TEXT_GREEN);
+        ex.text(this.font, "\u00a7cTHE HOUSE SELLS", contentX() + COL_W + 8, contentTop, COLOR_TEXT_RED);
 
         int y = contentTop + 14;
         int maxRows = Math.min(rows.size(), 12);
@@ -126,27 +127,27 @@ public class ExchangeScreen extends BaseCasinoScreen {
 
             // alternating row tint so long lists stay readable
             if (i % 2 == 0) {
-                ex.fill(leftPos + 10, rowY - 2, leftPos + 10 + COL_W, rowY + ROW_H - 3, 0x22FFFFFF);
-                ex.fill(leftPos + 10 + COL_W + 8, rowY - 2,
-                        leftPos + 10 + COL_W + 8 + COL_W, rowY + ROW_H - 3, 0x22FFFFFF);
+                ex.fill(contentX(), rowY - 2, contentX() + COL_W, rowY + ROW_H - 3, 0x22FFFFFF);
+                ex.fill(contentX() + COL_W + 8, rowY - 2,
+                        contentX() + COL_W + 8 + COL_W, rowY + ROW_H - 3, 0x22FFFFFF);
             }
 
             String label = shortId(r.id());
 
             // sell column
-            ex.text(this.font, label, leftPos + 12, rowY, COLOR_TEXT_WHITE);
+            ex.text(this.font, label, contentX(), rowY, COLOR_TEXT_WHITE);
             String sellTxt = "\u00a7a+\u00a7e" + r.sell();
-            ex.text(this.font, sellTxt, leftPos + 10 + COL_W - 40, rowY, COLOR_TEXT_GREEN);
+            ex.text(this.font, sellTxt, contentX() + COL_W - 40, rowY, COLOR_TEXT_GREEN);
 
             // buy column
-            ex.text(this.font, label, leftPos + 12 + COL_W + 8, rowY, COLOR_TEXT_WHITE);
+            ex.text(this.font, label, contentX() + COL_W + 8, rowY, COLOR_TEXT_WHITE);
             String buyTxt = "\u00a7c-\u00a7e" + r.buy();
-            ex.text(this.font, buyTxt, leftPos + 10 + COL_W + 8 + COL_W - 40, rowY, COLOR_TEXT_RED);
+            ex.text(this.font, buyTxt, contentX() + COL_W + 8 + COL_W - 40, rowY, COLOR_TEXT_RED);
         }
 
         if (rows.isEmpty()) {
             ex.text(this.font, "\u00a77No prices loaded \u2014 check data/casino/prices/",
-                    leftPos + 12, y, 0xFF888888);
+                    contentX(), y, 0xFF888888);
         }
 
         // --- the spread, stated plainly ---
@@ -154,10 +155,10 @@ public class ExchangeScreen extends BaseCasinoScreen {
         ex.text(this.font,
                 "\u00a77Sell at \u00a7a" + fmtPercent(sellMultiplier)
                         + "\u00a77  \u00b7  Buy at \u00a7c" + fmtPercent(buyMultiplier),
-                leftPos + 12, footY, COLOR_TEXT_WHITE);
+                contentX(), footY, COLOR_TEXT_WHITE);
         ex.text(this.font,
                 "\u00a77The difference is the house edge \u2014 that is what makes it a game.",
-                leftPos + 12, footY + 10, 0xFF999999);
+                contentX(), footY + 10, 0xFF999999);
     }
 
     private static String shortId(String id) {
