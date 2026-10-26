@@ -114,7 +114,8 @@ public class RouletteScreen extends BaseCasinoScreen {
         graphics.drawString(this.font, "Total Bet: §e" + totalBet + " EMC §7(" + pendingBets.size() + " bets)", leftPos + 10, topPos + 130, COLOR_TEXT_GOLD, false);
 
         // Roulette wheel sprite (resource-pack overridable)
-        blitTexture(graphics, CasinoSprites.ROULETTE_WHEEL, leftPos + 10, topPos + 58, 64, 64);
+        blitTexture(graphics, CasinoSprites.ROULETTE_WHEEL, leftPos + 10, topPos + 58, 64, 64,
+                CasinoSprites.ROULETTE_WHEEL_W, CasinoSprites.ROULETTE_WHEEL_H);
 
         // Roulette Wheel winning result box
         int resBoxX = leftPos + 230;

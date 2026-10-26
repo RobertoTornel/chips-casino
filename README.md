@@ -8,18 +8,29 @@ standalone ProjectE-style economy with the 0.8× / 1.2× exchange spread.
 
 ## Downloads
 
+### Architectury multiloader build (canonical 1.20.1)
+
 | Minecraft | Loader | Java | Artifact |
 |---|---|---|---|
-| **26.3** | Fabric ≥ 0.19.5 | 25 | `emc-casino-26.3-fabric-0.1.0.jar` |
-| **1.20.1** | Fabric ≥ 0.14.21 | 17 | `emc-casino-1.20.1-fabric-0.1.0.jar` |
-| **1.20.1** | Forge 47.3.0 | 17 | `emc-casino-1.20.1-forge-0.1.0.jar` |
-| **1.20.1** | NeoForge 47.1.3 | 17 | `emc-casino-1.20.1-neoforge-0.1.0.jar` |
+| **1.20.1** | Fabric ≥ 0.14.21 | 17 | [`architectury/…-arch-fabric-0.1.0.jar`](dist/architectury/emc-casino-1.20.1-arch-fabric-0.1.0.jar) |
+| **1.20.1** | Forge 47.x | 17 | [`architectury/…-arch-forge-0.1.0.jar`](dist/architectury/emc-casino-1.20.1-arch-forge-0.1.0.jar) |
+| **1.20.1** | NeoForge 47.1.x | 17 | [`architectury/…-arch-neoforge-0.1.0.jar`](dist/architectury/emc-casino-1.20.1-arch-neoforge-0.1.0.jar) |
 
-Built jars live in [`dist/`](dist/). Drop the matching one into `mods/`.
+Built from one `common` source tree in [`mc1.20.1-arch/`](mc1.20.1-arch/) and packaged
+per platform. See its [README](mc1.20.1-arch/README.md) for the module layout and the
+NeoForge 1.20.1 packaging note.
 
-The 1.20.1 line is also packaged as an **Architectury multiloader** project in
-[`mc1.20.1-arch/`](mc1.20.1-arch/) — one `common` source tree plus `fabric`, `forge`
-and `neoforge` platform modules.
+### Standalone per-version builds
+
+| Minecraft | Loader | Java | Artifact |
+|---|---|---|---|
+| **26.3** | Fabric ≥ 0.19.5 | 25 | [`emc-casino-26.3-fabric-0.1.0.jar`](dist/emc-casino-26.3-fabric-0.1.0.jar) |
+| **1.20.1** | Fabric ≥ 0.14.21 | 17 | [`emc-casino-1.20.1-fabric-0.1.0.jar`](dist/emc-casino-1.20.1-fabric-0.1.0.jar) |
+| **1.20.1** | Forge 47.3.0 | 17 | [`emc-casino-1.20.1-forge-0.1.0.jar`](dist/emc-casino-1.20.1-forge-0.1.0.jar) |
+| **1.20.1** | NeoForge 47.1.3 | 17 | [`emc-casino-1.20.1-neoforge-0.1.0.jar`](dist/emc-casino-1.20.1-neoforge-0.1.0.jar) |
+
+Built jars live in [`dist/`](dist/). Drop the matching one into `mods/` — either the
+Architectury or the standalone artifact works; they carry the same features.
 
 ---
 

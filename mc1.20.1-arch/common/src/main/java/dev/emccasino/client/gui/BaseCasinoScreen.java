@@ -91,10 +91,12 @@ public abstract class BaseCasinoScreen extends Screen {
         drawCasinoFrame(graphics, leftPos, topPos, bgWidth, bgHeight);
 
         // Header bar sprite
-        blitTexture(graphics, CasinoSprites.HEADER_BAR, leftPos, topPos, bgWidth, 32);
+        blitTexture(graphics, CasinoSprites.HEADER_BAR, leftPos, topPos, bgWidth, 32,
+                CasinoSprites.HEADER_BAR_W, CasinoSprites.HEADER_BAR_H);
 
         // Balance bar sprite at bottom
-        blitTexture(graphics, CasinoSprites.BALANCE_BAR, leftPos, topPos + bgHeight - 28, bgWidth, 16);
+        blitTexture(graphics, CasinoSprites.BALANCE_BAR, leftPos, topPos + bgHeight - 28, bgWidth, 16,
+                CasinoSprites.BALANCE_BAR_W, CasinoSprites.BALANCE_BAR_H);
 
         // Title & Balance text (over sprites)
         graphics.drawString(this.font, this.title.getString(), leftPos + 10, topPos + 8, COLOR_TEXT_GOLD, false);
@@ -115,7 +117,8 @@ public abstract class BaseCasinoScreen extends Screen {
      * to retheme the entire cabinet appearance.
      */
     protected void drawCasinoFrame(GuiGraphics graphics, int x, int y, int w, int h) {
-        blitTexture(graphics, CasinoSprites.CASINO_FRAME, x - 4, y - 4, w + 8, h + 8);
+        blitTexture(graphics, CasinoSprites.CASINO_FRAME, x - 4, y - 4, w + 8, h + 8,
+                CasinoSprites.CASINO_FRAME_W, CasinoSprites.CASINO_FRAME_H);
     }
 
     /**
@@ -127,12 +130,14 @@ public abstract class BaseCasinoScreen extends Screen {
         int cardH = 28;
 
         if ("??".equals(cardStr)) {
-            blitTexture(graphics, CasinoSprites.CARD_BACK, x, y, cardW, cardH);
+            blitTexture(graphics, CasinoSprites.CARD_BACK, x, y, cardW, cardH,
+                    CasinoSprites.CARD_W, CasinoSprites.CARD_H);
             graphics.drawCenteredString(this.font, "?", x + cardW / 2, y + 9, 0xFFFFFFFF);
             return;
         }
 
-        blitTexture(graphics, CasinoSprites.CARD_FRONT, x, y, cardW, cardH);
+        blitTexture(graphics, CasinoSprites.CARD_FRONT, x, y, cardW, cardH,
+                    CasinoSprites.CARD_W, CasinoSprites.CARD_H);
 
         boolean isRed = cardStr.contains("♥") || cardStr.contains("♦");
         int textColor = isRed ? 0xFFCC1111 : 0xFF111111;
@@ -148,16 +153,23 @@ public abstract class BaseCasinoScreen extends Screen {
      * Draws a chip sprite at the given position.
      */
     protected void drawChip(GuiGraphics graphics, int x, int y) {
-        blitTexture(graphics, CasinoSprites.CHIP, x, y, 16, 16);
+        blitTexture(graphics, CasinoSprites.CHIP, x, y, 16, 16,
+                CasinoSprites.CHIP_W, CasinoSprites.CHIP_H);
     }
 
     /**
-     * Blit a texture stretched to the given width and height.
-     * In 1.20.1 GuiGraphics, blit(ResourceLocation, x, y, u, v, w, h, texW, texH) is used.
+     * Blit a texture, scaling the whole sprite into the destination box.
+     *
+     * 1.20.1's GuiGraphics takes an explicit source region plus the texture's native
+     * size, so callers must pass the sprite's real pixel dimensions:
+     * {@code blit(id, x, y, dstW, dstH, uOffset, vOffset, uWidth, vHeight, texW, texH)}.
      */
-    protected void blitTexture(GuiGraphics graphics, ResourceLocation texture, int x, int y, int w, int h) {
+    protected void blitTexture(GuiGraphics graphics, ResourceLocation texture,
+                               int x, int y, int w, int h,
+                               int texW, int texH) {
         RenderSystem.enableBlend();
-        graphics.blit(texture, x, y, 0, 0, w, h, w, h);
+        RenderSystem.defaultBlendFunc();
+        graphics.blit(texture, x, y, w, h, 0f, 0f, texW, texH, texW, texH);
         RenderSystem.disableBlend();
     }
 

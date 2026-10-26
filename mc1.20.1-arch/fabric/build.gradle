@@ -27,7 +27,7 @@ dependencies {
 /// The platform `remapJar` task then remaps those classes together with ours, so the
 /// shipped jar is a single, self-contained mod.
 jar {
-    from(configurations.common.map { zipTree(it) })
+    from { configurations.common.collect { zipTree(it) } }
 }
 
 processResources {

@@ -9,6 +9,11 @@ architectury {
     forge()
 }
 
+loom {
+    // Enables architectury-loom's Forge mode and creates the `forge` dependency configuration.
+    forge {}
+}
+
 // Re-use the Forge module's platform glue verbatim (same Forge 47 API on both sides).
 sourceSets {
     main {
@@ -37,17 +42,17 @@ dependencies {
 }
 
 jar {
-    from(configurations.common.map { zipTree(it) })
+    from { configurations.common.collect { zipTree(it) } }
     archiveClassifier = "neoforge"
 }
 
 processResources {
     def props = [
             mod_id           : rootProject.mod_id,
-            mod_name         : rootProject.mod_name + " (NeoForge)",
+            mod_name         : rootProject.mod_name,
             mod_license      : rootProject.mod_license,
             mod_authors      : rootProject.mod_authors,
-            mod_description  : rootProject.mod_description,
+            mod_description  : rootProject.mod_description + " [NeoForge 1.20.1 (Forge-API compatible) build]",
             mod_version      : project.version,
             minecraft_version: rootProject.minecraft_version,
             forge_version    : rootProject.forge_version,

@@ -3,18 +3,27 @@
   "id": "emc_casino",
   "version": "${version}",
   "name": "EMC Casino",
-  "description": "EMC-based casino & gambling machines with ProjectE balancing, multiplayer tables, and bots.",
-  "authors": ["Antigravity"],
+  "description": "EMC-based casino and gambling machines with a ProjectE-style economy (0.8x deposit / 1.2x withdraw), six game tables, a sprite-driven themable UI, multiplayer Texas Hold'em seating and server-side bots.",
+  "authors": [
+    "Antigravity"
+  ],
   "license": "MIT",
   "environment": "*",
   "entrypoints": {
-    "main": ["dev.emccasino.EmcCasino"],
-    "client": ["dev.emccasino.EmcCasinoClient"]
+    "main": [
+      "dev.emccasino.EmcCasino"
+    ],
+    "client": [
+      "dev.emccasino.EmcCasinoClient"
+    ]
   },
   "depends": {
     "fabricloader": ">=0.19.5",
     "minecraft": "~26.3",
     "java": ">=25",
     "fabric-api": "*"
+  },
+  "suggests": {
+    "kubejs": "*"
   }
 }

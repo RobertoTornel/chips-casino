@@ -9,7 +9,7 @@
   "environment": "*",
   "entrypoints": {
     "main": ["dev.emccasino.fabric.EmcCasinoFabric"],
-    "client": ["dev.emccasino.fabric.EmcCasinoFabric$Client"]
+    "client": ["dev.emccasino.fabric.EmcCasinoFabricClient"]
   },
   "depends": {
     "fabricloader": ">=0.14.21",

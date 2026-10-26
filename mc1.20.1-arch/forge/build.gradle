@@ -3,6 +3,11 @@ architectury {
     forge()
 }
 
+loom {
+    // Enables architectury-loom's Forge mode and creates the `forge` dependency configuration.
+    forge {}
+}
+
 configurations {
     common
     compileClasspath.extendsFrom common
@@ -21,7 +26,7 @@ dependencies {
 /// Merge the shared module (classes + resources) into the platform artifact.
 /// Forge's `reobfJar` then remaps the merged classes named -> SRG in one pass.
 jar {
-    from(configurations.common.map { zipTree(it) })
+    from { configurations.common.collect { zipTree(it) } }
 }
 
 processResources {

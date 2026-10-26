@@ -3,15 +3,7 @@ package dev.emccasino.network;
 import dev.architectury.networking.NetworkManager;
 import dev.emccasino.EmcCasino;
 import dev.emccasino.block.entity.BaseCasinoBlockEntity;
-import dev.emccasino.client.gui.BaccaratScreen;
-import dev.emccasino.client.gui.BaseCasinoScreen;
-import dev.emccasino.client.gui.BlackjackScreen;
-import dev.emccasino.client.gui.PachinkoScreen;
-import dev.emccasino.client.gui.RouletteScreen;
-import dev.emccasino.client.gui.TexasHoldemScreen;
-import dev.emccasino.client.gui.VideoPokerScreen;
 import io.netty.buffer.Unpooled;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -61,49 +53,6 @@ public final class CasinoNetwork {
                 }
             });
         });
-    }
-
-    /**
-     * Registers the clientbound (S2C) handlers. Must only be called from a client-side
-     * entrypoint — it touches {@code net.minecraft.client.*} classes.
-     */
-    public static void initClient() {
-        NetworkManager.registerReceiver(NetworkManager.Side.S2C, SYNC_ID, (buf, context) -> {
-            buf.readBlockPos();
-            buf.readUtf(); // gameType (unused: the screen for this table is already open)
-            String stateJson = buf.readUtf();
-            long balance = buf.readLong();
-            context.queue(() -> {
-                if (Minecraft.getInstance().screen instanceof BaseCasinoScreen screen) {
-                    screen.updateState(stateJson, balance);
-                }
-            });
-        });
-
-        NetworkManager.registerReceiver(NetworkManager.Side.S2C, OPEN_SCREEN_ID, (buf, context) -> {
-            BlockPos pos = buf.readBlockPos();
-            String gameType = buf.readUtf();
-            String stateJson = buf.readUtf();
-            long balance = buf.readLong();
-            context.queue(() -> {
-                BaseCasinoScreen screen = createScreen(gameType, pos, stateJson, balance);
-                if (screen != null) {
-                    Minecraft.getInstance().setScreen(screen);
-                }
-            });
-        });
-    }
-
-    private static BaseCasinoScreen createScreen(String gameType, BlockPos pos, String stateJson, long balance) {
-        return switch (gameType.toUpperCase()) {
-            case "ROULETTE" -> new RouletteScreen(pos, stateJson, balance);
-            case "BLACKJACK" -> new BlackjackScreen(pos, stateJson, balance);
-            case "BACCARAT" -> new BaccaratScreen(pos, stateJson, balance);
-            case "VIDEO_POKER" -> new VideoPokerScreen(pos, stateJson, balance);
-            case "PACHINKO" -> new PachinkoScreen(pos, stateJson, balance);
-            case "TEXAS_HOLDEM" -> new TexasHoldemScreen(pos, stateJson, balance);
-            default -> null;
-        };
     }
 
     // ------------------------------------------------------------------

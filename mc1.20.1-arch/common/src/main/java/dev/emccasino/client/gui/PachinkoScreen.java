@@ -88,7 +88,8 @@ public class PachinkoScreen extends BaseCasinoScreen {
         int boardH = 150;
 
         graphics.fill(boardX - 2, boardY - 2, boardX + boardW + 2, boardY + boardH + 2, 0xFF4A3B2C);
-        blitTexture(graphics, CasinoSprites.PACHINKO_BOARD, boardX, boardY, boardW, boardH); // Sprite board (resource-pack overridable)
+        blitTexture(graphics, CasinoSprites.PACHINKO_BOARD, boardX, boardY, boardW, boardH,
+                CasinoSprites.PACHINKO_BOARD_W, CasinoSprites.PACHINKO_BOARD_H); // Sprite board (resource-pack overridable)
 
         // Draw Pins grid
         for (int r = 0; r < PachinkoEngine.ROWS; r++) {
