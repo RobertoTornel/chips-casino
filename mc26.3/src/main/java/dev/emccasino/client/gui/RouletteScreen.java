@@ -113,6 +113,9 @@ public class RouletteScreen extends BaseCasinoScreen {
         long totalBet = pendingBets.stream().mapToLong(b -> b.amount).sum();
         extractor.text(this.font, "Total Bet: §e" + totalBet + " EMC §7(" + pendingBets.size() + " bets)", leftPos + 10, topPos + 130, COLOR_TEXT_GOLD);
 
+        // Roulette wheel sprite (resource-pack overridable)
+        extractor.blit(CasinoSprites.ROULETTE_WHEEL, leftPos + 10, topPos + 58, 64, 64, 0f, 0f, 1f, 1f);
+
         // Roulette Wheel winning result box
         int resBoxX = leftPos + 230;
         int resBoxY = topPos + 130;

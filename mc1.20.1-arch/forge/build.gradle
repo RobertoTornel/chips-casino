@@ -1,0 +1,43 @@
+architectury {
+    platformSetupLoomIde()
+    forge()
+}
+
+configurations {
+    common
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentForge.extendsFrom common
+}
+
+dependencies {
+    forge "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
+    modApi "dev.architectury:architectury-forge:${rootProject.architectury_api_version}"
+
+    // Shared code lives in :common and is merged into this jar (see `jar` below).
+    common(project(path: ":common", configuration: "namedElements")) { transitive = false }
+}
+
+/// Merge the shared module (classes + resources) into the platform artifact.
+/// Forge's `reobfJar` then remaps the merged classes named -> SRG in one pass.
+jar {
+    from(configurations.common.map { zipTree(it) })
+}
+
+processResources {
+    def props = [
+            mod_id           : rootProject.mod_id,
+            mod_name         : rootProject.mod_name,
+            mod_license      : rootProject.mod_license,
+            mod_authors      : rootProject.mod_authors,
+            mod_description  : rootProject.mod_description,
+            mod_version      : project.version,
+            minecraft_version: rootProject.minecraft_version,
+            forge_version    : rootProject.forge_version,
+            architectury_api : rootProject.architectury_api_version
+    ]
+    inputs.properties props
+    filesMatching("META-INF/mods.toml") {
+        expand props
+    }
+}

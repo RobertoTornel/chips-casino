@@ -1,0 +1,35 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    // 1.20.1 路线：legacyforge 插件对 Forge 47.1.3 坐标开发（官方 MDK 现状，见方案 R6）。
+    id 'net.neoforged.moddev.legacyforge' version '2.0.91'
+    id 'idea'
+}
+
+version = "0.1.0"
+group = "dev.emccasino"
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+legacyForge {
+    version = "1.20.1-47.1.3"
+    parchment {
+        mappingsVersion = "2023.09.03"
+        minecraftVersion = "1.20.1"
+    }
+    runs {
+        client { client() }
+        server { server() }
+        data { data() }
+    }
+    mods {
+        "emc-casino" { sourceSet sourceSets.main }
+    }
+}
+
+// Expand only the text metadata templates; binary assets (PNG textures) must be copied verbatim.
+processResources {
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta', '**/*.json']) {
+        expand project.properties
+    }
+}

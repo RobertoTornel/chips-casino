@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * and configurable via datapack JSON in data/emc_casino/emc/values.json.
  */
 public class EmcRegistry {
-    private static final Logger LOGGER = LoggerFactory.getLogger("EmcRegistry");
+    static final Logger LOGGER = LoggerFactory.getLogger("EmcRegistry");
     private static final Map<String, Long> EMC_MAP = new ConcurrentHashMap<>();
 
     public static final double DEPOSIT_MULTIPLIER = 0.8;

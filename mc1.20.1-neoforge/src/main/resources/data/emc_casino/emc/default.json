@@ -1,0 +1,17 @@
+{
+  "minecraft:cobblestone": 1,
+  "minecraft:dirt": 1,
+  "minecraft:stone": 1,
+  "minecraft:coal": 128,
+  "minecraft:copper_ingot": 64,
+  "minecraft:iron_ingot": 256,
+  "minecraft:gold_ingot": 2048,
+  "minecraft:redstone": 64,
+  "minecraft:lapis_lazuli": 864,
+  "minecraft:diamond": 8192,
+  "minecraft:emerald": 16384,
+  "minecraft:netherite_ingot": 57344,
+  "minecraft:nether_star": 139264,
+  "minecraft:ender_pearl": 1024,
+  "minecraft:blaze_rod": 1536
+}

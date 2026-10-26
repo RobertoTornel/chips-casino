@@ -1,5 +1,6 @@
 package dev.emccasino;
 
+import dev.emccasino.api.EmcDataLoader;
 import dev.emccasino.api.EmcRegistry;
 import dev.emccasino.block.*;
 import dev.emccasino.block.entity.*;
@@ -131,6 +132,9 @@ public class EmcCasino implements ModInitializer {
                     ResourcePackActivationType.NORMAL
             );
         });
+
+        // 8. Data-driven EMC table (data/<ns>/emc/*.json, reloadable via /reload)
+        EmcDataLoader.register();
 
         LOGGER.info("EMC Casino initialized with 6 games, 0.8x deposit / 1.2x withdraw economy, and bot AI!");
     }

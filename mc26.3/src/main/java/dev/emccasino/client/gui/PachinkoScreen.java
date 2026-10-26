@@ -81,14 +81,14 @@ public class PachinkoScreen extends BaseCasinoScreen {
             extractor.text(this.font, res, leftPos + 10, topPos + 176, color);
         }
 
-        // Draw Pachinko Board Cabinet Frame (right half)
+        // Draw Pachinko Board using sprite background (resource-pack overridable)
         int boardX = leftPos + 145;
         int boardY = topPos + 36;
         int boardW = PachinkoEngine.BOARD_WIDTH;
         int boardH = 150;
 
         extractor.fill(boardX - 2, boardY - 2, boardX + boardW + 2, boardY + boardH + 2, 0xFF4A3B2C);
-        extractor.fill(boardX, boardY, boardX + boardW, boardY + boardH, 0xFF181C26); // Deep blue-gray cabinet felt
+        extractor.blit(CasinoSprites.PACHINKO_BOARD, boardX, boardY, boardW, boardH, 0f, 0f, 1f, 1f);
 
         // Draw Pins grid
         for (int r = 0; r < PachinkoEngine.ROWS; r++) {

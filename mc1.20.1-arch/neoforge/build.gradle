@@ -1,0 +1,60 @@
+// NeoForge for Minecraft 1.20.1 is published as `net.neoforged:forge:1.20.1-47.1.x` and is
+// implemented on top of the Forge 47 API. There is no `net.neoforged:neoforge` artifact for
+// the 20.1 line (that coordinate starts at 20.2), so architectury-loom's `neoforge()`
+// platform cannot resolve it. As documented in the project notes, this module therefore
+// re-uses the Forge platform build: the resulting jar is a plain Forge-API mod that
+// NeoForge 47.1.x loads natively.
+architectury {
+    platformSetupLoomIde()
+    forge()
+}
+
+// Re-use the Forge module's platform glue verbatim (same Forge 47 API on both sides).
+sourceSets {
+    main {
+        java {
+            srcDirs = [project(":forge").file("src/main/java")]
+        }
+        resources {
+            // Only this module's own metadata; shared assets/data come from :common.
+            srcDirs = [file("src/main/resources")]
+        }
+    }
+}
+
+configurations {
+    common
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentForge.extendsFrom common
+}
+
+dependencies {
+    forge "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
+    modApi "dev.architectury:architectury-forge:${rootProject.architectury_api_version}"
+
+    common(project(path: ":common", configuration: "namedElements")) { transitive = false }
+}
+
+jar {
+    from(configurations.common.map { zipTree(it) })
+    archiveClassifier = "neoforge"
+}
+
+processResources {
+    def props = [
+            mod_id           : rootProject.mod_id,
+            mod_name         : rootProject.mod_name + " (NeoForge)",
+            mod_license      : rootProject.mod_license,
+            mod_authors      : rootProject.mod_authors,
+            mod_description  : rootProject.mod_description,
+            mod_version      : project.version,
+            minecraft_version: rootProject.minecraft_version,
+            forge_version    : rootProject.forge_version,
+            architectury_api : rootProject.architectury_api_version
+    ]
+    inputs.properties props
+    filesMatching("META-INF/mods.toml") {
+        expand props
+    }
+}

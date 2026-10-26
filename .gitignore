@@ -1,0 +1,23 @@
+# Gradle
+.gradle/
+build/
+*/build/
+*/*/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.eclipse/
+.classpath
+.project
+.settings/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Run dirs
+run/
+*/run/

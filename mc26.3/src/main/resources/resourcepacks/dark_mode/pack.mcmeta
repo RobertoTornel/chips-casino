@@ -1,6 +1,10 @@
 {
   "pack": {
-    "pack_format": 48,
+    "pack_format": 97,
+    "supported_formats": {
+      "min_inclusive": 97,
+      "max_inclusive": 121
+    },
     "description": "EMC Casino Sleek Dark Mode Theme"
   }
 }
