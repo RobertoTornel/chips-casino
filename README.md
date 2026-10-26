@@ -195,6 +195,25 @@ cd mc1.20.1-arch     && ./gradlew build   # 1.20.1, all three loaders at once
 
 Jars land in `<project>/build/libs/`.
 
+### Checks
+
+Three static gates run without launching the game, so a change can be verified in
+seconds rather than by driving a client:
+
+```bash
+python3 tools/layout_check.py mc26.3/src   # no widget overlaps, nothing outside its panel
+python3 tools/asset_sync_check.py          # the five trees ship identical textures
+python3 tools/verify_jars.py               # each built jar contains what it must
+```
+
+`layout_check.py` parses each screen's widget coordinates out of the source and checks
+them against the panel interior — it catches a button drawn over the frame border or
+pushed into the footer, which compiles perfectly and only shows up on screen. An
+unresolvable widget is reported as a gap in the check, never as a pass.
+
+`tools/gen_block_models.py` regenerates the eight machine models and their item models
+from one description, so the furniture shapes stay consistent across all five trees.
+
 ### Version notes
 
 - **26.x** is unobfuscated (mojmap). `ResourceLocation` is `Identifier`,
