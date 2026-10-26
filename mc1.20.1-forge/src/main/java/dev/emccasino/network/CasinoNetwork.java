@@ -2,8 +2,6 @@ package dev.emccasino.network;
 
 import dev.emccasino.EmcCasino;
 import dev.emccasino.block.entity.BaseCasinoBlockEntity;
-import dev.emccasino.client.gui.*;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -105,20 +103,9 @@ public class CasinoNetwork {
 
         public static void handle(OpenScreenPacket pkt, Supplier<NetworkEvent.Context> ctxSupplier) {
             NetworkEvent.Context ctx = ctxSupplier.get();
-            ctx.enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-                BaseCasinoScreen screen = switch (pkt.gameType.toUpperCase()) {
-                    case "ROULETTE" -> new RouletteScreen(pkt.pos, pkt.initialState, pkt.playerBalance);
-                    case "BLACKJACK" -> new BlackjackScreen(pkt.pos, pkt.initialState, pkt.playerBalance);
-                    case "BACCARAT" -> new BaccaratScreen(pkt.pos, pkt.initialState, pkt.playerBalance);
-                    case "VIDEO_POKER" -> new VideoPokerScreen(pkt.pos, pkt.initialState, pkt.playerBalance);
-                    case "PACHINKO" -> new PachinkoScreen(pkt.pos, pkt.initialState, pkt.playerBalance);
-                    case "TEXAS_HOLDEM" -> new TexasHoldemScreen(pkt.pos, pkt.initialState, pkt.playerBalance);
-                    default -> null;
-                };
-                if (screen != null) {
-                    Minecraft.getInstance().setScreen(screen);
-                }
-            }));
+            ctx.enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+                    () -> () -> dev.emccasino.client.ClientPacketHandler.openScreen(
+                            pkt.pos, pkt.gameType, pkt.initialState, pkt.playerBalance)));
             ctx.setPacketHandled(true);
         }
     }
@@ -149,11 +136,9 @@ public class CasinoNetwork {
 
         public static void handle(SyncPacket pkt, Supplier<NetworkEvent.Context> ctxSupplier) {
             NetworkEvent.Context ctx = ctxSupplier.get();
-            ctx.enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-                if (Minecraft.getInstance().screen instanceof BaseCasinoScreen screen) {
-                    screen.updateState(pkt.stateJson, pkt.playerBalance);
-                }
-            }));
+            ctx.enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+                    () -> () -> dev.emccasino.client.ClientPacketHandler.updateState(
+                            pkt.stateJson, pkt.playerBalance)));
             ctx.setPacketHandled(true);
         }
     }
