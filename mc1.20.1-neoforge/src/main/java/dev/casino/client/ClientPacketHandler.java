@@ -5,6 +5,7 @@ import dev.casino.client.gui.ExchangeScreen;
 import dev.casino.client.gui.BaccaratScreen;
 import dev.casino.client.gui.BlackjackScreen;
 import dev.casino.client.gui.PachinkoScreen;
+import dev.casino.client.gui.PinballScreen;
 import dev.casino.client.gui.RouletteScreen;
 import dev.casino.client.gui.TexasHoldemScreen;
 import dev.casino.client.gui.VideoPokerScreen;
@@ -31,6 +32,7 @@ public final class ClientPacketHandler {
             case "BACCARAT" -> new BaccaratScreen(pos, state, balance);
             case "VIDEO_POKER" -> new VideoPokerScreen(pos, state, balance);
             case "PACHINKO" -> new PachinkoScreen(pos, state, balance);
+            case "PINBALL" -> new PinballScreen(pos, state, balance);
             case "TEXAS_HOLDEM" -> new TexasHoldemScreen(pos, state, balance);
             case "EXCHANGE" -> new ExchangeScreen(pos, state, balance);
             default -> null;

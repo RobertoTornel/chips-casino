@@ -1117,6 +1117,56 @@ def texas_holdem_floor(p) -> Image.Image:
     return img
 
 
+def pinball_machine(p) -> Image.Image:
+    """Pinball cabinet: backglass on top, scoring window, and two flippers at the bottom.
+
+    At 16x16 a pinball machine is recognised by exactly two things: a lit backglass at the
+    top and the two angled flippers at the bottom. Everything between them is playfield, so
+    the middle is left as dark recessed field with a couple of bumper studs rather than
+    trying to draw the whole table.
+    """
+    img = new(16, 16)
+    # Cabinet body: deep lacquer with a lit top edge.
+    vramp(img, 0, 0, 15, 15, [p["BG_PANEL_HI"], p["BG_PANEL"], p["BG_DEEP"]])
+    border(img, 0, 0, 15, 15, p["INK"])
+    hline(img, 1, 1, 14, p["WOOD_L"])
+    vline(img, 1, 1, 14, p["WOOD_M"])
+    hline(img, 14, 1, 14, mul(p["BG_DEEP"], 0.7))
+    vline(img, 14, 1, 14, mul(p["BG_DEEP"], 0.7))
+
+    # ---- backglass: a bright lit panel across rows 2..5 --------------------
+    box(img, 2, 2, 13, 5, p["BRASS_D"])
+    hline(img, 2, 3, 12, p["BRASS"])
+    box(img, 3, 3, 12, 4, p["GOLD_SH"])
+    # a warm glow inside the glass, brightest top-left
+    hline(img, 3, 3, 12, p["GOLD"])
+    put(img, 4, 3, p["GOLD_HI"])
+    put(img, 5, 3, p["GOLD_HI"])
+    # score digits hinted as three dark slots
+    for x in (5, 8, 11):
+        put(img, x, 4, p["INK"])
+
+    # ---- playfield: recessed dark field with bumper studs ------------------
+    box(img, 3, 6, 12, 11, p["INLAY"])
+    hline(img, 6, 3, 12, p["BG_DEEP"])
+    for (bx, by) in ((6, 8), (9, 8), (7, 10), (10, 10)):
+        put(img, bx, by, p["BRASS_L"])
+        put(img, bx + 1, by, p["BRASS_D"])
+
+    # ---- flippers: two angled paddles at the bottom ------------------------
+    # Left flipper points up-right, right flipper points up-left.
+    put(img, 4, 12, p["STEEL_L"]); put(img, 5, 12, p["STEEL"])
+    put(img, 6, 11, p["STEEL"]);   put(img, 7, 11, p["STEEL_SH"])
+    put(img, 11, 12, p["STEEL_L"]); put(img, 10, 12, p["STEEL"])
+    put(img, 9, 11, p["STEEL"]);    put(img, 8, 11, p["STEEL_SH"])
+
+    # Center drain gap between the flippers, and the plunger lane on the right.
+    box(img, 7, 13, 8, 13, p["BG_DEEP"])
+    vline(img, 13, 7, 13, p["BRASS_D"])
+    put(img, 13, 12, p["GOLD"])
+    return img
+
+
 def exchange_block(p) -> Image.Image:
     """The Exchange: the house counter where items become money and back.
 
@@ -1250,6 +1300,7 @@ BLOCK_ASSETS = [
     ("pachinko_cabinet.png",  pachinko_cabinet),
     ("texas_holdem_floor.png", texas_holdem_floor),
     ("exchange.png",          exchange_block),
+    ("pinball_machine.png",   pinball_machine),
     ("casino_body_side.png",  casino_body_side),
     ("casino_body_top.png",   casino_body_top),
 ]

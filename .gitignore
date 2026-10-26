@@ -2,22 +2,24 @@
 .gradle/
 build/
 */build/
-*/*/build/
-!gradle/wrapper/gradle-wrapper.jar
+!tools/
+!dist/
+!examples/
+!build-art-preview/
 
 # IDE
 .idea/
 *.iml
-.eclipse/
-.classpath
-.project
-.settings/
 .vscode/
+*.ipr
+*.iws
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Run dirs
+# Logs / scratch
+*.log
+logs/
 run/
-*/run/
+.env

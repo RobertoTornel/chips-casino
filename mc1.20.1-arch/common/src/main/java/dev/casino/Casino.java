@@ -72,9 +72,14 @@ public final class Casino {
     public static final RegistrySupplier<BlockEntityType<PokerMachineBlockEntity>> POKER_MACHINE_BE_TYPE =
             BLOCK_ENTITIES.register("poker_machine",
                     () -> makeType(PokerMachineBlockEntity::new, POKER_MACHINE_BLOCK.get()));
+    public static final RegistrySupplier<dev.casino.block.PinballMachineBlock> PINBALL_BLOCK =
+            BLOCKS.register("pinball_machine", dev.casino.block.PinballMachineBlock::new);
     public static final RegistrySupplier<BlockEntityType<PachinkoBlockEntity>> PACHINKO_BE_TYPE =
             BLOCK_ENTITIES.register("pachinko_cabinet",
                     () -> makeType(PachinkoBlockEntity::new, PACHINKO_BLOCK.get()));
+    public static final RegistrySupplier<BlockEntityType<PinballBlockEntity>> PINBALL_BE_TYPE =
+            BLOCK_ENTITIES.register("pinball_machine",
+                    () -> makeType(PinballBlockEntity::new, PINBALL_BLOCK.get()));
     public static final RegistrySupplier<BlockEntityType<TexasHoldemBlockEntity>> TEXAS_HOLDEM_BE_TYPE =
             BLOCK_ENTITIES.register("texas_holdem_floor",
                     () -> makeType(TexasHoldemBlockEntity::new, TEXAS_HOLDEM_BLOCK.get()));
@@ -93,6 +98,8 @@ public final class Casino {
             ITEMS.register("poker_machine", () -> new BlockItem(POKER_MACHINE_BLOCK.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> PACHINKO_ITEM =
             ITEMS.register("pachinko_cabinet", () -> new BlockItem(PACHINKO_BLOCK.get(), new Item.Properties()));
+    public static final RegistrySupplier<Item> PINBALL_ITEM =
+            ITEMS.register("pinball_machine", () -> new BlockItem(PINBALL_BLOCK.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> TEXAS_HOLDEM_ITEM =
             ITEMS.register("texas_holdem_floor", () -> new BlockItem(TEXAS_HOLDEM_BLOCK.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> EXCHANGE_ITEM =

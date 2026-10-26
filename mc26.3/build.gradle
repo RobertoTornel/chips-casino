@@ -32,3 +32,29 @@ java {
         languageVersion = JavaLanguageVersion.of(25)
     }
 }
+
+// ---------------------------------------------------------------------------
+// Unit tests
+//
+// The game engines (PachinkoEngine, RouletteEngine, Deck, ...) are plain Java with no
+// Minecraft types, so they can be tested on the JVM without a client or a server. That
+// matters more than usual here: the first PachinkoEngine returned 54x per bet, which is
+// a money printer rather than a casino game, and nothing in the build could notice.
+// ---------------------------------------------------------------------------
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform("org.junit:junit-bom:5.11.4")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "failed", "skipped"
+        showStandardStreams = false
+    }
+}

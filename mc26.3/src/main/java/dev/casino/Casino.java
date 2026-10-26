@@ -46,6 +46,7 @@ public class Casino implements ModInitializer {
     public static final BaccaratTableBlock BACCARAT_BLOCK = new BaccaratTableBlock();
     public static final PokerMachineBlock POKER_MACHINE_BLOCK = new PokerMachineBlock();
     public static final PachinkoCabinetBlock PACHINKO_BLOCK = new PachinkoCabinetBlock();
+    public static final PinballMachineBlock PINBALL_BLOCK = new PinballMachineBlock();
     public static final TexasHoldemFloorBlock TEXAS_HOLDEM_BLOCK = new TexasHoldemFloorBlock();
     public static final ExchangeBlock EXCHANGE_BLOCK = new ExchangeBlock();
 
@@ -57,6 +58,7 @@ public class Casino implements ModInitializer {
     public static BlockEntityType<BaccaratBlockEntity> BACCARAT_BE_TYPE;
     public static BlockEntityType<PokerMachineBlockEntity> POKER_MACHINE_BE_TYPE;
     public static BlockEntityType<PachinkoBlockEntity> PACHINKO_BE_TYPE;
+    public static BlockEntityType<PinballBlockEntity> PINBALL_BE_TYPE;
     public static BlockEntityType<TexasHoldemBlockEntity> TEXAS_HOLDEM_BE_TYPE;
     public static BlockEntityType<ExchangeBlockEntity> EXCHANGE_BE_TYPE;
 
@@ -70,6 +72,7 @@ public class Casino implements ModInitializer {
         registerBlock("baccarat_table", BACCARAT_BLOCK);
         registerBlock("poker_machine", POKER_MACHINE_BLOCK);
         registerBlock("pachinko_cabinet", PACHINKO_BLOCK);
+        registerBlock("pinball_machine", PINBALL_BLOCK);
         registerBlock("texas_holdem_floor", TEXAS_HOLDEM_BLOCK);
         registerBlock("exchange", EXCHANGE_BLOCK);
 
@@ -107,6 +110,11 @@ public class Casino implements ModInitializer {
                 BuiltInRegistries.BLOCK_ENTITY_TYPE,
                 id("texas_holdem_floor"),
                 new BlockEntityType<>(TexasHoldemBlockEntity::new, Set.of(TEXAS_HOLDEM_BLOCK))
+        );
+        PINBALL_BE_TYPE = Registry.register(
+                BuiltInRegistries.BLOCK_ENTITY_TYPE,
+                id("pinball_machine"),
+                new BlockEntityType<>(PinballBlockEntity::new, Set.of(PINBALL_BLOCK))
         );
 
         EXCHANGE_BE_TYPE = Registry.register(

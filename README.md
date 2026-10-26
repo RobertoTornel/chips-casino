@@ -129,9 +129,18 @@ KubeJS values last for the session; use a datapack for anything permanent.
 | `casino:blackjack_table` | Blackjack — hit, stand, double | 1 |
 | `casino:baccarat_table` | Baccarat — player, banker, tie | 1 |
 | `casino:poker_machine` | Video poker — hold/draw, Jacks or Better | 1 |
-| `casino:pachinko_cabinet` | Pachinko — drop a ball, physics decides | 1 |
+| `casino:pachinko_cabinet` | Pachinko — drop a ball, a Galton board decides | 1 |
+| `casino:pinball_machine` | Pinball — fire a ball, time your flippers | 1 |
 | `casino:texas_holdem_floor` | Texas Hold'em — full table, seats up to 6 | 1–6 |
 | `casino:exchange` | The house exchange — sell and buy items | — |
+
+### House edge
+
+Every machine is tuned to return less than the stake over time, and the number is asserted
+in a test rather than eyeballed. Pachinko returns **0.891** (10.9% edge); pinball returns
+**0.92** even against a player with perfect flipper timing, and **0.26** for someone who
+never times a flip. See [ECONOMY.md](ECONOMY.md) for the payout tables and the derivation —
+including the bug that once had the pachinko board returning 54x per bet.
 
 ### Multiplayer
 

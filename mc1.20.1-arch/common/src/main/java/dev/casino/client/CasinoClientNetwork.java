@@ -6,6 +6,7 @@ import dev.casino.client.gui.BaseCasinoScreen;
 import dev.casino.client.gui.ExchangeScreen;
 import dev.casino.client.gui.BlackjackScreen;
 import dev.casino.client.gui.PachinkoScreen;
+import dev.casino.client.gui.PinballScreen;
 import dev.casino.client.gui.RouletteScreen;
 import dev.casino.client.gui.TexasHoldemScreen;
 import dev.casino.client.gui.VideoPokerScreen;
@@ -57,6 +58,7 @@ public final class CasinoClientNetwork {
             case "BACCARAT" -> new BaccaratScreen(pos, stateJson, balance);
             case "VIDEO_POKER" -> new VideoPokerScreen(pos, stateJson, balance);
             case "PACHINKO" -> new PachinkoScreen(pos, stateJson, balance);
+            case "PINBALL" -> new PinballScreen(pos, stateJson, balance);
             case "TEXAS_HOLDEM" -> new TexasHoldemScreen(pos, stateJson, balance);
             case "EXCHANGE" -> new ExchangeScreen(pos, stateJson, balance);
             default -> null;

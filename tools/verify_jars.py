@@ -21,11 +21,11 @@ DIST = "/home/mana/Documents/mcmod/emc-casino/dist"
 
 BLOCKS = [
     "roulette_table", "blackjack_table", "baccarat_table", "poker_machine",
-    "pachinko_cabinet", "texas_holdem_floor", "exchange",
+    "pachinko_cabinet", "texas_holdem_floor", "exchange", "pinball_machine",
 ]
 SCREENS = [
     "RouletteScreen", "BlackjackScreen", "BaccaratScreen", "VideoPokerScreen",
-    "PachinkoScreen", "TexasHoldemScreen", "ExchangeScreen",
+    "PachinkoScreen", "TexasHoldemScreen", "ExchangeScreen", "PinballScreen",
 ]
 
 fail = 0
@@ -59,7 +59,7 @@ def verify(jar):
             check(f"assets/casino/blockstates/{b}.json" in names, f"no blockstate {b}", jar)
             check(f"assets/casino/models/block/{b}.json" in names, f"no block model {b}", jar)
         for tex in ["roulette_table", "blackjack_table", "baccarat_table", "poker_machine",
-                    "pachinko_cabinet", "texas_holdem_floor", "exchange"]:
+                    "pachinko_cabinet", "texas_holdem_floor", "exchange", "pinball_machine"]:
             check(f"assets/casino/textures/block/{tex}.png" in names, f"no block texture {tex}", jar)
 
         # --- GUI sprites ---
