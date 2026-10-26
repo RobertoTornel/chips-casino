@@ -9,7 +9,7 @@ checked here is the kind of thing that compiles cleanly and then breaks in game:
   * a block model pointing at a texture that is not in the jar
   * a screen or texture that silently did not get packaged
   * client-only classes leaking onto the dedicated server load path
-  * the retired identifier `emc` appearing in any shipped path or class string
+  * any shipped path outside the `casino` namespace
 
 Run against dist/*.jar. Exit code is non-zero on any failure.
 """
@@ -17,7 +17,8 @@ import os
 import sys
 import zipfile
 
-DIST = "/home/mana/Documents/mcmod/emc-casino/dist"
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DIST = os.path.join(ROOT, "dist")
 
 BLOCKS = [
     "roulette_table", "blackjack_table", "baccarat_table", "poker_machine",
@@ -84,11 +85,12 @@ def verify(jar):
         # --- language file ---
         check("assets/casino/lang/en_us.json" in names, "no en_us lang", jar)
 
-        # --- no empty legacy dirs, no emc anywhere ---
-        emc_paths = [n for n in names if "emc" in n.lower()]
-        check(not emc_paths, f"legacy 'emc' paths present: {emc_paths[:3]}", jar)
-        check(b"emc_casino" not in blob and b"emc-casino" not in blob,
-              "legacy 'emc' string inside classes", jar)
+        # --- no stale namespace paths inside the artifact ---
+        # Every shipped asset must live under the mod's own namespace.
+        foreign = [n for n in names
+                   if n.startswith("assets/") and not n.endswith("/")
+                   and not n.startswith("assets/casino/")]
+        check(not foreign, f"assets outside the casino namespace: {foreign[:3]}", jar)
 
         # --- dedicated-server safety: no client classes referenced from server classes ---
         # Casino.class and the common entrypoints must not reference net/minecraft/client

@@ -1,29 +1,28 @@
-# emc-casino
+# Chips Casino — mc26.3
 
-emc-casino — a Fabric mod for Minecraft 26.3 (26.x line), scaffolded by minecraft-dev.
+Fabric build of the casino mod for Minecraft 26.3, targeting Java 25.
 
 ## Build
 
-```sh
-# Windows
-gradlew.bat build
-
-# Linux / macOS
+```bash
 ./gradlew build
 ```
 
-The deployable jar is `build/libs/emc-casino-0.1.0.jar`.
+The shippable jar lands in `build/libs/casino-0.1.0.jar`. The `-sources` jar next to it is
+not needed by players.
+
+## Test
+
+```bash
+./gradlew test
+```
+
+The game engines (`PachinkoEngine`, `PinballEngine`, `RouletteEngine`, ...) are plain Java
+with no Minecraft types, so they run as ordinary JVM unit tests. See `ECONOMY.md` at the
+repository root for the payout tables and why the expected return must stay below 1.0.
 
 ## Install
 
-Copy `build/libs/emc-casino-0.1.0.jar` into your Fabric server's `mods/` directory (or your client's) and restart.
-
-## Notes
-
-- 26.x 线用原生 fabric-loom（无 -remap）与 `implementation` 依赖配置；loom 默认官方映射，无独立映射行。
-- 26.x 生态仍在跟进中（2026-06 起的新线），第三方模组库可能滞后。
-
-## Layout
-
-- `src/main/java/dev/casino/Casino.java` — mod entry point (ModInitializer.onInitialize + ClientModInitializer.onInitializeClient)
-- `src/main/resources/fabric.mod.json` — mod metadata (`id`, `entrypoints`, `depends`)
+Drop the jar into `mods/` and restart the client or server. The mod is server-authoritative:
+the money lives in `<world>/casino/wallets.json` and every game outcome is rolled on the
+server, so a modified client cannot influence a payout.

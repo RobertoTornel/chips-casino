@@ -1,27 +1,28 @@
-# emc-casino
+# Chips Casino — mc1.20.1-neoforge
 
-emc-casino — a NeoForge mod for Minecraft 1.20.1 (legacyforge route, Forge 47.1.3), scaffolded by minecraft-dev.
+NeoForge (via the Forge jar) build of the casino mod for Minecraft 1.20.1, targeting Java 17.
 
 ## Build
 
-```sh
-# Windows
-gradlew.bat build
-
-# Linux / macOS
+```bash
 ./gradlew build
 ```
 
-产物 `build/libs/emc-casino-0.1.0.jar` 拖入 `mods/` 启动测试；`gradlew runClient`/`runServer`/`runData` 可用。
+The shippable jar lands in `build/libs/casino-0.1.0.jar`. The `-sources` jar next to it is
+not needed by players.
 
-## Notes
+## Test
 
-- NeoForge 20.x 官方 1.20.1 路线 = `net.neoforged.moddev.legacyforge` 插件对 **Forge 47.1.3** 坐标开发（官方 MDK `1.20.1-legacy` 分支现状）；mods.toml 走 javafml 老形态。
-- moddev 插件声明仅支持 NeoForge ≥21.0.x，1.20.1 必须用 legacyforge 插件（R6）。
+```bash
+./gradlew test
+```
 
-## Layout
+The game engines (`PachinkoEngine`, `PinballEngine`, `RouletteEngine`, ...) are plain Java
+with no Minecraft types, so they run as ordinary JVM unit tests. See `ECONOMY.md` at the
+repository root for the payout tables and why the expected return must stay below 1.0.
 
-- `src/main/java/dev/casino/Casino.java` — `@Mod` 主类 + 事件总线注册骨架
-- `src/main/resources/META-INF/mods.toml` — javafml 形态（modLoader/loaderVersion 必填）
-- `src/main/resources/pack.mcmeta` — pack_format 15
-- `build.gradle` — legacyforge 2.0.91 + Parchment + Java 17 toolchain
+## Install
+
+Drop the jar into `mods/` and restart the client or server. The mod is server-authoritative:
+the money lives in `<world>/casino/wallets.json` and every game outcome is rolled on the
+server, so a modified client cannot influence a payout.

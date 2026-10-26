@@ -1,41 +1,40 @@
-# EMC Casino — KubeJS integration
+# KubeJS integration
 
-The mod never hard-depends on KubeJS. If KubeJS is installed, its `Java.loadClass`
-bridge reaches the mod's public static API directly.
+Edit the item price table from a KubeJS server script — no datapack, no restart.
 
-## Namespace
+The mod ships a spreadsheet of base item values. Players **sell** items to the house for
+**80%** of that value and **buy** them back for **120%**, which is the mod's whole economy:
+no trade loop can come out ahead.
 
+```js
+// examples/kubejs/server_scripts/casino.js
+ServerEvents.loaded(event => {
+    const prices = Java.loadClass('dev.casino.api.PriceKubeJsBridge')
+
+    prices.set('minecraft:diamond', 8192)      // set a base value
+    prices.set('minecraft:netherite_ingot', 32768)
+    prices.remove('minecraft:dirt')             // make an item untradable
+
+    console.info(`table size: ${prices.size()}`)
+    console.info(`diamond sells for ${prices.sellPrice('minecraft:diamond')}`)
+    console.info(`diamond costs    ${prices.buyPrice('minecraft:diamond')}`)
+})
 ```
-dev.emccasino.api.EmcKubeJsBridge
-```
 
-| Method | Meaning |
+## API
+
+| Method | Effect |
 |---|---|
-| `set(itemId, emc)` | Set the base EMC value of an item |
-| `remove(itemId)` | Make an item un-tradeable |
-| `get(itemId)` | Base EMC value (0 when unset) |
-| `deposit(itemId)` | What the player gets when depositing one (`floor(base × 0.8)`) |
-| `withdraw(itemId)` | What it costs to withdraw one (`ceil(base × 1.2)`) |
-| `has(itemId)` | Whether the item has an EMC value |
-| `size()` | How many items are priced |
-| `setById(itemId, emc)` | Like `set`, but validates the item exists first |
+| `set(itemId, value)` | Set the base value of an item |
+| `remove(itemId)` | Make an item untradable |
+| `get(itemId)` | Base value (0 when unset) |
+| `has(itemId)` | Whether the item has a value |
+| `size` | Number of priced items |
+| `sellPrice(itemId)` | What the player receives (80% of base, minimum 1) |
+| `buyPrice(itemId)` | What the player pays (120% of base, minimum 1) |
+| `sellValueOfStack(stack)` | Payout for a whole ItemStack |
+| `buyCostOfStack(stack)` | Cost of a whole ItemStack |
 
-## Persistent pricing
-
-Values set from a script live only for that server session. For values that
-must survive restarts, ship a **data pack** file instead:
-
-```
-data/<your_namespace>/emc/prices.json
-```
-
-```json
-{
-  "minecraft:diamond": 9000,
-  "minecraft:emerald": 20000
-}
-```
-
-The mod merges every `data/*/emc/*.json` it finds into the table and re-applies
-them on every `/reload`, so a data pack is the durable path and a KubeJS script
-is the dynamic one.
+The sell/buy multipliers are fixed at 0.8 / 1.2 in `PriceTable`. They are deliberately not
+exposed to scripting: a server admin who could set both would be able to remove the house
+edge entirely, which is the one thing the economy depends on.

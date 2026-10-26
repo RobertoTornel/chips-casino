@@ -14,7 +14,7 @@ import hashlib
 import os
 import sys
 
-ROOT = "/home/mana/Documents/mcmod/emc-casino"
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TREES = [
     "mc26.3",
     "mc1.20.1",

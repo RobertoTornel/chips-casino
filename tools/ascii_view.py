@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Render a PNG as palette-mapped ASCII so its readability can be judged in text."""
+import os
 import sys
 from PIL import Image
 
-sys.path.insert(0, "/home/mana/Documents/mcmod/emc-casino/tools")
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__))))
 from gen_casino_art import LIGHT, DARK
 
 # stable glyph per palette key (visual density roughly matches brightness)
@@ -43,7 +44,8 @@ def dump(path, tab, scale=1, box=None):
         print("".join(row))
 
 if __name__ == "__main__":
-    B = "/home/mana/Documents/mcmod/emc-casino/mc26.3/src/main/resources/assets/casino/textures"
+    B = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                 "mc26.3", "src", "main", "resources", "assets", "casino", "textures")
     tab = DARK if "--dark" in sys.argv else LIGHT
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     scale = 1

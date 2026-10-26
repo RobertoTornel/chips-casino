@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-emc-casino — procedural pixel-art asset generator.
+Chips Casino — procedural pixel-art asset generator.
 
 Produces every GUI sprite (light + dark themes) and the block textures for the
-emc-casino mod, deterministically, using Pillow only.
+casino mod, deterministically, using Pillow only.
 
 Design rules enforced here:
   * all shading goes through mul()/mix(), which snap the result onto the active
@@ -1305,7 +1305,7 @@ BLOCK_ASSETS = [
     ("casino_body_top.png",   casino_body_top),
 ]
 
-ROOT = "/home/mana/Documents/mcmod/emc-casino"
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Every source tree that ships these textures. The five projects are separate Gradle
 # builds with their own resource directories, so one generated set has to be written
@@ -1320,9 +1320,7 @@ RESOURCE_ROOTS = [
     f"{ROOT}/mc1.20.1-arch/common/src/main/resources",
 ]
 
-# The mod's namespace is `casino`. (An earlier `emc_casino` namespace existed
-# when this pipeline was written; it was dropped because the mod has no ties to
-# EMC and the identifier must not ship. Do not reintroduce it.)
+# The mod's resource namespace.
 NAMESPACES = ["casino"]
 
 def trees() -> list:
@@ -1479,7 +1477,7 @@ def main() -> int:
             blocks.append((name, im))
 
     if args.preview:
-        prev = "/home/mana/Documents/mcmod/emc-casino/build-art-preview"
+        prev = os.path.join(ROOT, "build-art-preview")
         os.makedirs(prev, exist_ok=True)
         print("previews")
         contact_sheet(built["light"], 3, os.path.join(prev, "sheet_light.png"), "light gui")
