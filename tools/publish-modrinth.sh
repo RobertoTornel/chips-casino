@@ -33,6 +33,19 @@ cd "$ROOT"
 VERSION="${VERSION:-$(grep -hE '^version=' mc26.3/gradle.properties 2>/dev/null | head -1 | cut -d= -f2 | tr -d '[:space:]')}"
 VERSION="${VERSION:-0.1.0}"
 PROJECT_ID="${PROJECT_ID:-chips-casino}"
+
+# The API wants the base62 project id, not the slug: the version endpoint echoes it into a
+# field Modrinth parses as a base62 id, so a slug containing '-' fails with
+# "Invalid character '-' in base62 encoding" even though the slug exists.
+# Resolve the slug once here so callers can keep using the friendly name.
+if [[ -n "${MODRINTH_TOKEN:-}" ]] && ! [[ "$PROJECT_ID" =~ ^[A-Za-z0-9]{8,9}$ ]]; then
+  resolved=$(curl -sS -H "Authorization: Bearer ${MODRINTH_TOKEN}" \
+    "https://api.modrinth.com/v2/project/${PROJECT_ID}" \
+    | python3 -c "import sys,json;print(json.load(sys.stdin).get('id',''))" 2>/dev/null || true)
+  if [[ -n "$resolved" ]]; then
+    PROJECT_ID="$resolved"
+  fi
+fi
 RELEASE_TYPE="${RELEASE_TYPE:-beta}"
 ONLY="${ONLY:-}"
 
