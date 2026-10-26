@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "emc_casino:block/texas_holdem_floor" }
+  }
+}
