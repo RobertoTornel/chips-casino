@@ -175,24 +175,22 @@ public class RouletteBlockEntity extends BaseCasinoBlockEntity {
                     }
                     int target = type == RouletteEngine.BetType.STRAIGHT ? number : 0;
 
-                    // Wallet order is deliberate: validate, then refund the chip already on
-                    // that target, then charge the new one. Validating first means a rejected
-                    // amount never touches the balance; refunding first would let a malformed
-                    // bet hand out chips and leave the cell with a stake nobody paid for.
+                    // Wallet order is deliberate: validate affordability before any balance
+                    // moves, then swap old stake for new in one clean step. If anything fails
+                    // after the deduct, the felt is rolled back to exactly its prior layout.
                     long previous = table.stakeOn(uuid, type, target);
+                    long delta = amount - previous;
+
+                    if (delta > 0 && !CasinoAccountManager.deductBalance(uuid, delta)) {
+                        // Not enough chips for the increase: nothing changes on the felt.
+                        return;
+                    }
                     if (previous > 0) {
                         CasinoAccountManager.addBalance(uuid, previous);
                     }
-                    if (!CasinoAccountManager.deductBalance(uuid, amount)) {
-                        // Not enough chips for the new stake: put the old chip back so the
-                        // felt keeps exactly the layout it had before this packet.
-                        if (previous > 0) {
-                            CasinoAccountManager.deductBalance(uuid, previous);
-                        }
-                        return;
-                    }
                     if (!table.placeBet(uuid, type, target, amount)) {
-                        // The table refused (window shut, or the layout is full): unwind.
+                        // The table refused (window shut, or the layout is full): unwind the
+                        // swap so the felt is byte-identical to before this packet.
                         CasinoAccountManager.addBalance(uuid, amount);
                         if (previous > 0) {
                             CasinoAccountManager.deductBalance(uuid, previous);

@@ -1,3 +1,11 @@
+## 0.1.8 — Slot machine security + wallet hardening
+
+- **Slot machine now drains payouts exactly once** (`SlotMachineBlockEntity`): winnings are queued in `pendingPayouts` and credited via `serverTick` instead of being paid directly in the spin handler, so duplicate SPIN packets can no longer double-pay. Matches the table games' exactly-once guarantee.
+- **Slot bet limits**: `SET_BET` now enforces `MIN_BET=10`..`MAX_BET=10_000`; previously accepted any bet 1–10000.
+- **Roulette BET wallet ordering** (`RouletteBlockEntity`): validates affordability before any balance moves, then swaps old stake for new in one clean step — no roundabout refund-then-rollback.
+- **Baccarat BET refund guard** (`BaccaratBlockEntity`): only refunds the previous stake when `previous > 0`, matching roulette's pattern.
+- Version bumped 0.1.7 → 0.1.8 across all five trees.
+
 ## 0.1.7 — Creative Mode Tab + SLOT screen fix
 
 - **Creative Mode Tab**: "Chips Casino" tab registered in all 5 trees (Fabric 26.3, Fabric 1.20.1, Forge 1.20.1, NeoForge 1.20.1, Architectury 1.20.1 multiloader), with slot_machine icon and all 9 block items. No more `null` tab / NPE risk.

@@ -115,8 +115,7 @@ public class Casino {
         BLOCK_ENTITIES.register(modBus);
         CREATIVE_TABS.register(modBus);
 
-        // Creative Mode Tab (stub — registration filled in by C stage)
-        registerCreativeTab();
+        // Creative Mode Tab registered via CREATIVE_TABS above;
 
         modBus.addListener(this::commonSetup);
 
@@ -147,10 +146,6 @@ public class Casino {
         CasinoAccountManager.save();
     }
 
-    private static void registerCreativeTab() {
-        // TODO: DeferredRegister<CreativeModeTab> on ForgeRegistries.CREATIVE_MODE_TABS with
-        // icon = () -> new ItemStack(SLOT_MACHINE_BLOCK.get().asItem()), title = "Chips Casino",
-        // contents = all 9 block items (PLAN-FLAIR.md Pass 1).
-        // Loader API for CreativeModeTab varies; left as compiling stub for C stage.
-    }
+    // Creative Mode Tab is registered above via CREATIVE_TABS.register(modBus) —
+    // no separate registration method needed for Forge/NeoForge.
 }

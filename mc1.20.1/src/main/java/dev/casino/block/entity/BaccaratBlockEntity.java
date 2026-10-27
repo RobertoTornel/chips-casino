@@ -151,23 +151,25 @@ public class BaccaratBlockEntity extends BaseCasinoBlockEntity {
                         return;
                     }
                     long previous = table.getSeats()[seat].bet;
+                    long delta = amount - previous;
 
-                    // Wallet order is deliberate, and it is the same order blackjack uses.
-                    // Validate first, so a rejected stake never touches the wallet. Then
-                    // refund the stake already on the felt — a player is allowed to change
-                    // their amount or their line before the shoe deals — and only then
-                    // charge the new one. If the charge fails, put the old stake back so a
-                    // player who cannot cover the raise stays exactly where they were.
-                    CasinoAccountManager.addBalance(uuid, previous);
-                    if (!CasinoAccountManager.deductBalance(uuid, amount)) {
-                        CasinoAccountManager.deductBalance(uuid, previous);
+                    // Wallet order is deliberate: validate affordability first, then swap
+                    // old stake for new in one clean step. If anything fails, the felt is
+                    // rolled back to exactly its prior layout.
+
+                    if (delta > 0 && !CasinoAccountManager.deductBalance(uuid, delta)) {
                         return;
+                    }
+                    if (previous > 0) {
+                        CasinoAccountManager.addBalance(uuid, previous);
                     }
                     if (!table.placeBet(uuid, target, amount)) {
                         // The table refused it after all — the betting window closed between
                         // the click and the tick. Unwind the swap both ways.
                         CasinoAccountManager.addBalance(uuid, amount);
-                        CasinoAccountManager.deductBalance(uuid, previous);
+                        if (previous > 0) {
+                            CasinoAccountManager.deductBalance(uuid, previous);
+                        }
                     }
                 } catch (Exception e) {
                     Casino.LOGGER.warn("baccarat action {} failed for {}", action, player.getName().getString(), e);
