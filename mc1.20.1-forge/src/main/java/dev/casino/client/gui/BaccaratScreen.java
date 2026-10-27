@@ -76,6 +76,7 @@ public class BaccaratScreen extends BaseCasinoScreen {
 
     @Override
     protected void renderGameContent(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        graphics.drawString(this.font, "PLAYER \u2022 BANKER \u2022 TIE", contentX(), contentY() + 16, COLOR_BACCARAT, false);
         graphics.drawString(this.font, "Bet: §e" + betAmount + " Chips §7on §b" + target.name(), contentX() + 110, contentY() + 6, COLOR_TEXT_WHITE, false);
 
         // Player side

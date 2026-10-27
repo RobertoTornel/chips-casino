@@ -23,10 +23,12 @@ DIST = os.path.join(ROOT, "dist")
 BLOCKS = [
     "roulette_table", "blackjack_table", "baccarat_table", "poker_machine",
     "pachinko_cabinet", "texas_holdem_floor", "exchange", "pinball_machine",
+    "slot_machine",
 ]
 SCREENS = [
     "RouletteScreen", "BlackjackScreen", "BaccaratScreen", "VideoPokerScreen",
     "PachinkoScreen", "TexasHoldemScreen", "ExchangeScreen", "PinballScreen",
+    "SlotMachineScreen",
 ]
 
 fail = 0
@@ -60,13 +62,17 @@ def verify(jar):
             check(f"assets/casino/blockstates/{b}.json" in names, f"no blockstate {b}", jar)
             check(f"assets/casino/models/block/{b}.json" in names, f"no block model {b}", jar)
         for tex in ["roulette_table", "blackjack_table", "baccarat_table", "poker_machine",
-                    "pachinko_cabinet", "texas_holdem_floor", "exchange", "pinball_machine"]:
+                    "pachinko_cabinet", "texas_holdem_floor", "exchange", "pinball_machine",
+                    "slot_machine"]:
             check(f"assets/casino/textures/block/{tex}.png" in names, f"no block texture {tex}", jar)
 
         # --- GUI sprites ---
         for g in ["casino_frame", "header_bar", "button", "button_hover", "balance_bar",
                   "chip", "roulette_wheel", "pachinko_board",
-                  "cards/card_front", "cards/card_back"]:
+                  "cards/card_front", "cards/card_back",
+                  "slot_reel_window", "slot_reel_strip", "slot_spin_button",
+                  "slot_spin_button_hover", "slot_symbol_cherry", "slot_symbol_lemon",
+                  "slot_symbol_bell", "slot_symbol_bar", "slot_symbol_seven"]:
             check(f"assets/casino/textures/gui/{g}.png" in names, f"no gui sprite {g}", jar)
         # dark theme pack
         for g in ["casino_frame", "header_bar", "button", "balance_bar", "chip"]:

@@ -7,6 +7,7 @@ import dev.casino.economy.CasinoAccountManager;
 import dev.casino.network.CasinoNetwork;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -24,11 +25,15 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.security.SecureRandom;
 
 @Mod(Casino.MODID)
 public class Casino {
     public static final String MODID = "casino";
     public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
+
+    /** Cryptographically strong RNG for server-owned game seeds. */
+    public static final SecureRandom SLOT_RANDOM = new SecureRandom();
 
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
@@ -44,6 +49,10 @@ public class Casino {
     public static final RegistryObject<Block> TEXAS_HOLDEM_BLOCK = BLOCKS.register("texas_holdem_floor", TexasHoldemFloorBlock::new);
     public static final RegistryObject<Block> EXCHANGE_BLOCK = BLOCKS.register("exchange", ExchangeBlock::new);
     public static final RegistryObject<Block> SLOT_MACHINE_BLOCK = BLOCKS.register("slot_machine", SlotMachineBlock::new);
+
+    // Creative mode tab (stub — C stage fills real registration, PLAN-FLAIR.md Pass 1)
+    // Tab "Chips Casino" with slot_machine block item as icon, holding all 9 block items.
+    public static final CreativeModeTab CASINO_TAB = null; // TODO: register CreativeModeTab here
 
     // Items
     public static final RegistryObject<Item> ROULETTE_ITEM = ITEMS.register("roulette_table", () -> new BlockItem(ROULETTE_BLOCK.get(), new Item.Properties()));
@@ -84,6 +93,9 @@ public class Casino {
         ITEMS.register(modBus);
         BLOCK_ENTITIES.register(modBus);
 
+        // Creative Mode Tab (stub — registration filled in by C stage)
+        registerCreativeTab();
+
         modBus.addListener(this::commonSetup);
 
         // Forge Event Bus
@@ -111,5 +123,12 @@ public class Casino {
 
     private void onServerStopping(ServerStoppingEvent event) {
         CasinoAccountManager.save();
+    }
+
+    private static void registerCreativeTab() {
+        // TODO: DeferredRegister<CreativeModeTab> on ForgeRegistries.CREATIVE_MODE_TABS with
+        // icon = () -> new ItemStack(SLOT_MACHINE_BLOCK.get().asItem()), title = "Chips Casino",
+        // contents = all 9 block items (PLAN-FLAIR.md Pass 1).
+        // Loader API for CreativeModeTab varies; left as compiling stub for C stage.
     }
 }

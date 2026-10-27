@@ -18,16 +18,21 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.security.SecureRandom;
 
 public class Casino implements ModInitializer {
     public static final String MOD_ID = "casino";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
+    /** Cryptographically strong RNG for server-owned game seeds. */
+    public static final SecureRandom SLOT_RANDOM = new SecureRandom();
 
     // Network Channel IDs
     public static final ResourceLocation ACTION_ID = id("action");
@@ -44,6 +49,10 @@ public class Casino implements ModInitializer {
     public static final TexasHoldemFloorBlock TEXAS_HOLDEM_BLOCK = new TexasHoldemFloorBlock();
     public static final ExchangeBlock EXCHANGE_BLOCK = new ExchangeBlock();
     public static final SlotMachineBlock SLOT_MACHINE_BLOCK = new SlotMachineBlock();
+
+    // Creative mode tab (stub — C stage fills real registration, PLAN-FLAIR.md Pass 1)
+    // Tab "Chips Casino" with slot_machine block item as icon, holding all 9 block items.
+    public static final CreativeModeTab CASINO_TAB = null; // TODO: register CreativeModeTab here
 
     // Block Entities
     public static BlockEntityType<RouletteBlockEntity> ROULETTE_BE_TYPE;
@@ -154,6 +163,9 @@ public class Casino implements ModInitializer {
         // 7. Data-driven Chips table (data/<ns>/prices/*.json, reloadable via /reload)
         dev.casino.api.PriceDataLoader.register();
 
+        // 8. Creative Mode Tab (stub — registration filled in by C stage)
+        registerCreativeTab();
+
         LOGGER.info("Casino 1.20.1 initialized successfully!");
     }
 
@@ -165,5 +177,12 @@ public class Casino implements ModInitializer {
 
     public static ResourceLocation id(String path) {
         return new ResourceLocation(MOD_ID, path);
+    }
+
+    private static void registerCreativeTab() {
+        // TODO: CASINO_TAB = CreativeModeTab registry registration with
+        // icon = new ItemStack(SLOT_MACHINE_BLOCK.asItem()), title = "Chips Casino",
+        // contents = all 9 block items (PLAN-FLAIR.md Pass 1).
+        // Loader API for CreativeModeTab varies; left as compiling stub for C stage.
     }
 }

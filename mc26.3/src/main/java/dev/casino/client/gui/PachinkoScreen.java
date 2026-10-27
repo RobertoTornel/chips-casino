@@ -65,6 +65,7 @@ public class PachinkoScreen extends BaseCasinoScreen {
 
     @Override
     protected void renderGameContent(GuiGraphicsExtractor extractor, int mouseX, int mouseY, float partialTick) {
+        extractor.text(this.font, "PEG DROP FEVER", contentX(), contentY() + 16, COLOR_PACHINKO);
         extractor.text(this.font, "Ball Bet: §e" + betAmount + " Chips", contentX(), contentY() + 54, COLOR_TEXT_WHITE);
 
         // Payout table info

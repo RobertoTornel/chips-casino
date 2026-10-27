@@ -83,6 +83,7 @@ public class VideoPokerScreen extends BaseCasinoScreen {
 
     @Override
     protected void renderGameContent(GuiGraphicsExtractor extractor, int mouseX, int mouseY, float partialTick) {
+        extractor.text(this.font, "JACKS OR BETTER", contentX(), contentY() + 16, COLOR_VIDEOPOKER);
         extractor.text(this.font, "Bet: §e" + betAmount + " Chips", contentX() + 105, contentY() + 4, COLOR_TEXT_WHITE);
 
         // Paytable summary banner

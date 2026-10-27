@@ -13,12 +13,14 @@ import dev.casino.network.CasinoNetwork;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.security.SecureRandom;
 
 /**
  * Platform-neutral mod core (Architectury multiloader).
@@ -33,6 +35,9 @@ public final class Casino {
     public static final String MOD_NAME = "Casino";
     public static final String VERSION = "0.1.0";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
+    /** Cryptographically strong RNG for server-owned game seeds. */
+    public static final SecureRandom SLOT_RANDOM = new SecureRandom();
 
     // ---------------------------------------------------------------------
     // Registries (Architectury wraps Fabric/Forge/NeoForge registry plumbing)
@@ -59,6 +64,10 @@ public final class Casino {
             BLOCKS.register("exchange", ExchangeBlock::new);
     public static final RegistrySupplier<SlotMachineBlock> SLOT_MACHINE_BLOCK =
             BLOCKS.register("slot_machine", SlotMachineBlock::new);
+
+    // Creative mode tab (stub — C stage fills real registration, PLAN-FLAIR.md Pass 1)
+    // Tab "Chips Casino" with slot_machine block item as icon, holding all 9 block items.
+    public static final CreativeModeTab CASINO_TAB = null; // TODO: register CreativeModeTab here
 
     // ---- Block entities --------------------------------------------------
     public static final RegistrySupplier<BlockEntityType<RouletteBlockEntity>> ROULETTE_BE_TYPE =
@@ -129,6 +138,9 @@ public final class Casino {
         BLOCK_ENTITIES.register();
         ITEMS.register();
 
+        // Creative Mode Tab (stub — registration filled in by C stage)
+        registerCreativeTab();
+
         // Common (C2S) packet handler.
         CasinoNetwork.initCommon();
 
@@ -154,5 +166,12 @@ public final class Casino {
     private static <T extends BlockEntity> BlockEntityType<T> makeType(
             BlockEntityType.BlockEntitySupplier<T> supplier, Block block) {
         return BlockEntityType.Builder.of(supplier, block).build(null);
+    }
+
+    private static void registerCreativeTab() {
+        // TODO: CreativeModeTab registration with
+        // icon = new ItemStack(SLOT_MACHINE_BLOCK.get().asItem()), title = "Chips Casino",
+        // contents = all 9 block items (PLAN-FLAIR.md Pass 1).
+        // Loader API for CreativeModeTab varies; left as compiling stub for C stage.
     }
 }

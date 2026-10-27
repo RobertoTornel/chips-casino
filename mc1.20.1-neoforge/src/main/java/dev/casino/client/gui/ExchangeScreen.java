@@ -109,6 +109,7 @@ public class ExchangeScreen extends BaseCasinoScreen {
         // --- column headings, and the spread explained right on the panel ---
         ex.drawString(this.font, "\u00a7aTHE HOUSE BUYS", contentX() + 2, contentTop, COLOR_TEXT_GREEN, false);
         ex.drawString(this.font, "\u00a7cTHE HOUSE SELLS", contentX() + 2 + COL_W + 8, contentTop, COLOR_TEXT_RED, false);
+        ex.drawString(this.font, "BUY HIGH SELL LOW", contentX(), contentY() + 16, COLOR_EXCHANGE, false);
 
         int y = contentTop + 14;
         int maxRows = Math.min(rows.size(), 12);

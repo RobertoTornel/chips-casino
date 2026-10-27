@@ -66,6 +66,18 @@ public abstract class BaseCasinoScreen extends Screen {
     public static int COLOR_TEXT_GREEN   = 0xFF55FF55;
     public static int COLOR_TEXT_RED     = 0xFFFF5555;
 
+    // Per-screen theme accent colors (neon/casino palette)
+    public static int COLOR_ROULETTE    = 0xFFB32630; // red
+    public static int COLOR_BLACKJACK   = 0xFF17603A; // green felt
+    public static int COLOR_BACCARAT    = 0xFF1A3A63; // navy
+    public static int COLOR_VIDEOPOKER  = 0xFF8B5CF6; // purple
+    public static int COLOR_PACHINKO    = 0xFFD8454E; // pink/red
+    public static int COLOR_PINBALL     = 0xFFF0C55A; // yellow
+    public static int COLOR_HOLDEM      = 0xFF4A3423; // leather
+    public static int COLOR_EXCHANGE    = 0xFFB8862C; // brass
+    public static int COLOR_SLOT_NEON   = 0xFF00E5FF; // neon cyan
+    public static int COLOR_SLOT_MAG    = 0xFFFF00FF; // magenta
+
     public BaseCasinoScreen(Component title, BlockPos pos, String initialStateJson, long playerBalance) {
         super(title);
         this.pos = pos;
@@ -163,6 +175,15 @@ public abstract class BaseCasinoScreen extends Screen {
         graphics.drawString(this.font, this.title.getString(), contentX(), topPos + 8, COLOR_TEXT_GOLD, false);
         String balStr = "Chips: §e" + playerBalance + " §7(sell 0.8x / buy 1.2x)";
         graphics.drawString(this.font, balStr, contentX(), topPos + 20, COLOR_TEXT_WHITE, false);
+
+        // Inner glow line below the header bar — subtle highlight under the header.
+        graphics.fill(contentX(), topPos + 32, contentX() + contentW(), topPos + 33, 0x30FFFFFF);
+        // Corner accent marks — four dimmed gold blocks at the panel interior corners.
+        int accent = 0x80FFFFD8; // COLOR_TEXT_GOLD dimmed
+        graphics.fill(contentX(), contentY(), contentX() + 4, contentY() + 4, accent);
+        graphics.fill(contentX() + contentW() - 4, contentY(), contentX() + contentW(), contentY() + 4, accent);
+        graphics.fill(contentX(), contentBottom() - 4, contentX() + 4, contentBottom(), accent);
+        graphics.fill(contentX() + contentW() - 4, contentBottom() - 4, contentX() + contentW(), contentBottom(), accent);
 
         // Game contents
         renderGameContent(graphics, mouseX, mouseY, partialTick);

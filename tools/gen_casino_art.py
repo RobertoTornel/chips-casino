@@ -1369,6 +1369,83 @@ def casino_body_top(p) -> Image.Image:
 
 
 # ==========================================================================
+# slot_spin_button.png / slot_spin_button_hover.png — 64x20
+# ==========================================================================
+
+
+def slot_spin_button(p) -> Image.Image:
+    """64x20 brass spin button. "SPIN" hinted as two bright centre px."""
+    img = new(64, 20)
+    w, h = 64, 20
+    fill = [p["BRASS_D"], p["BRASS"], p["GOLD_SH"]]
+    edge = p["GOLD_SH"]
+    top_hi = p["GOLD_HI"]
+    bands(img, 1, 2, w - 2, 17, [
+        (6, fill[0]),
+        (5, fill[1]),
+        (5, fill[2]),
+    ])
+    border(img, 0, 0, w - 1, h - 1, p["INK"])
+    hline(img, 1, 1, w - 2, top_hi)
+    vline(img, 1, 2, 17, edge)
+    vline(img, w - 2, 2, 17, mul(edge, 0.6))
+    hline(img, 18, 1, w - 2, mix(fill[2], p["INK"], 0.75))
+    # "SPIN" hint: two bright pixels at centre
+    cx, cy = w // 2, h // 2
+    put(img, cx - 1, cy, p["GOLD_HI"])
+    put(img, cx + 1, cy, p["WHITE"])
+    cut_rounded(img, 2)
+    return img
+
+
+def slot_spin_button_hover(p) -> Image.Image:
+    """64x20 brighter brass spin button, lit variant of slot_spin_button."""
+    img = new(64, 20)
+    w, h = 64, 20
+    fill = [p["BRASS"], p["GOLD_SH"], p["GOLD"]]
+    edge = p["GOLD"]
+    top_hi = p["GOLD_HI"]
+    bands(img, 1, 2, w - 2, 17, [
+        (6, fill[0]),
+        (5, fill[1]),
+        (5, fill[2]),
+    ])
+    border(img, 0, 0, w - 1, h - 1, p["INK"])
+    hline(img, 1, 1, w - 2, top_hi)
+    vline(img, 1, 2, 17, edge)
+    vline(img, w - 2, 2, 17, mul(edge, 0.8))
+    hline(img, 18, 1, w - 2, mix(fill[2], p["INK"], 0.6))
+    cx, cy = w // 2, h // 2
+    put(img, cx - 1, cy, p["GOLD_HI"])
+    put(img, cx, cy, p["WHITE"])
+    put(img, cx + 1, cy, p["GOLD_HI"])
+    cut_rounded(img, 2)
+    return img
+
+
+# ==========================================================================
+# slot_reel_strip.png — 16x64
+# ==========================================================================
+
+
+def slot_reel_strip(p) -> Image.Image:
+    """16x64 dark reel column: BG_DEEP field, INK border, three symbol slots
+    separated by brass divider lines with one hint pixel pair per slot."""
+    img = new(16, 64)
+    w, h = 16, 64
+    box(img, 0, 0, w - 1, h - 1, p["BG_DEEP"])
+    border(img, 0, 0, w - 1, h - 1, p["INK"])
+    # slot dividers between the three symbol windows
+    hline(img, 21, 1, w - 2, p["BRASS"])
+    hline(img, 42, 1, w - 2, p["BRASS"])
+    # one hint pixel pair per slot, centred
+    for sy in (10, 31, 52):
+        put(img, w // 2 - 1, sy, p["GOLD_SH"])
+        put(img, w // 2 + 1, sy, p["BRASS_L"])
+    return img
+
+
+# ==========================================================================
 # registry / driver
 # ==========================================================================
 
@@ -1453,6 +1530,9 @@ GUI_ASSETS = [
     ("slot_symbol_bell.png",   lambda p: slot_symbol(p, "bell")),
     ("slot_symbol_bar.png",    lambda p: slot_symbol(p, "bar")),
     ("slot_symbol_seven.png",  lambda p: slot_symbol(p, "seven")),
+    ("slot_spin_button.png",       lambda p: slot_spin_button(p)),
+    ("slot_spin_button_hover.png", lambda p: slot_spin_button_hover(p)),
+    ("slot_reel_strip.png",        lambda p: slot_reel_strip(p)),
 ]
 
 BLOCK_ASSETS = [
@@ -1563,6 +1643,9 @@ def verify() -> int:
         "slot_symbol_cherry.png": (16, 16), "slot_symbol_lemon.png": (16, 16),
         "slot_symbol_bell.png": (16, 16), "slot_symbol_bar.png": (16, 16),
         "slot_symbol_seven.png": (16, 16),
+        "slot_spin_button.png": (64, 20),
+        "slot_spin_button_hover.png": (64, 20),
+        "slot_reel_strip.png": (16, 64),
     }
     expected_block = {n: (16, 16) for n, _ in BLOCK_ASSETS}
     problems = []

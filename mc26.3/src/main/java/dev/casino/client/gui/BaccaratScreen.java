@@ -76,6 +76,7 @@ public class BaccaratScreen extends BaseCasinoScreen {
 
     @Override
     protected void renderGameContent(GuiGraphicsExtractor extractor, int mouseX, int mouseY, float partialTick) {
+        extractor.text(this.font, "PLAYER \u2022 BANKER \u2022 TIE", contentX(), contentY() + 16, COLOR_BACCARAT);
         extractor.text(this.font, "Bet: §e" + betAmount + " Chips §7on §b" + target.name(), contentX() + 10, contentY() + 6, COLOR_TEXT_WHITE);
 
         // Player side

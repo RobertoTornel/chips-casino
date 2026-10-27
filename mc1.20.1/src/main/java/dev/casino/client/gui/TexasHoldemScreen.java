@@ -141,6 +141,7 @@ public class TexasHoldemScreen extends BaseCasinoScreen {
         // Poker table oval felt
         graphics.fill(contentX() + 30, contentY() + 9, leftPos + bgWidth - 40, contentY() + 129, 0xFF0D421E);
 
+        graphics.drawString(this.font, "ALL IN OR FOLD", contentX(), contentY() + 30, COLOR_HOLDEM, false);
         graphics.drawCenteredString(this.font, "POT: §e" + pot + " Chips §7(Call: " + currentHighestBet + ")", centerX, contentY() + 16, COLOR_TEXT_GOLD);
         graphics.drawCenteredString(this.font, "§7[§f" + phase + "§7]", centerX, contentY() + 28, COLOR_TEXT_WHITE);
 

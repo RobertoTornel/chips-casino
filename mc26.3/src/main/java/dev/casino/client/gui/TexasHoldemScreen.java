@@ -141,6 +141,7 @@ public class TexasHoldemScreen extends BaseCasinoScreen {
         // Poker table oval felt
         extractor.fill(contentX() + 30, contentY() + 9, leftPos + bgWidth - 40, contentY() + 129, 0xFF0D421E);
 
+        extractor.text(this.font, "ALL IN OR FOLD", contentX(), contentY() + 30, COLOR_HOLDEM);
         extractor.centeredText(this.font, "POT: §e" + pot + " Chips §7(Call: " + currentHighestBet + ")", centerX, contentY() + 16, COLOR_TEXT_GOLD);
         extractor.centeredText(this.font, "§7[§f" + phase + "§7]", centerX, contentY() + 28, COLOR_TEXT_WHITE);
 

@@ -365,6 +365,39 @@
           "texture": "casino:block/casino_body_side"
         }
       }
+    },
+    {
+      "name": "highlight",
+      "from": [
+        1.0,
+        17.0,
+        1.0
+      ],
+      "to": [
+        15.0,
+        17.5,
+        2.75
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            14,
+            1
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            14,
+            1
+          ],
+          "texture": "casino:block/casino_body_top"
+        }
+      }
     }
   ]
 }

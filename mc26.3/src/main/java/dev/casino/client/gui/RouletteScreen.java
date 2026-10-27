@@ -121,6 +121,7 @@ public class RouletteScreen extends BaseCasinoScreen {
 
     @Override
     protected void renderGameContent(GuiGraphicsExtractor extractor, int mouseX, int mouseY, float partialTick) {
+        extractor.text(this.font, "THE WHEEL NEVER SLEEPS", contentX(), contentY() + 16, COLOR_ROULETTE);
         extractor.text(this.font, "Chip: §e" + selectedChip, contentX() + 170, contentY() + 6, COLOR_TEXT_WHITE);
 
         long totalBet = pendingBets.stream().mapToLong(b -> b.amount).sum();

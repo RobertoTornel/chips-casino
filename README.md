@@ -126,12 +126,13 @@ KubeJS values last for the session; use a datapack for anything permanent.
 | Block | Game | Players |
 |---|---|---|
 | `casino:roulette_table` | Roulette — number, colour and split bets | 1 |
-| `casino:blackjack_table` | Blackjack — hit, stand, double | 1 |
+| `casino:blackjack_table` | Blackjack — one dealer, six seats, hit/stand/double/split | 1–6 |
 | `casino:baccarat_table` | Baccarat — player, banker, tie | 1 |
 | `casino:poker_machine` | Video poker — hold/draw, Jacks or Better | 1 |
 | `casino:pachinko_cabinet` | Pachinko — drop a ball, a Galton board decides | 1 |
 | `casino:pinball_machine` | Pinball — fire a ball, time your flippers | 1 |
 | `casino:texas_holdem_floor` | Texas Hold'em — full table, seats up to 6 | 1–6 |
+| `casino:slot_machine` | Slot machine — three reels, weighted symbols | 1 |
 | `casino:exchange` | The house exchange — sell and buy items | — |
 
 ### House edge
@@ -144,9 +145,11 @@ including the bug that once had the pachinko board returning 54x per bet.
 
 ### Multiplayer
 
-Texas Hold'em seats up to six. A buy-in is deducted when you sit and refunded if you leave
-before the hand resolves. Every viewer of a table is kept in sync, so spectators see the
-same state as the players.
+Texas Hold'em and Blackjack both seat up to six. Hold'em deducts a buy-in when you sit and
+refunds it if you leave before the hand resolves; blackjack charges each stake as you commit
+it and pays the table out at settle. Every viewer of a table is kept in sync, so spectators
+see the same state as the players — and in blackjack the dealer's hole card is withheld from
+the sync packet itself until it is turned, not just hidden on screen.
 
 ### Bots
 

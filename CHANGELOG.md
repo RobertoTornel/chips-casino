@@ -1,3 +1,53 @@
+## 0.1.4 — Multiplayer blackjack table
+
+The blackjack table stops being a single-player form and becomes a real table: six
+seats on a semicircle facing one dealer, everyone playing the same shoe, with cards
+that visibly travel out of it. Five more players can sit down with you, and the houses
+deal themselves into empty chairs so the table is never empty.
+
+### Multiplayer
+- Six seats, one shared dealer hand, one shared shoe. The server owns the shoe, the
+  shuffle and every outcome; a client sends a bet and a verb and nothing else.
+- The hole card is stripped server-side until the dealer actually turns it, so the
+  secret is not merely hidden on screen — it is not in the packet.
+- Seats fill with house players on their own, so a lone player still gets a full table.
+  Each one bets, hits, stands, doubles and splits on its own clock.
+- The table runs on a 20 Hz state machine: betting window, paced deal, turns in seat
+  order, dealer reveal, dealer draws, settle, next round. Any seated player can call
+  the deal instead of waiting for the window.
+
+### Rules
+- Full blackjack: naturals pay 3:2, push on equal totals, dealer stands on all 17.
+- **Double** on any two cards, **split** up to four hands (aces receive one card each
+  and close), both charged against your balance before the card is dealt and refunded
+  if the verb was illegal.
+- Each of a split's halves is settled separately, so you can win one and lose the other.
+
+### Animation
+- Every dealt card records the tick it landed, so all clients slide it out of the shoe
+  along the same eased path and agree on the frame.
+- The hole card plays a flip when the dealer reveals; the dealer draws with a beat
+  between cards rather than dumping its hand at once.
+- Chips scale in when a bet is committed, the active seat pulses, and the dealer
+  narrates the round in a speech panel.
+
+### Fixed
+- A split hand was marked as *not* from a split, so a 21 built from a split pair would
+  have been paid as a natural and could be split again.
+- After a split, only the first half was closed on 21 — the second stayed playable and
+  could be hit into a bust.
+- `Deck` reshuffled the whole shoe mid-hand when it ran dry; it now reshuffles only
+  between rounds, and never below 52 cards.
+- The slot machine's spin seed was derived from the clock and the player's UUID, which
+  is guessable; it now comes from a `SecureRandom`, and the bet is taken from the
+  server-side pending bet rather than from the packet.
+
+### Tooling
+- `tools/port_screen.py` rewrites a 26.3 screen into its 1.20.1 equivalent, so a screen
+  is authored once and cannot drift between eras.
+- `tools/verify_jars.py` now covers the slot machine (block, model, texture, screen and
+  nine sprites): 462 checks across seven jars.
+
 ## 0.1.3 — Slot Machine game
 
 A brand-new casino machine with custom art, not a flat block: a steel-and-brass

@@ -42,6 +42,18 @@ public class Deck {
         return drawn;
     }
 
+    /**
+     * Test hook: forces the next {@link #draw()} calls to return these cards in the
+     * given order. Production code never calls this; the shoe is otherwise shuffled
+     * from {@link #reset()}.
+     */
+    public void setDrawOrder(java.util.List<Card> order) {
+        cards.clear();
+        for (int i = order.size() - 1; i >= 0; i--) {
+            cards.add(order.get(i));
+        }
+    }
+
     public int remaining() {
         return cards.size();
     }

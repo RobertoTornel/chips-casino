@@ -130,6 +130,7 @@ public class PinballScreen extends BaseCasinoScreen {
     @Override
     protected void renderGameContent(GuiGraphics ex, int mouseX, int mouseY, float partialTick) {
         // ---- readouts -------------------------------------------------------
+        ex.drawString(this.font, "TILT THE MACHINE", contentX(), contentY() + 16, COLOR_PINBALL, false);
         ex.drawString(this.font, "Stake: §e" + bet + " Chips", contentX(), contentY() + 2, COLOR_TEXT_WHITE, false);
         ex.drawString(this.font, "Score: §e" + score, contentX() + 110, contentY() + 2, COLOR_TEXT_WHITE, false);
         String st = inPlay ? "§aBALL IN PLAY" : "§7" + stateName;

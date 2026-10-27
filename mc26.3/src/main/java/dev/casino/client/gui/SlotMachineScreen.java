@@ -83,6 +83,7 @@ public class SlotMachineScreen extends BaseCasinoScreen {
 
     @Override
     protected void renderGameContent(GuiGraphicsExtractor extractor, int mouseX, int mouseY, float partialTick) {
+        extractor.text(this.font, "SPIN TO WIN (OR LOSE)", contentX(), contentY() + 16, COLOR_SLOT_NEON);
         // Bet label
         extractor.text(this.font, "Bet: §e" + betAmount + " Chips", contentX(), contentY() + 54, COLOR_TEXT_WHITE);
 

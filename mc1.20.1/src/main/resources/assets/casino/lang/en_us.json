@@ -7,5 +7,15 @@
   "block.casino.texas_holdem_floor": "Texas Hold'em Table",
   "block.casino.exchange": "The Exchange",
   "block.casino.pinball_machine": "Pinball Machine",
-  "block.casino.slot_machine": "Slot Machine"
+  "block.casino.slot_machine": "Slot Machine",
+  "item.casino.roulette_table": "Spin the wheel. The house always wins \u2014 eventually.",
+  "item.casino.blackjack_table": "Twenty-one or bust. No mercy.",
+  "item.casino.baccarat_table": "Player, banker, or tie. Pick your poison.",
+  "item.casino.poker_machine": "Jacks or better. Insert chips, pray for aces.",
+  "item.casino.pachinko_cabinet": "Drop the ball. Watch the pegs decide your fate.",
+  "item.casino.pinball_machine": "Skill shot. Flippers. Chaos.",
+  "item.casino.texas_holdem_floor": "Six seats. One winner. Bluff the rest.",
+  "item.casino.exchange": "Sell high, buy higher. The spread is the house edge.",
+  "item.casino.slot_machine": "One-armed bandit. Pull the lever, lose your shirt.",
+  "itemGroup.casino": "Chips Casino"
 }
