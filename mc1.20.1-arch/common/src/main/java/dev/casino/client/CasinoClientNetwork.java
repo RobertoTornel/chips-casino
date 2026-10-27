@@ -4,6 +4,7 @@ import dev.architectury.networking.NetworkManager;
 import dev.casino.client.gui.BaccaratScreen;
 import dev.casino.client.gui.BaseCasinoScreen;
 import dev.casino.client.gui.ExchangeScreen;
+import dev.casino.client.gui.SlotMachineScreen;
 import dev.casino.client.gui.BlackjackScreen;
 import dev.casino.client.gui.PachinkoScreen;
 import dev.casino.client.gui.PinballScreen;
@@ -61,6 +62,7 @@ public final class CasinoClientNetwork {
             case "PINBALL" -> new PinballScreen(pos, stateJson, balance);
             case "TEXAS_HOLDEM" -> new TexasHoldemScreen(pos, stateJson, balance);
             case "EXCHANGE" -> new ExchangeScreen(pos, stateJson, balance);
+            case "SLOT" -> new SlotMachineScreen(pos, stateJson, balance);
             default -> null;
         };
         if (screen != null) {

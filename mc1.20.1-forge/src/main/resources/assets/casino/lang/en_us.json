@@ -6,5 +6,6 @@
   "block.casino.pachinko_cabinet": "Pachinko Cabinet",
   "block.casino.texas_holdem_floor": "Texas Hold'em Table",
   "block.casino.exchange": "The Exchange",
-  "block.casino.pinball_machine": "Pinball Machine"
+  "block.casino.pinball_machine": "Pinball Machine",
+  "block.casino.slot_machine": "Slot Machine"
 }

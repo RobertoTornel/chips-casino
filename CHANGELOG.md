@@ -1,3 +1,29 @@
+## 0.1.3 — Slot Machine game
+
+A brand-new casino machine with custom art, not a flat block: a steel-and-brass
+cabinet with a lit marquee that rises above the block, three reel windows, and a
+protruding spin button. Reels spin on the server and land on a weighted symbol
+pool (CHERRY, LEMON, BELL, BAR, SEVEN) with a calibrated ~12.8% house edge — the
+same honest math as Pachinko and Pinball, asserted by unit tests.
+
+### New: Slot Machine
+- Bet 10 / 20 / 50 / 100 Chips ◈, spin, and watch three reels stop on symbols.
+- 3-of-a-kind on the centre line pays: SEVEN 200×, BAR 50×, BELL 18×, LEMON 7×,
+  CHERRY 4×; two left-aligned CHERRYs pay 2×.
+- House edge ≈ 12.76% (RTP ≈ 87.24%), verified by `SlotMachineEngineTest` over
+  200,000 simulated spins.
+- Custom textures: cabinet face/side/top, reel-window backdrop, and five symbol
+  sprites, generated deterministically and byte-identical across all five trees.
+
+### Visual flair pass (all machines)
+- Richer 3D block models: tables have inset felt, side aprons, legs with foot
+  caps; cabinets have marquees, bezelled screens, control ledges; every machine
+  rises above or sits below a flat block silhouette.
+- Neon marquee rail + "CHIPS ◈" label in every screen header.
+- New `gen_block_models.py` and `gen_casino_art.py` produce all geometry and art
+  deterministically.
+
+## 0.1.2 — UI, models and the exchange
 ## 0.1.1 — UI, models and the exchange
 
 Everything here was reported as broken; each is fixed at the cause rather than the

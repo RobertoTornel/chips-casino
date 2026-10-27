@@ -159,6 +159,13 @@ public abstract class BaseCasinoScreen extends Screen {
         blitTexture(graphics, CasinoSprites.BALANCE_BAR, leftPos, topPos + bgHeight - 20, bgWidth, 16,
                 CasinoSprites.BALANCE_BAR_W, CasinoSprites.BALANCE_BAR_H);
 
+        // Neon marquee glow behind the title — makes the cabinet feel like a lit machine
+        // rather than a flat panel.
+        int neonX = contentX();
+        int neonW = contentW();
+        graphics.fill(neonX - 4, topPos + 6, neonX + neonW + 4, topPos + 18, 0x50FFD86B);
+        graphics.fill(neonX - 2, topPos + 8, neonX + neonW + 2, topPos + 16, 0x30FFFFFF);
+
         // Title & Balance text (over sprites)
         graphics.drawString(this.font, this.title.getString(), contentX(), topPos + 8, COLOR_TEXT_GOLD, false);
         String balStr = "Chips: §e" + playerBalance + " §7(sell 0.8x / buy 1.2x)";

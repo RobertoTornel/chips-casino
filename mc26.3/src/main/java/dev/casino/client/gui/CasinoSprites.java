@@ -28,4 +28,12 @@ public class CasinoSprites {
     public static final Identifier PACHINKO_BOARD = Identifier.fromNamespaceAndPath(NS, "textures/gui/pachinko_board.png");
     // Balance bar (256x16)
     public static final Identifier BALANCE_BAR = Identifier.fromNamespaceAndPath(NS, "textures/gui/balance_bar.png");
+    // Slot machine reel window (96x96)
+    public static final Identifier SLOT_REEL_WINDOW = Identifier.fromNamespaceAndPath(NS, "textures/gui/slot_reel_window.png");
+    // Symbol sprites (16x16 each)
+    public static final Identifier SYMBOL_CHERRY = Identifier.fromNamespaceAndPath(NS, "textures/gui/slot_symbol_cherry.png");
+    public static final Identifier SYMBOL_LEMON = Identifier.fromNamespaceAndPath(NS, "textures/gui/slot_symbol_lemon.png");
+    public static final Identifier SYMBOL_BELL = Identifier.fromNamespaceAndPath(NS, "textures/gui/slot_symbol_bell.png");
+    public static final Identifier SYMBOL_BAR = Identifier.fromNamespaceAndPath(NS, "textures/gui/slot_symbol_bar.png");
+    public static final Identifier SYMBOL_SEVEN = Identifier.fromNamespaceAndPath(NS, "textures/gui/slot_symbol_seven.png");
 }

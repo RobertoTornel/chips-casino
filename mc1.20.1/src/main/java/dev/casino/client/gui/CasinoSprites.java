@@ -23,6 +23,12 @@ public final class CasinoSprites {
     public static final ResourceLocation ROULETTE_WHEEL= new ResourceLocation(NS, "textures/gui/roulette_wheel.png");
     public static final ResourceLocation CHIP          = new ResourceLocation(NS, "textures/gui/chip.png");
     public static final ResourceLocation PACHINKO_BOARD= new ResourceLocation(NS, "textures/gui/pachinko_board.png");
+    public static final ResourceLocation SLOT_REEL_WINDOW = new ResourceLocation(NS, "textures/gui/slot_reel_window.png");
+    public static final ResourceLocation SYMBOL_CHERRY = new ResourceLocation(NS, "textures/gui/slot_symbol_cherry.png");
+    public static final ResourceLocation SYMBOL_LEMON = new ResourceLocation(NS, "textures/gui/slot_symbol_lemon.png");
+    public static final ResourceLocation SYMBOL_BELL = new ResourceLocation(NS, "textures/gui/slot_symbol_bell.png");
+    public static final ResourceLocation SYMBOL_BAR = new ResourceLocation(NS, "textures/gui/slot_symbol_bar.png");
+    public static final ResourceLocation SYMBOL_SEVEN = new ResourceLocation(NS, "textures/gui/slot_symbol_seven.png");
 
     // Native pixel sizes, used to map the full texture into an arbitrary destination box.
     public static final int CASINO_FRAME_W = 256, CASINO_FRAME_H = 256;
@@ -33,6 +39,8 @@ public final class CasinoSprites {
     public static final int ROULETTE_WHEEL_W = 64, ROULETTE_WHEEL_H = 64;
     public static final int CHIP_W = 16,          CHIP_H = 16;
     public static final int PACHINKO_BOARD_W = 128, PACHINKO_BOARD_H = 128;
+    public static final int SLOT_REEL_WINDOW_W = 96, SLOT_REEL_WINDOW_H = 96;
+    public static final int SYMBOL_W = 16, SYMBOL_H = 16;
 
     private CasinoSprites() {
     }

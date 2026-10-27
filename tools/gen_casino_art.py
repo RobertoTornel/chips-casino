@@ -1223,6 +1223,99 @@ def exchange_block(p) -> Image.Image:
     return img
 
 
+def slot_machine(p) -> Image.Image:
+    """One-armed bandit cabinet: brass marquee, three reel windows, spin button.
+
+    Recognised at 16x16 by exactly three things: a lit marquee across the top,
+    three narrow vertical reel windows down the centre, and a big spin button at
+    the bottom. Everything else is dark steel cabinet body.
+    """
+    img = new(16, 16)
+    # Cabinet body: dark steel, lit top-left.
+    vramp(img, 0, 0, 15, 15, [p["STEEL"], p["STEEL_D"], p["STEEL_SH"]])
+    border(img, 0, 0, 15, 15, p["INK"])
+    hline(img, 1, 1, 14, p["STEEL_L"])
+    vline(img, 1, 1, 14, p["STEEL"])
+    hline(img, 14, 1, 14, p["STEEL_SH"])
+    vline(img, 14, 1, 14, p["STEEL_SH"])
+
+    # ---- marquee: lit sign across the top (rows 1..3) -----------------------
+    box(img, 1, 1, 14, 3, p["BRASS_D"])
+    hline(img, 1, 2, 13, p["BRASS_L"])
+    hline(img, 2, 2, 13, p["GOLD"])
+    hline(img, 3, 2, 13, p["BRASS_D"])
+    # three bright dots hint "SLOTS" / jackpot lights
+    put(img, 4, 2, p["GOLD_HI"]); put(img, 8, 2, p["GOLD_HI"]); put(img, 12, 2, p["GOLD_HI"])
+
+    # ---- three reel windows: narrow vertical strips (rows 4..10) ------------
+    # Each reel is 4px wide with a 1px brass bezel; BG_DEEP field inside.
+    reel_x = (3, 6, 9)          # left edges of the three reels
+    for rx in reel_x:
+        # bezel
+        vline(img, rx, 4, 10, p["BRASS_D"])
+        vline(img, rx + 3, 4, 10, p["BRASS"])
+        hline(img, 4, rx, rx + 3, p["BRASS_D"])
+        hline(img, 10, rx, rx + 3, p["BRASS"])
+        box(img, rx + 1, 5, rx + 2, 9, p["BG_DEEP"])
+        # a hint of symbol stripe inside each reel (two bright px)
+        put(img, rx + 1, 6, p["GOLD_SH"]); put(img, rx + 2, 7, p["GOLD_SH"])
+
+    # ---- coin slot above the button (row 11) --------------------------------
+    hline(img, 11, 5, 10, p["STEEL_SH"])
+    box(img, 6, 12, 9, 12, p["INK"])
+    put(img, 7, 12, p["GOLD_HI"])
+
+    # ---- spin button: big brass disc at the bottom centre (rows 13..14) -----
+    disc(img, 8.0, 13.5, 1.9, p["BRASS"], edge_hi=p["BRASS_L"], edge_lo=p["BRASS_D"])
+    put(img, 8, 13, p["GOLD_HI"])
+
+    # ---- payout tray: thin strip along the very bottom (row 15) -------------
+    hline(img, 15, 2, 13, p["BRASS_D"])
+    box(img, 4, 14, 11, 15, p["BG_DEEP"])
+    return img
+
+
+def slot_machine_side(p) -> Image.Image:
+    """Cabinet side: dark steel with a brass band and a hint of the coin mechanism."""
+    img = new(16, 16)
+    vramp(img, 0, 0, 15, 15, [p["STEEL"], p["STEEL_D"], p["STEEL_SH"]])
+    border(img, 0, 0, 15, 15, p["INK"])
+    hline(img, 1, 1, 14, p["STEEL_L"])
+    vline(img, 1, 1, 14, p["STEEL"])
+    hline(img, 14, 1, 14, p["STEEL_SH"])
+    vline(img, 14, 1, 14, p["STEEL_SH"])
+    # brass trim band around the mid-section
+    box(img, 2, 6, 13, 9, p["INK"])
+    hline(img, 7, 2, 13, p["BRASS"])
+    hline(img, 8, 2, 13, p["BRASS_L"])
+    hline(img, 9, 2, 13, p["BRASS_D"])
+    # coin slot + mechanism hint
+    box(img, 6, 11, 9, 12, p["INK"])
+    put(img, 7, 11, p["GOLD_HI"])
+    return img
+
+
+def slot_machine_top(p) -> Image.Image:
+    """Cabinet top: brass lacquer with corner studs and a lit top edge."""
+    img = new(16, 16)
+    for y in range(16):
+        for x in range(16):
+            n = rnd(x, y, 73)
+            put(img, x, y, p["BRASS"] if n > 0.55 else p["BRASS_D"])
+    border(img, 0, 0, 15, 15, p["INK"])
+    hline(img, 0, 1, 14, p["BRASS_L"])
+    vline(img, 0, 1, 14, p["BRASS"])
+    hline(img, 15, 1, 14, p["BRASS_D"])
+    vline(img, 15, 1, 14, p["BRASS_D"])
+    # corner studs
+    for (x, y) in ((2, 2), (13, 2), (2, 13), (13, 13)):
+        put(img, x, y, p["GOLD_SH"])
+    # centre keyhole / lock
+    box(img, 7, 7, 8, 9, p["INK"])
+    put(img, 7, 7, p["GOLD"])
+    return img
+
+
 def casino_body_side(p) -> Image.Image:
     """Dark wood planks with a brass trim band, shared by the cabinets."""
     img = new(16, 16)
@@ -1292,6 +1385,76 @@ GUI_ASSETS = [
     ("cards/card_back.png",   lambda p: card_back(p)),
 ]
 
+
+def slot_reel_window(p) -> Image.Image:
+    """Dark glass reel backdrop with a brass frame, 96x96."""
+    img = new(96, 96)
+    box(img, 0, 0, 95, 95, p["BG_DEEP"])
+    border(img, 0, 0, 95, 95, p["INK"])
+    # inner brass bezel
+    box(img, 3, 3, 92, 92, p["BRASS_D"])
+    box(img, 5, 5, 90, 90, p["INLAY"])
+    # three reel lanes, faint vertical dividers
+    for x in (32, 64):
+        vline(img, x, 6, 89, p["BG_PANEL"])
+    # marquee hint at top
+    hline(img, 6, 10, 85, p["BRASS"])
+    hline(img, 7, 10, 85, p["BRASS_D"])
+    return img
+
+
+def slot_symbol(p, kind) -> Image.Image:
+    """16x16 symbol sprite: cherry / lemon / bell / bar / seven."""
+    img = new(16, 16)
+    cx = 8.0
+    if kind == "cherry":
+        # two red cherries on green stems
+        disc(img, cx - 2.5, 7.0, 2.2, p["RED"], edge_hi=p["RED_L"], edge_lo=p["RED_D"])
+        disc(img, cx + 2.5, 7.0, 2.2, p["RED"], edge_hi=p["RED_L"], edge_lo=p["RED_D"])
+        vline(img, int(cx), 2, 6, p["GREEN_DOT"])
+        put(img, int(cx), 2, p["GREEN_FELT_L"])
+    elif kind == "lemon":
+        disc(img, cx, 8.0, 3.0, p["GOLD"], edge_hi=p["GOLD_HI"], edge_lo=p["GOLD_SH"])
+        vline(img, int(cx), 4, 5, p["GREEN_DOT"])
+        put(img, int(cx), 4, p["GREEN_FELT_L"])
+    elif kind == "bell":
+        disc(img, cx, 9.0, 2.6, p["GOLD"], edge_hi=p["GOLD_HI"], edge_lo=p["GOLD_SH"])
+        box(img, int(cx) - 1, 12, int(cx) + 1, 13, p["GOLD_SH"])
+        put(img, int(cx), 13, p["GOLD"])
+        hline(img, 11, int(cx) - 1, int(cx) + 1, p["GOLD_SH"])
+    elif kind == "bar":
+        for yy in (6, 8, 10):
+            hline(img, yy, int(cx) - 3, int(cx) + 3, p["BRASS"])
+        vline(img, int(cx) - 3, 6, 10, p["BRASS_D"])
+        vline(img, int(cx) + 3, 6, 10, p["BRASS_D"])
+    elif kind == "seven":
+        hline(img, 6, int(cx) - 3, int(cx), p["RED"])
+        vline(img, int(cx), 6, 11, p["RED"])
+        hline(img, 11, int(cx), int(cx) + 3, p["RED_L"])
+        put(img, int(cx) - 1, 6, p["RED_D"])
+        put(img, int(cx) + 1, 11, p["RED_L"])
+    return img
+
+
+GUI_ASSETS = [
+    ("casino_frame.png",      lambda p: casino_frame(p)),
+    ("header_bar.png",        lambda p: header_bar(p)),
+    ("button.png",            lambda p: button(p, False)),
+    ("button_hover.png",      lambda p: button(p, True)),
+    ("balance_bar.png",       lambda p: balance_bar(p)),
+    ("chip.png",              lambda p: chip(p)),
+    ("roulette_wheel.png",    lambda p: roulette_wheel(p)),
+    ("pachinko_board.png",    lambda p: pachinko_board(p)),
+    ("cards/card_front.png",  lambda p: card_front(p)),
+    ("cards/card_back.png",   lambda p: card_back(p)),
+    ("slot_reel_window.png",  lambda p: slot_reel_window(p)),
+    ("slot_symbol_cherry.png", lambda p: slot_symbol(p, "cherry")),
+    ("slot_symbol_lemon.png",  lambda p: slot_symbol(p, "lemon")),
+    ("slot_symbol_bell.png",   lambda p: slot_symbol(p, "bell")),
+    ("slot_symbol_bar.png",    lambda p: slot_symbol(p, "bar")),
+    ("slot_symbol_seven.png",  lambda p: slot_symbol(p, "seven")),
+]
+
 BLOCK_ASSETS = [
     ("roulette_table.png",    roulette_table),
     ("blackjack_table.png",   blackjack_table),
@@ -1301,6 +1464,9 @@ BLOCK_ASSETS = [
     ("texas_holdem_floor.png", texas_holdem_floor),
     ("exchange.png",          exchange_block),
     ("pinball_machine.png",   pinball_machine),
+    ("slot_machine.png",      slot_machine),
+    ("slot_machine_side.png", slot_machine_side),
+    ("slot_machine_top.png",  slot_machine_top),
     ("casino_body_side.png",  casino_body_side),
     ("casino_body_top.png",   casino_body_top),
 ]
@@ -1393,6 +1559,10 @@ def verify() -> int:
         "balance_bar.png": (256, 16), "chip.png": (16, 16),
         "roulette_wheel.png": (64, 64), "pachinko_board.png": (128, 128),
         "cards/card_front.png": (20, 28), "cards/card_back.png": (20, 28),
+        "slot_reel_window.png": (96, 96),
+        "slot_symbol_cherry.png": (16, 16), "slot_symbol_lemon.png": (16, 16),
+        "slot_symbol_bell.png": (16, 16), "slot_symbol_bar.png": (16, 16),
+        "slot_symbol_seven.png": (16, 16),
     }
     expected_block = {n: (16, 16) for n, _ in BLOCK_ASSETS}
     problems = []

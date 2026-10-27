@@ -2,6 +2,7 @@ package dev.casino.client;
 
 import dev.casino.client.gui.BaseCasinoScreen;
 import dev.casino.client.gui.ExchangeScreen;
+import dev.casino.client.gui.SlotMachineScreen;
 import dev.casino.client.gui.BaccaratScreen;
 import dev.casino.client.gui.BlackjackScreen;
 import dev.casino.client.gui.PachinkoScreen;
@@ -35,6 +36,7 @@ public final class ClientPacketHandler {
             case "PINBALL" -> new PinballScreen(pos, state, balance);
             case "TEXAS_HOLDEM" -> new TexasHoldemScreen(pos, state, balance);
             case "EXCHANGE" -> new ExchangeScreen(pos, state, balance);
+            case "SLOT" -> new SlotMachineScreen(pos, state, balance);
             default -> null;
         };
         if (screen != null) {

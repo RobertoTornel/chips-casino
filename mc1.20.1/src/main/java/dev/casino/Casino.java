@@ -43,6 +43,7 @@ public class Casino implements ModInitializer {
     public static final PinballMachineBlock PINBALL_BLOCK = new PinballMachineBlock();
     public static final TexasHoldemFloorBlock TEXAS_HOLDEM_BLOCK = new TexasHoldemFloorBlock();
     public static final ExchangeBlock EXCHANGE_BLOCK = new ExchangeBlock();
+    public static final SlotMachineBlock SLOT_MACHINE_BLOCK = new SlotMachineBlock();
 
     // Block Entities
     public static BlockEntityType<RouletteBlockEntity> ROULETTE_BE_TYPE;
@@ -53,6 +54,7 @@ public class Casino implements ModInitializer {
     public static BlockEntityType<PinballBlockEntity> PINBALL_BE_TYPE;
     public static BlockEntityType<TexasHoldemBlockEntity> TEXAS_HOLDEM_BE_TYPE;
     public static BlockEntityType<ExchangeBlockEntity> EXCHANGE_BE_TYPE;
+    public static BlockEntityType<SlotMachineBlockEntity> SLOT_MACHINE_BE_TYPE;
 
     @Override
     public void onInitialize() {
@@ -67,6 +69,7 @@ public class Casino implements ModInitializer {
         registerBlock("pinball_machine", PINBALL_BLOCK);
         registerBlock("texas_holdem_floor", TEXAS_HOLDEM_BLOCK);
         registerBlock("exchange", EXCHANGE_BLOCK);
+        registerBlock("slot_machine", SLOT_MACHINE_BLOCK);
 
         // 2. Register Block Entity Types
         ROULETTE_BE_TYPE = Registry.register(
@@ -109,6 +112,11 @@ public class Casino implements ModInitializer {
                 BuiltInRegistries.BLOCK_ENTITY_TYPE,
                 id("exchange"),
                 BlockEntityType.Builder.of(ExchangeBlockEntity::new, EXCHANGE_BLOCK).build(null)
+        );
+        SLOT_MACHINE_BE_TYPE = Registry.register(
+                BuiltInRegistries.BLOCK_ENTITY_TYPE,
+                id("slot_machine"),
+                BlockEntityType.Builder.of(SlotMachineBlockEntity::new, SLOT_MACHINE_BLOCK).build(null)
         );
 
         // 3. Register Network Receiver

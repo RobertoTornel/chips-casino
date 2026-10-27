@@ -30,6 +30,7 @@ public class CasinoClient implements ClientModInitializer {
                     case "PINBALL" -> new PinballScreen(pos, state, bal);
                     case "TEXAS_HOLDEM" -> new TexasHoldemScreen(pos, state, bal);
                     case "EXCHANGE" -> new ExchangeScreen(pos, state, bal);
+                    case "SLOT" -> new SlotMachineScreen(pos, state, bal);
                     default -> null;
                 };
 

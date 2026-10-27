@@ -8,15 +8,39 @@
   },
   "elements": [
     {
+      "name": "plinth",
+      "from": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "to": [
+        16.0,
+        2.0,
+        16.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "casino:block/casino_body_top"
+        }
+      }
+    },
+    {
       "name": "body",
       "from": [
         1,
-        0,
+        2,
         1
       ],
       "to": [
         15,
-        13,
+        14,
         15
       ],
       "faces": {
@@ -43,7 +67,7 @@
             0,
             0,
             14,
-            13
+            12
           ],
           "texture": "casino:block/pinball_machine"
         },
@@ -52,7 +76,7 @@
             0,
             0,
             14,
-            13
+            12
           ],
           "texture": "casino:block/casino_body_side"
         },
@@ -61,7 +85,7 @@
             0,
             0,
             14,
-            13
+            12
           ],
           "texture": "casino:block/casino_body_side"
         },
@@ -70,26 +94,35 @@
             0,
             0,
             14,
-            13
+            12
           ],
           "texture": "casino:block/casino_body_side"
         }
       }
     },
     {
-      "name": "marquee",
+      "name": "cap",
       "from": [
-        0,
-        13,
-        0
+        0.0,
+        14.0,
+        0.0
       ],
       "to": [
-        16,
-        16,
-        16
+        16.0,
+        16.0,
+        16.0
       ],
       "faces": {
         "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "down": {
           "uv": [
             0,
             0,
@@ -103,7 +136,7 @@
             0,
             0,
             16,
-            3
+            16
           ],
           "texture": "casino:block/casino_body_top"
         },
@@ -112,7 +145,7 @@
             0,
             0,
             16,
-            3
+            16
           ],
           "texture": "casino:block/casino_body_top"
         },
@@ -121,7 +154,7 @@
             0,
             0,
             16,
-            3
+            16
           ],
           "texture": "casino:block/casino_body_top"
         },
@@ -130,7 +163,169 @@
             0,
             0,
             16,
-            3
+            16
+          ],
+          "texture": "casino:block/casino_body_top"
+        }
+      }
+    },
+    {
+      "name": "marquee_box",
+      "from": [
+        1.0,
+        16.0,
+        1.0
+      ],
+      "to": [
+        15.0,
+        18.0,
+        15.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            14,
+            14
+          ],
+          "texture": "casino:block/casino_body_top"
+        }
+      }
+    },
+    {
+      "name": "marquee_light",
+      "from": [
+        2,
+        16,
+        2
+      ],
+      "to": [
+        14,
+        18,
+        14
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            12,
+            12
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            12,
+            12
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            12,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            12,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            12,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            12,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        }
+      }
+    },
+    {
+      "name": "screen_bezel",
+      "from": [
+        2,
+        5,
+        -0.5
+      ],
+      "to": [
+        14,
+        12,
+        1.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            12,
+            7
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            12,
+            7
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            12,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            12,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            2,
+            7
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            2,
+            7
           ],
           "texture": "casino:block/casino_body_top"
         }
@@ -140,13 +335,13 @@
       "name": "screen",
       "from": [
         3,
-        4,
-        -0.01
+        6,
+        0.5
       ],
       "to": [
         13,
         11,
-        1.01
+        0.51
       ],
       "faces": {
         "north": {
@@ -154,7 +349,7 @@
             0,
             0,
             10,
-            7
+            5
           ],
           "texture": "casino:block/pinball_machine"
         },
@@ -163,45 +358,9 @@
             0,
             0,
             10,
-            7
+            5
           ],
           "texture": "casino:block/pinball_machine"
-        },
-        "up": {
-          "uv": [
-            0,
-            0,
-            10,
-            1
-          ],
-          "texture": "casino:block/casino_body_top"
-        },
-        "down": {
-          "uv": [
-            0,
-            0,
-            10,
-            1
-          ],
-          "texture": "casino:block/casino_body_top"
-        },
-        "east": {
-          "uv": [
-            0,
-            0,
-            1,
-            7
-          ],
-          "texture": "casino:block/casino_body_top"
-        },
-        "west": {
-          "uv": [
-            0,
-            0,
-            1,
-            7
-          ],
-          "texture": "casino:block/casino_body_top"
         }
       }
     },
@@ -209,12 +368,12 @@
       "name": "controls",
       "from": [
         2,
-        1,
-        -1.5
+        2,
+        -1
       ],
       "to": [
         14,
-        3,
+        4,
         1
       ],
       "faces": {

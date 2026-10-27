@@ -43,6 +43,7 @@ public class Casino {
     public static final RegistryObject<Block> PINBALL_BLOCK = BLOCKS.register("pinball_machine", dev.casino.block.PinballMachineBlock::new);
     public static final RegistryObject<Block> TEXAS_HOLDEM_BLOCK = BLOCKS.register("texas_holdem_floor", TexasHoldemFloorBlock::new);
     public static final RegistryObject<Block> EXCHANGE_BLOCK = BLOCKS.register("exchange", ExchangeBlock::new);
+    public static final RegistryObject<Block> SLOT_MACHINE_BLOCK = BLOCKS.register("slot_machine", SlotMachineBlock::new);
 
     // Items
     public static final RegistryObject<Item> ROULETTE_ITEM = ITEMS.register("roulette_table", () -> new BlockItem(ROULETTE_BLOCK.get(), new Item.Properties()));
@@ -53,6 +54,7 @@ public class Casino {
     public static final RegistryObject<Item> PINBALL_ITEM = ITEMS.register("pinball_machine", () -> new BlockItem(PINBALL_BLOCK.get(), new Item.Properties()));
     public static final RegistryObject<Item> TEXAS_HOLDEM_ITEM = ITEMS.register("texas_holdem_floor", () -> new BlockItem(TEXAS_HOLDEM_BLOCK.get(), new Item.Properties()));
     public static final RegistryObject<Item> EXCHANGE_ITEM = ITEMS.register("exchange", () -> new BlockItem(EXCHANGE_BLOCK.get(), new Item.Properties()));
+    public static final RegistryObject<Item> SLOT_MACHINE_ITEM = ITEMS.register("slot_machine", () -> new BlockItem(SLOT_MACHINE_BLOCK.get(), new Item.Properties()));
 
     // Block Entities
     public static final RegistryObject<BlockEntityType<RouletteBlockEntity>> ROULETTE_BE_TYPE = BLOCK_ENTITIES.register("roulette_table",
@@ -72,6 +74,8 @@ public class Casino {
 
     public static final RegistryObject<BlockEntityType<ExchangeBlockEntity>> EXCHANGE_BE_TYPE = BLOCK_ENTITIES.register("exchange",
             () -> BlockEntityType.Builder.of(ExchangeBlockEntity::new, EXCHANGE_BLOCK.get()).build(null));
+    public static final RegistryObject<BlockEntityType<SlotMachineBlockEntity>> SLOT_MACHINE_BE_TYPE = BLOCK_ENTITIES.register("slot_machine",
+            () -> BlockEntityType.Builder.of(SlotMachineBlockEntity::new, SLOT_MACHINE_BLOCK.get()).build(null));
 
     public Casino() {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();

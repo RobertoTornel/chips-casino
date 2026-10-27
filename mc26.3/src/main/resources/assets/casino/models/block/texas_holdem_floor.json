@@ -7,16 +7,16 @@
   },
   "elements": [
     {
-      "name": "border",
+      "name": "stage",
       "from": [
-        0,
-        0,
-        0
+        0.0,
+        0.0,
+        0.0
       ],
       "to": [
-        16,
-        2,
-        16
+        16.0,
+        3.0,
+        16.0
       ],
       "faces": {
         "up": {
@@ -76,15 +76,39 @@
       }
     },
     {
+      "name": "stage_trim",
+      "from": [
+        0.0,
+        3.0,
+        0.0
+      ],
+      "to": [
+        16.0,
+        4.0,
+        16.0
+      ],
+      "faces": {
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "casino:block/casino_body_side"
+        }
+      }
+    },
+    {
       "name": "felt",
       "from": [
         1,
-        2,
+        4,
         1
       ],
       "to": [
         15,
-        3,
+        5,
         15
       ],
       "faces": {
@@ -141,6 +165,30 @@
             1
           ],
           "texture": "casino:block/casino_body_top"
+        }
+      }
+    },
+    {
+      "name": "dealer_spot",
+      "from": [
+        7.0,
+        5.0,
+        0.0
+      ],
+      "to": [
+        9.0,
+        6.0,
+        2.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/texas_holdem_floor"
         }
       }
     }

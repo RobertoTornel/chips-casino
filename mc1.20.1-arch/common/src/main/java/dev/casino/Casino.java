@@ -57,6 +57,8 @@ public final class Casino {
             BLOCKS.register("texas_holdem_floor", TexasHoldemFloorBlock::new);
     public static final RegistrySupplier<ExchangeBlock> EXCHANGE_BLOCK =
             BLOCKS.register("exchange", ExchangeBlock::new);
+    public static final RegistrySupplier<SlotMachineBlock> SLOT_MACHINE_BLOCK =
+            BLOCKS.register("slot_machine", SlotMachineBlock::new);
 
     // ---- Block entities --------------------------------------------------
     public static final RegistrySupplier<BlockEntityType<RouletteBlockEntity>> ROULETTE_BE_TYPE =
@@ -85,6 +87,9 @@ public final class Casino {
     public static final RegistrySupplier<BlockEntityType<ExchangeBlockEntity>> EXCHANGE_BE_TYPE =
             BLOCK_ENTITIES.register("exchange",
                     () -> makeType(ExchangeBlockEntity::new, EXCHANGE_BLOCK.get()));
+    public static final RegistrySupplier<BlockEntityType<SlotMachineBlockEntity>> SLOT_MACHINE_BE_TYPE =
+            BLOCK_ENTITIES.register("slot_machine",
+                    () -> makeType(SlotMachineBlockEntity::new, SLOT_MACHINE_BLOCK.get()));
 
     // ---- Block items -----------------------------------------------------
     public static final RegistrySupplier<Item> ROULETTE_ITEM =
@@ -103,6 +108,8 @@ public final class Casino {
             ITEMS.register("texas_holdem_floor", () -> new BlockItem(TEXAS_HOLDEM_BLOCK.get(), new Item.Properties()));
     public static final RegistrySupplier<Item> EXCHANGE_ITEM =
             ITEMS.register("exchange", () -> new BlockItem(EXCHANGE_BLOCK.get(), new Item.Properties()));
+    public static final RegistrySupplier<Item> SLOT_MACHINE_ITEM =
+            ITEMS.register("slot_machine", () -> new BlockItem(SLOT_MACHINE_BLOCK.get(), new Item.Properties()));
 
     private static boolean initialized;
 

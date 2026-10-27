@@ -7,15 +7,15 @@
   },
   "elements": [
     {
-      "name": "felt",
+      "name": "felt_top",
       "from": [
         0,
-        12,
+        10,
         0
       ],
       "to": [
         16,
-        14,
+        12,
         16
       ],
       "faces": {
@@ -76,16 +76,16 @@
       }
     },
     {
-      "name": "rim_n",
+      "name": "apron_n",
       "from": [
-        0,
-        14,
-        0
+        0.0,
+        8.0,
+        0.0
       ],
       "to": [
-        16,
-        16,
-        2
+        16.0,
+        10.0,
+        2.0
       ],
       "faces": {
         "up": {
@@ -95,66 +95,21 @@
             16,
             2
           ],
-          "texture": "casino:block/casino_body_side"
-        },
-        "down": {
-          "uv": [
-            0,
-            0,
-            16,
-            2
-          ],
-          "texture": "casino:block/casino_body_side"
-        },
-        "north": {
-          "uv": [
-            0,
-            0,
-            16,
-            2
-          ],
-          "texture": "casino:block/casino_body_side"
-        },
-        "south": {
-          "uv": [
-            0,
-            0,
-            16,
-            2
-          ],
-          "texture": "casino:block/casino_body_side"
-        },
-        "east": {
-          "uv": [
-            0,
-            0,
-            16,
-            2
-          ],
-          "texture": "casino:block/casino_body_side"
-        },
-        "west": {
-          "uv": [
-            0,
-            0,
-            16,
-            2
-          ],
-          "texture": "casino:block/casino_body_side"
+          "texture": "casino:block/casino_body_top"
         }
       }
     },
     {
-      "name": "rim_s",
+      "name": "apron_s",
       "from": [
-        0,
-        14,
-        14
+        0.0,
+        8.0,
+        14.0
       ],
       "to": [
-        16,
-        16,
-        16
+        16.0,
+        10.0,
+        16.0
       ],
       "faces": {
         "up": {
@@ -164,66 +119,21 @@
             16,
             2
           ],
-          "texture": "casino:block/casino_body_side"
-        },
-        "down": {
-          "uv": [
-            0,
-            0,
-            16,
-            2
-          ],
-          "texture": "casino:block/casino_body_side"
-        },
-        "north": {
-          "uv": [
-            0,
-            0,
-            16,
-            2
-          ],
-          "texture": "casino:block/casino_body_side"
-        },
-        "south": {
-          "uv": [
-            0,
-            0,
-            16,
-            2
-          ],
-          "texture": "casino:block/casino_body_side"
-        },
-        "east": {
-          "uv": [
-            0,
-            0,
-            16,
-            2
-          ],
-          "texture": "casino:block/casino_body_side"
-        },
-        "west": {
-          "uv": [
-            0,
-            0,
-            16,
-            2
-          ],
-          "texture": "casino:block/casino_body_side"
+          "texture": "casino:block/casino_body_top"
         }
       }
     },
     {
-      "name": "rim_w",
+      "name": "apron_w",
       "from": [
-        0,
-        14,
-        2
+        0.0,
+        8.0,
+        2.0
       ],
       "to": [
-        2,
-        16,
-        14
+        2.0,
+        10.0,
+        14.0
       ],
       "faces": {
         "up": {
@@ -233,66 +143,21 @@
             2,
             12
           ],
-          "texture": "casino:block/casino_body_side"
-        },
-        "down": {
-          "uv": [
-            0,
-            0,
-            2,
-            12
-          ],
-          "texture": "casino:block/casino_body_side"
-        },
-        "north": {
-          "uv": [
-            0,
-            0,
-            2,
-            12
-          ],
-          "texture": "casino:block/casino_body_side"
-        },
-        "south": {
-          "uv": [
-            0,
-            0,
-            2,
-            12
-          ],
-          "texture": "casino:block/casino_body_side"
-        },
-        "east": {
-          "uv": [
-            0,
-            0,
-            2,
-            12
-          ],
-          "texture": "casino:block/casino_body_side"
-        },
-        "west": {
-          "uv": [
-            0,
-            0,
-            2,
-            12
-          ],
-          "texture": "casino:block/casino_body_side"
+          "texture": "casino:block/casino_body_top"
         }
       }
     },
     {
-      "name": "rim_e",
+      "name": "apron_e",
       "from": [
-        14,
-        14,
-        2
+        14.0,
+        8.0,
+        2.0
       ],
       "to": [
-        16,
-        16,
-        14
+        16.0,
+        10.0,
+        14.0
       ],
       "faces": {
         "up": {
@@ -302,66 +167,21 @@
             2,
             12
           ],
-          "texture": "casino:block/casino_body_side"
-        },
-        "down": {
-          "uv": [
-            0,
-            0,
-            2,
-            12
-          ],
-          "texture": "casino:block/casino_body_side"
-        },
-        "north": {
-          "uv": [
-            0,
-            0,
-            2,
-            12
-          ],
-          "texture": "casino:block/casino_body_side"
-        },
-        "south": {
-          "uv": [
-            0,
-            0,
-            2,
-            12
-          ],
-          "texture": "casino:block/casino_body_side"
-        },
-        "east": {
-          "uv": [
-            0,
-            0,
-            2,
-            12
-          ],
-          "texture": "casino:block/casino_body_side"
-        },
-        "west": {
-          "uv": [
-            0,
-            0,
-            2,
-            12
-          ],
-          "texture": "casino:block/casino_body_side"
+          "texture": "casino:block/casino_body_top"
         }
       }
     },
     {
       "name": "leg_nw",
       "from": [
-        1,
-        0,
-        1
+        1.0,
+        0.0,
+        1.0
       ],
       "to": [
-        3,
-        12,
-        3
+        3.0,
+        10.0,
+        3.0
       ],
       "faces": {
         "up": {
@@ -417,20 +237,89 @@
             2
           ],
           "texture": "casino:block/casino_body_side"
+        }
+      }
+    },
+    {
+      "name": "foot_nw",
+      "from": [
+        1.0,
+        0.0,
+        1.0
+      ],
+      "to": [
+        3.0,
+        1.0,
+        3.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
         }
       }
     },
     {
       "name": "leg_ne",
       "from": [
-        13,
-        0,
-        1
+        13.0,
+        0.0,
+        1.0
       ],
       "to": [
-        15,
-        12,
-        3
+        15.0,
+        10.0,
+        3.0
       ],
       "faces": {
         "up": {
@@ -486,20 +375,89 @@
             2
           ],
           "texture": "casino:block/casino_body_side"
+        }
+      }
+    },
+    {
+      "name": "foot_ne",
+      "from": [
+        13.0,
+        0.0,
+        1.0
+      ],
+      "to": [
+        15.0,
+        1.0,
+        3.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
         }
       }
     },
     {
       "name": "leg_sw",
       "from": [
-        1,
-        0,
-        13
+        1.0,
+        0.0,
+        13.0
       ],
       "to": [
-        3,
-        12,
-        15
+        3.0,
+        10.0,
+        15.0
       ],
       "faces": {
         "up": {
@@ -559,16 +517,85 @@
       }
     },
     {
-      "name": "leg_se",
+      "name": "foot_sw",
       "from": [
-        13,
-        0,
-        13
+        1.0,
+        0.0,
+        13.0
       ],
       "to": [
-        15,
-        12,
-        15
+        3.0,
+        1.0,
+        15.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        }
+      }
+    },
+    {
+      "name": "leg_se",
+      "from": [
+        13.0,
+        0.0,
+        13.0
+      ],
+      "to": [
+        15.0,
+        10.0,
+        15.0
       ],
       "faces": {
         "up": {
@@ -624,6 +651,75 @@
             2
           ],
           "texture": "casino:block/casino_body_side"
+        }
+      }
+    },
+    {
+      "name": "foot_se",
+      "from": [
+        13.0,
+        0.0,
+        13.0
+      ],
+      "to": [
+        15.0,
+        1.0,
+        15.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "casino:block/casino_body_top"
         }
       }
     }
