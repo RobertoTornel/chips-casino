@@ -59,9 +59,9 @@ outcomes, and house bots fill empty seats so a lone player still gets a full tab
 
 | Minecraft | Loader | Java | Artifact |
 |---|---|---|---|
-| **1.20.1** | Fabric ≥ 0.14.21 | 17 | [`architectury/casino-1.20.1-arch-fabric-0.1.9.jar`](dist/architectury/casino-1.20.1-arch-fabric-0.1.9.jar) |
-| **1.20.1** | Forge 47.x | 17 | [`architectury/casino-1.20.1-arch-forge-0.1.9.jar`](dist/architectury/casino-1.20.1-arch-forge-0.1.9.jar) |
-| **1.20.1** | NeoForge 47.1.x | 17 | [`architectury/casino-1.20.1-arch-neoforge-0.1.9.jar`](dist/architectury/casino-1.20.1-arch-neoforge-0.1.9.jar) |
+| **1.20.1** | Fabric ≥ 0.14.21 | 17 | [`architectury/casino-1.20.1-arch-fabric-0.1.10.jar`](dist/architectury/casino-1.20.1-arch-fabric-0.1.10.jar) |
+| **1.20.1** | Forge 47.x | 17 | [`architectury/casino-1.20.1-arch-forge-0.1.10.jar`](dist/architectury/casino-1.20.1-arch-forge-0.1.10.jar) |
+| **1.20.1** | NeoForge 47.1.x | 17 | [`architectury/casino-1.20.1-arch-neoforge-0.1.10.jar`](dist/architectury/casino-1.20.1-arch-neoforge-0.1.10.jar) |
 
 One `common` source tree in [`mc1.20.1-arch/`](mc1.20.1-arch/), packaged per platform.
 
@@ -69,10 +69,10 @@ One `common` source tree in [`mc1.20.1-arch/`](mc1.20.1-arch/), packaged per pla
 
 | Minecraft | Loader | Java | Artifact |
 |---|---|---|---|
-| **26.3** | Fabric ≥ 0.19.5 | 25 | [`casino-26.3-fabric-0.1.9.jar`](dist/casino-26.3-fabric-0.1.9.jar) |
-| **1.20.1** | Fabric ≥ 0.14.21 | 17 | [`casino-1.20.1-fabric-0.1.9.jar`](dist/casino-1.20.1-fabric-0.1.9.jar) |
-| **1.20.1** | Forge 47.3.0 | 17 | [`casino-1.20.1-forge-0.1.9.jar`](dist/casino-1.20.1-forge-0.1.9.jar) |
-| **1.20.1** | NeoForge 47.1.3 | 17 | [`casino-1.20.1-neoforge-0.1.9.jar`](dist/casino-1.20.1-neoforge-0.1.9.jar) |
+| **26.3** | Fabric ≥ 0.19.5 | 25 | [`casino-26.3-fabric-0.1.10.jar`](dist/casino-26.3-fabric-0.1.10.jar) |
+| **1.20.1** | Fabric ≥ 0.14.21 | 17 | [`casino-1.20.1-fabric-0.1.10.jar`](dist/casino-1.20.1-fabric-0.1.10.jar) |
+| **1.20.1** | Forge 47.3.0 | 17 | [`casino-1.20.1-forge-0.1.10.jar`](dist/casino-1.20.1-forge-0.1.10.jar) |
+| **1.20.1** | NeoForge 47.1.3 | 17 | [`casino-1.20.1-neoforge-0.1.10.jar`](dist/casino-1.20.1-neoforge-0.1.10.jar) |
 
 Either set works — the Architectury and standalone jars carry the same features.
 

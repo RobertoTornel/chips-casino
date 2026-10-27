@@ -647,7 +647,7 @@ public class RouletteScreen extends BaseCasinoScreen {
         // the wheel itself is drawn unrotated; rotation is read from the ball and the
         // pointer instead.
         e.blit(CasinoSprites.ROULETTE_WHEEL, cx - WHEEL_R, cy - WHEEL_R, WHEEL_R * 2,
-                WHEEL_R * 2, 0f, 0f, 1f, 1f);
+                WHEEL_R * 2, 0f, 0f, WHEEL_R * 2f, WHEEL_R * 2f);
 
         // Pocket marks around the rim — fixed positions relative to the centre.
         for (int i = 0; i < POCKETS; i++) {

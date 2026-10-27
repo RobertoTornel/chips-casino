@@ -60,7 +60,7 @@ public class SpriteButton extends Button {
         // A single stretched quad is correct here: the button sprite is a flat plate with a
         // uniform 1px bevel, not an ornate frame, so there are no corners to preserve.
         int tint = this.active ? 0xFFFFFFFF : 0x80FFFFFF;
-        ex.blit(sprite, this.getX(), this.getY(), this.width, this.height, 0f, 0f, 1f, 1f);
+        ex.blit(sprite, this.getX(), this.getY(), this.width, this.height, 0f, 0f, 64f, 20f);
 
         ex.centeredText(Minecraft.getInstance().font, this.getMessage(),
                 this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2,

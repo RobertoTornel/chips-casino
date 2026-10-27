@@ -55,26 +55,9 @@ public class Casino implements ModInitializer {
     public static final ExchangeBlock EXCHANGE_BLOCK = new ExchangeBlock();
     public static final SlotMachineBlock SLOT_MACHINE_BLOCK = new SlotMachineBlock();
 
-    // Creative mode tab: "Chips Casino" with slot_machine icon, holding all 9 block items.
-    public static final CreativeModeTab CASINO_TAB = Registry.register(
-            BuiltInRegistries.CREATIVE_MODE_TAB,
-            id("casino_tab"),
-            new CreativeModeTab.Builder(CreativeModeTab.Row.TOP, 0)
-                    .title(Component.literal("Chips Casino"))
-                    .icon(() -> new ItemStack(SLOT_MACHINE_BLOCK.asItem()))
-                    .displayItems((features, emitter) -> {
-                        emitter.accept(ROULETTE_BLOCK.asItem());
-                        emitter.accept(BLACKJACK_BLOCK.asItem());
-                        emitter.accept(BACCARAT_BLOCK.asItem());
-                        emitter.accept(POKER_MACHINE_BLOCK.asItem());
-                        emitter.accept(PACHINKO_BLOCK.asItem());
-                        emitter.accept(PINBALL_BLOCK.asItem());
-                        emitter.accept(TEXAS_HOLDEM_BLOCK.asItem());
-                        emitter.accept(EXCHANGE_BLOCK.asItem());
-                        emitter.accept(SLOT_MACHINE_BLOCK.asItem());
-                    })
-                    .build()
-    );
+    // Creative mode tab placeholder — registered in onInitialize() after blocks exist,
+    // because Block.asItem() requires the block to be registered first.
+    public static CreativeModeTab CASINO_TAB;
 
 
 
@@ -191,7 +174,29 @@ public class Casino implements ModInitializer {
         // 8. Data-driven Chips table (data/<ns>/prices/*.json, reloadable via /reload)
         PriceDataLoader.register();
 
-        // 9. Creative Mode Tab (stub — registration filled in by C stage)
+        // 9. Creative Mode Tab — registered here (not as a static field) because
+        // Block.asItem() requires the block to be registered first.
+        CASINO_TAB = Registry.register(
+                BuiltInRegistries.CREATIVE_MODE_TAB,
+                id("casino_tab"),
+                new CreativeModeTab.Builder(CreativeModeTab.Row.TOP, 0)
+                        .title(Component.literal("Chips Casino"))
+                        .icon(() -> new ItemStack(SLOT_MACHINE_BLOCK.asItem()))
+                        .displayItems((features, emitter) -> {
+                            emitter.accept(ROULETTE_BLOCK.asItem());
+                            emitter.accept(BLACKJACK_BLOCK.asItem());
+                            emitter.accept(BACCARAT_BLOCK.asItem());
+                            emitter.accept(POKER_MACHINE_BLOCK.asItem());
+                            emitter.accept(PACHINKO_BLOCK.asItem());
+                            emitter.accept(PINBALL_BLOCK.asItem());
+                            emitter.accept(TEXAS_HOLDEM_BLOCK.asItem());
+                            emitter.accept(EXCHANGE_BLOCK.asItem());
+                            emitter.accept(SLOT_MACHINE_BLOCK.asItem());
+                        })
+                        .build()
+        );
+
+        // 10. Creative Mode Tab stub (no-op — registration happens above)
         registerCreativeTab();
 
         LOGGER.info("Casino ready: 6 games, sell at 0.8x / buy at 1.2x, bots active");

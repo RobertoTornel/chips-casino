@@ -103,7 +103,7 @@ public class SlotMachineScreen extends BaseCasinoScreen {
 
         // Backdrop for the whole reel area
         extractor.fill(reelX0 - 2, reelBaseY - 2, reelX0 + 3 * reelW + 2, reelBaseY + reelH + 2, 0xFF2A221C);
-        extractor.blit(CasinoSprites.SLOT_REEL_WINDOW, reelX0, reelBaseY, reelW * 3, reelH, 0f, 0f, 1f, 1f);
+        extractor.blit(CasinoSprites.SLOT_REEL_WINDOW, reelX0, reelBaseY, reelW * 3, reelH, 0f, 0f, 96f, 96f);
 
         for (int r = 0; r < 3; r++) {
             int rx = reelX0 + r * reelW + 12; // center of the strip
@@ -111,7 +111,7 @@ public class SlotMachineScreen extends BaseCasinoScreen {
                 int symY = reelBaseY + 8 + row * 28;
                 int sym = window[r][row];
                 if (sym >= 0 && sym < 5) {
-                    extractor.blit(spriteFor(sym), rx - 8, symY - 8, 16, 16, 0f, 0f, 1f, 1f);
+                    extractor.blit(spriteFor(sym), rx - 8, symY - 8, 16, 16, 0f, 0f, 16f, 16f);
                 }
                 // reel divider line between strips
                 if (r < 2 && row == 0) {

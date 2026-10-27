@@ -1,3 +1,11 @@
+## 0.1.10 — Sprite + wallet security fixes
+
+- **Sprite rendering fixed**: All GUI sprites (roulette wheel, slot reels, chips, buttons, card backs/fronts, casino frame, header bar, balance bar, pachinko board) now use correct pixel UV coordinates instead of normalized 0-1 values. Sprites no longer appear stretched or corrupted.
+- **Creative Mode Tab**: `CASINO_TAB` registration moved from static field initializer to `onInitialize()`, after blocks are registered. `Block.asItem()` requires the block to be registered first; the previous static initialization caused the tab to appear empty or crash on dedicated servers.
+- **Atomic wallet saves**: `wallets.json` written to temp file then atomically renamed, with `.bak` fallback. Crash mid-save can no longer truncate balances.
+- **Price cap**: `PriceTable.setPrice()` capped at 1 billion Chips per item, preventing `unit * count` overflow in the Exchange.
+- **Disconnect cleanup**: `removeViewer()` called on player disconnect via `cleanupPlayer()` in each table's `serverTick`. Mid-hand disconnects no longer jam tables or lock chips.
+
 ## 0.1.9 — Security hardening
 
 - **Atomic wallet saves** (`Wallet.java`): `wallets.json` is now written to a temp file and atomically renamed into place, with a `.bak` fallback for crash recovery. A crash mid-save can no longer truncate the balance file and destroy every player's money.

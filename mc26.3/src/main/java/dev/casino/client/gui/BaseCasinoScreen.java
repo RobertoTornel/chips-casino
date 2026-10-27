@@ -157,10 +157,10 @@ public abstract class BaseCasinoScreen extends Screen {
         drawPanelBacking(extractor, leftPos, topPos, bgWidth, bgHeight);
 
         // Header bar sprite
-        extractor.blit(CasinoSprites.HEADER_BAR, leftPos, topPos, bgWidth, 32, 0f, 0f, 1f, 1f);
+        extractor.blit(CasinoSprites.HEADER_BAR, leftPos, topPos, bgWidth, 32, 0f, 0f, 256f, 32f);
 
         // Balance bar sprite at bottom
-        extractor.blit(CasinoSprites.BALANCE_BAR, leftPos, topPos + bgHeight - 20, bgWidth, 16, 0f, 0f, 1f, 1f);
+        extractor.blit(CasinoSprites.BALANCE_BAR, leftPos, topPos + bgHeight - 20, bgWidth, 16, 0f, 0f, 256f, 16f);
 
         // Neon marquee glow behind the title — makes the cabinet feel like a lit machine
         // rather than a flat panel.
@@ -214,14 +214,14 @@ public abstract class BaseCasinoScreen extends Screen {
         int[] dx = { x - 4, x - 4 + i, x - 4 + w + 8 - i };
         int[] dw = { i, w + 8 - 2 * i, i };
         // Source slices in normalised UV space.
-        float[] u0 = { 0f, i / FRAME_TEX, (FRAME_TEX - i) / FRAME_TEX };
-        float[] uw = { i / FRAME_TEX, (FRAME_TEX - 2 * i) / FRAME_TEX, i / FRAME_TEX };
+        float[] u0 = { 0f, i, FRAME_TEX - i };
+        float[] uw = { i, FRAME_TEX - 2 * i, i };
 
         for (int row = 0; row < 3; row++) {
             int dy = (row == 0) ? y - 4 : (row == 1 ? y - 4 + i : y - 4 + h + 8 - i);
             int dh = (row == 1) ? h + 8 - 2 * i : i;
-            float v0 = (row == 0) ? 0f : (row == 1 ? i / FRAME_TEX : (FRAME_TEX - i) / FRAME_TEX);
-            float vh = (row == 1) ? (FRAME_TEX - 2 * i) / FRAME_TEX : i / FRAME_TEX;
+            float v0 = (row == 0) ? 0f : (row == 1 ? i : (FRAME_TEX - i));
+            float vh = (row == 1) ? (FRAME_TEX - 2 * i) : i;
             for (int col = 0; col < 3; col++) {
                 extractor.blit(CasinoSprites.CASINO_FRAME,
                         dx[col], dy, dw[col], dh,
@@ -260,13 +260,13 @@ public abstract class BaseCasinoScreen extends Screen {
 
         if ("??".equals(cardStr)) {
             // Face-down card — use card_back sprite
-            extractor.blit(CasinoSprites.CARD_BACK, x, y, cardW, cardH, 0f, 0f, 1f, 1f);
+            extractor.blit(CasinoSprites.CARD_BACK, x, y, cardW, cardH, 0f, 0f, cardW, cardH);
             extractor.centeredText(this.font, "?", x + cardW / 2, y + 9, 0xFFFFFFFF);
             return;
         }
 
         // Face-up card — use card_front sprite
-        extractor.blit(CasinoSprites.CARD_FRONT, x, y, cardW, cardH, 0f, 0f, 1f, 1f);
+        extractor.blit(CasinoSprites.CARD_FRONT, x, y, cardW, cardH, 0f, 0f, cardW, cardH);
 
         boolean isRed = cardStr.contains("♥") || cardStr.contains("♦");
         int textColor = isRed ? 0xFFCC1111 : 0xFF111111;
@@ -283,7 +283,7 @@ public abstract class BaseCasinoScreen extends Screen {
      * Resource-pack overridable via assets/casino/textures/gui/chip.png.
      */
     protected void drawChip(GuiGraphicsExtractor extractor, int x, int y) {
-        extractor.blit(CasinoSprites.CHIP, x, y, 16, 16, 0f, 0f, 1f, 1f);
+        extractor.blit(CasinoSprites.CHIP, x, y, 16, 16, 0f, 0f, 16f, 16f);
     }
 
     @Override

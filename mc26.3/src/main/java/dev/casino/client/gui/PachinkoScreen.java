@@ -89,7 +89,7 @@ public class PachinkoScreen extends BaseCasinoScreen {
         int boardH = 150;
 
         extractor.fill(boardX - 2, boardY - 2, boardX + boardW + 2, boardY + boardH + 2, 0xFF4A3B2C);
-        extractor.blit(CasinoSprites.PACHINKO_BOARD, boardX, boardY, boardW, boardH, 0f, 0f, 1f, 1f);
+        extractor.blit(CasinoSprites.PACHINKO_BOARD, boardX, boardY, boardW, boardH, 0f, 0f, 128f, 128f);
 
         // Draw Pins grid
         for (int r = 0; r < PachinkoEngine.ROWS; r++) {
