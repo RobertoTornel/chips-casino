@@ -5,10 +5,13 @@ import dev.casino.block.entity.*;
 import dev.casino.command.CasinoCommand;
 import dev.casino.economy.CasinoAccountManager;
 import dev.casino.network.CasinoNetwork;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.common.MinecraftForge;
@@ -50,9 +53,27 @@ public class Casino {
     public static final RegistryObject<Block> EXCHANGE_BLOCK = BLOCKS.register("exchange", ExchangeBlock::new);
     public static final RegistryObject<Block> SLOT_MACHINE_BLOCK = BLOCKS.register("slot_machine", SlotMachineBlock::new);
 
-    // Creative mode tab (stub — C stage fills real registration, PLAN-FLAIR.md Pass 1)
-    // Tab "Chips Casino" with slot_machine block item as icon, holding all 9 block items.
-    public static final CreativeModeTab CASINO_TAB = null; // TODO: register CreativeModeTab here
+    // Creative mode tab: "Chips Casino" with slot_machine icon, holding all 9 block items.
+    public static final DeferredRegister<CreativeModeTab> CREATIVE_TABS =
+            DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
+
+    public static final RegistryObject<CreativeModeTab> CASINO_TAB = CREATIVE_TABS.register("casino_tab",
+            () -> new CreativeModeTab.Builder(CreativeModeTab.Row.TOP, 0)
+                    .title(Component.literal("Chips Casino"))
+                    .icon(() -> new ItemStack(SLOT_MACHINE_BLOCK.get().asItem()))
+                    .displayItems((features, emitter) -> {
+                        emitter.accept(ROULETTE_BLOCK.get().asItem());
+                        emitter.accept(BLACKJACK_BLOCK.get().asItem());
+                        emitter.accept(BACCARAT_BLOCK.get().asItem());
+                        emitter.accept(POKER_MACHINE_BLOCK.get().asItem());
+                        emitter.accept(PACHINKO_BLOCK.get().asItem());
+                        emitter.accept(PINBALL_BLOCK.get().asItem());
+                        emitter.accept(TEXAS_HOLDEM_BLOCK.get().asItem());
+                        emitter.accept(EXCHANGE_BLOCK.get().asItem());
+                        emitter.accept(SLOT_MACHINE_BLOCK.get().asItem());
+                    })
+                    .build()
+    );
 
     // Items
     public static final RegistryObject<Item> ROULETTE_ITEM = ITEMS.register("roulette_table", () -> new BlockItem(ROULETTE_BLOCK.get(), new Item.Properties()));
@@ -92,6 +113,7 @@ public class Casino {
         BLOCKS.register(modBus);
         ITEMS.register(modBus);
         BLOCK_ENTITIES.register(modBus);
+        CREATIVE_TABS.register(modBus);
 
         // Creative Mode Tab (stub — registration filled in by C stage)
         registerCreativeTab();

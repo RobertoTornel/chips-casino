@@ -1,3 +1,9 @@
+## 0.1.7 — Creative Mode Tab + SLOT screen fix
+
+- **Creative Mode Tab**: "Chips Casino" tab registered in all 5 trees (Fabric 26.3, Fabric 1.20.1, Forge 1.20.1, NeoForge 1.20.1, Architectury 1.20.1 multiloader), with slot_machine icon and all 9 block items. No more `null` tab / NPE risk.
+- **SLOT screen fix**: `SlotMachineBlockEntity.getGameType()` now returns `"SLOT"` matching the client handler's `case "SLOT"` — previously returned `"SLOT_MACHINE"`, so the slot machine screen never opened. Fixed in all 5 trees.
+- Version bumped 0.1.6 → 0.1.7 across all five trees.
+
 ## 0.1.6 — Multiplayer baccarat and roulette tables
 
 Every table game now shares one shoe/wheel and one dealer clock, at blackjack's standard:

@@ -1,7 +1,7 @@
 # Casino
 
-A casino and gambling mod for Minecraft: six playable machines, a real money system, and
-server-side bots so the tables are never empty.
+A casino and gambling mod for Minecraft: nine playable tables and machines, a real money
+system, and server-side bots so the tables are never empty.
 
 The house takes a cut in both directions — **it buys your items at 80% of base value and
 sells them back at 120%**. That spread is the whole game design: no trade loop can come out
@@ -15,9 +15,9 @@ ahead, so money enters the world only by winning it.
 
 | Minecraft | Loader | Java | Artifact |
 |---|---|---|---|
-| **1.20.1** | Fabric ≥ 0.14.21 | 17 | [`architectury/casino-1.20.1-arch-fabric-0.1.0.jar`](dist/architectury/casino-1.20.1-arch-fabric-0.1.0.jar) |
-| **1.20.1** | Forge 47.x | 17 | [`architectury/casino-1.20.1-arch-forge-0.1.0.jar`](dist/architectury/casino-1.20.1-arch-forge-0.1.0.jar) |
-| **1.20.1** | NeoForge 47.1.x | 17 | [`architectury/casino-1.20.1-arch-neoforge-0.1.0.jar`](dist/architectury/casino-1.20.1-arch-neoforge-0.1.0.jar) |
+| **1.20.1** | Fabric ≥ 0.14.21 | 17 | [`architectury/casino-1.20.1-arch-fabric-0.1.7.jar`](dist/architectury/casino-1.20.1-arch-fabric-0.1.7.jar) |
+| **1.20.1** | Forge 47.x | 17 | [`architectury/casino-1.20.1-arch-forge-0.1.7.jar`](dist/architectury/casino-1.20.1-arch-forge-0.1.7.jar) |
+| **1.20.1** | NeoForge 47.1.x | 17 | [`architectury/casino-1.20.1-arch-neoforge-0.1.7.jar`](dist/architectury/casino-1.20.1-arch-neoforge-0.1.7.jar) |
 
 One `common` source tree in [`mc1.20.1-arch/`](mc1.20.1-arch/), packaged per platform.
 
@@ -25,10 +25,10 @@ One `common` source tree in [`mc1.20.1-arch/`](mc1.20.1-arch/), packaged per pla
 
 | Minecraft | Loader | Java | Artifact |
 |---|---|---|---|
-| **26.3** | Fabric ≥ 0.19.5 | 25 | [`casino-26.3-fabric-0.1.0.jar`](dist/casino-26.3-fabric-0.1.0.jar) |
-| **1.20.1** | Fabric ≥ 0.14.21 | 17 | [`casino-1.20.1-fabric-0.1.0.jar`](dist/casino-1.20.1-fabric-0.1.0.jar) |
-| **1.20.1** | Forge 47.3.0 | 17 | [`casino-1.20.1-forge-0.1.0.jar`](dist/casino-1.20.1-forge-0.1.0.jar) |
-| **1.20.1** | NeoForge 47.1.3 | 17 | [`casino-1.20.1-neoforge-0.1.0.jar`](dist/casino-1.20.1-neoforge-0.1.0.jar) |
+| **26.3** | Fabric ≥ 0.19.5 | 25 | [`casino-26.3-fabric-0.1.7.jar`](dist/casino-26.3-fabric-0.1.7.jar) |
+| **1.20.1** | Fabric ≥ 0.14.21 | 17 | [`casino-1.20.1-fabric-0.1.7.jar`](dist/casino-1.20.1-fabric-0.1.7.jar) |
+| **1.20.1** | Forge 47.3.0 | 17 | [`casino-1.20.1-forge-0.1.7.jar`](dist/casino-1.20.1-forge-0.1.7.jar) |
+| **1.20.1** | NeoForge 47.1.3 | 17 | [`casino-1.20.1-neoforge-0.1.7.jar`](dist/casino-1.20.1-neoforge-0.1.7.jar) |
 
 Either set works — the Architectury and standalone jars carry the same features.
 
@@ -127,7 +127,7 @@ KubeJS values last for the session; use a datapack for anything permanent.
 |---|---|---|
 | `casino:roulette_table` | Roulette — number, colour and split bets | 1 |
 | `casino:blackjack_table` | Blackjack — one dealer, six seats, hit/stand/double/split | 1–6 |
-| `casino:baccarat_table` | Baccarat — player, banker, tie | 1 |
+| `casino:baccarat_table` | Baccarat — player, banker, tie | 1–6 |
 | `casino:poker_machine` | Video poker — hold/draw, Jacks or Better | 1 |
 | `casino:pachinko_cabinet` | Pachinko — drop a ball, a Galton board decides | 1 |
 | `casino:pinball_machine` | Pinball — fire a ball, time your flippers | 1 |
@@ -145,11 +145,14 @@ including the bug that once had the pachinko board returning 54x per bet.
 
 ### Multiplayer
 
-Texas Hold'em and Blackjack both seat up to six. Hold'em deducts a buy-in when you sit and
-refunds it if you leave before the hand resolves; blackjack charges each stake as you commit
-it and pays the table out at settle. Every viewer of a table is kept in sync, so spectators
-see the same state as the players — and in blackjack the dealer's hole card is withheld from
-the sync packet itself until it is turned, not just hidden on screen.
+Texas Hold'em, Blackjack, Baccarat and Roulette all seat up to six around a shared table.
+Hold'em deducts a buy-in when you sit and refunds it if you leave before the hand resolves;
+blackjack charges each stake as you commit it and pays the table out at settle; baccarat
+lets each bettor back player, banker or tie against one shared shoe; roulette lets each
+bettor lay chips on the felt during the betting window and the wheel lands for everyone at
+once. Every viewer of a table is kept in sync, so spectators see the same state as the
+players — and in blackjack the dealer's hole card is withheld from the sync packet itself
+until it is turned, not just hidden on screen.
 
 ### Bots
 

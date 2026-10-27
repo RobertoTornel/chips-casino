@@ -20,6 +20,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -50,9 +51,26 @@ public class Casino implements ModInitializer {
     public static final ExchangeBlock EXCHANGE_BLOCK = new ExchangeBlock();
     public static final SlotMachineBlock SLOT_MACHINE_BLOCK = new SlotMachineBlock();
 
-    // Creative mode tab (stub — C stage fills real registration, PLAN-FLAIR.md Pass 1)
-    // Tab "Chips Casino" with slot_machine block item as icon, holding all 9 block items.
-    public static final CreativeModeTab CASINO_TAB = null; // TODO: register CreativeModeTab here
+    // Creative mode tab: "Chips Casino" with slot_machine icon, holding all 9 block items.
+    public static final CreativeModeTab CASINO_TAB = Registry.register(
+            BuiltInRegistries.CREATIVE_MODE_TAB,
+            id("casino_tab"),
+            new CreativeModeTab.Builder(CreativeModeTab.Row.TOP, 0)
+                    .title(Component.literal("Chips Casino"))
+                    .icon(() -> new ItemStack(SLOT_MACHINE_BLOCK.asItem()))
+                    .displayItems((features, emitter) -> {
+                        emitter.accept(ROULETTE_BLOCK.asItem());
+                        emitter.accept(BLACKJACK_BLOCK.asItem());
+                        emitter.accept(BACCARAT_BLOCK.asItem());
+                        emitter.accept(POKER_MACHINE_BLOCK.asItem());
+                        emitter.accept(PACHINKO_BLOCK.asItem());
+                        emitter.accept(PINBALL_BLOCK.asItem());
+                        emitter.accept(TEXAS_HOLDEM_BLOCK.asItem());
+                        emitter.accept(EXCHANGE_BLOCK.asItem());
+                        emitter.accept(SLOT_MACHINE_BLOCK.asItem());
+                    })
+                    .build()
+    );
 
     // Block Entities
     public static BlockEntityType<RouletteBlockEntity> ROULETTE_BE_TYPE;
@@ -180,9 +198,6 @@ public class Casino implements ModInitializer {
     }
 
     private static void registerCreativeTab() {
-        // TODO: CASINO_TAB = CreativeModeTab registry registration with
-        // icon = new ItemStack(SLOT_MACHINE_BLOCK.asItem()), title = "Chips Casino",
-        // contents = all 9 block items (PLAN-FLAIR.md Pass 1).
-        // Loader API for CreativeModeTab varies; left as compiling stub for C stage.
+        // Eagerly registered above as the CASINO_TAB field initializer; nothing to do here.
     }
 }

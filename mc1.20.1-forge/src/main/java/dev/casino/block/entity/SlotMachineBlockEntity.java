@@ -40,7 +40,7 @@ public class SlotMachineBlockEntity extends BaseCasinoBlockEntity {
 
     @Override
     public String getGameType() {
-        return "SLOT_MACHINE";
+        return "SLOT";
     }
 
     @Override

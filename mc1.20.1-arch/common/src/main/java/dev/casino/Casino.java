@@ -11,10 +11,12 @@ import dev.casino.command.CasinoCommand;
 import dev.casino.economy.CasinoAccountManager;
 import dev.casino.network.CasinoNetwork;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -33,7 +35,7 @@ import java.security.SecureRandom;
 public final class Casino {
     public static final String MOD_ID = "casino";
     public static final String MOD_NAME = "Casino";
-    public static final String VERSION = "0.1.0";
+    public static final String VERSION = "0.1.7";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     /** Cryptographically strong RNG for server-owned game seeds. */
@@ -64,12 +66,31 @@ public final class Casino {
             BLOCKS.register("exchange", ExchangeBlock::new);
     public static final RegistrySupplier<SlotMachineBlock> SLOT_MACHINE_BLOCK =
             BLOCKS.register("slot_machine", SlotMachineBlock::new);
-
-    // Creative mode tab (stub — C stage fills real registration, PLAN-FLAIR.md Pass 1)
-    // Tab "Chips Casino" with slot_machine block item as icon, holding all 9 block items.
-    public static final CreativeModeTab CASINO_TAB = null; // TODO: register CreativeModeTab here
+    public static final RegistrySupplier<dev.casino.block.PinballMachineBlock> PINBALL_BLOCK =
+            BLOCKS.register("pinball_machine", dev.casino.block.PinballMachineBlock::new);
 
     // ---- Block entities --------------------------------------------------
+    public static final DeferredRegister<CreativeModeTab> CREATIVE_TABS =
+            DeferredRegister.create(MOD_ID, Registries.CREATIVE_MODE_TAB);
+
+    public static final RegistrySupplier<CreativeModeTab> CASINO_TAB = CREATIVE_TABS.register("casino_tab",
+            () -> new CreativeModeTab.Builder(CreativeModeTab.Row.TOP, 0)
+                    .title(Component.literal("Chips Casino"))
+                    .icon(() -> new ItemStack(SLOT_MACHINE_BLOCK.get().asItem()))
+                    .displayItems((features, emitter) -> {
+                        emitter.accept(ROULETTE_BLOCK.get().asItem());
+                        emitter.accept(BLACKJACK_BLOCK.get().asItem());
+                        emitter.accept(BACCARAT_BLOCK.get().asItem());
+                        emitter.accept(POKER_MACHINE_BLOCK.get().asItem());
+                        emitter.accept(PACHINKO_BLOCK.get().asItem());
+                        emitter.accept(PINBALL_BLOCK.get().asItem());
+                        emitter.accept(TEXAS_HOLDEM_BLOCK.get().asItem());
+                        emitter.accept(EXCHANGE_BLOCK.get().asItem());
+                        emitter.accept(SLOT_MACHINE_BLOCK.get().asItem());
+                    })
+                    .build()
+    );
+
     public static final RegistrySupplier<BlockEntityType<RouletteBlockEntity>> ROULETTE_BE_TYPE =
             BLOCK_ENTITIES.register("roulette_table",
                     () -> makeType(RouletteBlockEntity::new, ROULETTE_BLOCK.get()));
@@ -82,8 +103,6 @@ public final class Casino {
     public static final RegistrySupplier<BlockEntityType<PokerMachineBlockEntity>> POKER_MACHINE_BE_TYPE =
             BLOCK_ENTITIES.register("poker_machine",
                     () -> makeType(PokerMachineBlockEntity::new, POKER_MACHINE_BLOCK.get()));
-    public static final RegistrySupplier<dev.casino.block.PinballMachineBlock> PINBALL_BLOCK =
-            BLOCKS.register("pinball_machine", dev.casino.block.PinballMachineBlock::new);
     public static final RegistrySupplier<BlockEntityType<PachinkoBlockEntity>> PACHINKO_BE_TYPE =
             BLOCK_ENTITIES.register("pachinko_cabinet",
                     () -> makeType(PachinkoBlockEntity::new, PACHINKO_BLOCK.get()));
@@ -137,6 +156,7 @@ public final class Casino {
         BLOCKS.register();
         BLOCK_ENTITIES.register();
         ITEMS.register();
+        CREATIVE_TABS.register();
 
         // Creative Mode Tab (stub — registration filled in by C stage)
         registerCreativeTab();
@@ -169,9 +189,6 @@ public final class Casino {
     }
 
     private static void registerCreativeTab() {
-        // TODO: CreativeModeTab registration with
-        // icon = new ItemStack(SLOT_MACHINE_BLOCK.get().asItem()), title = "Chips Casino",
-        // contents = all 9 block items (PLAN-FLAIR.md Pass 1).
-        // Loader API for CreativeModeTab varies; left as compiling stub for C stage.
+        // Eagerly registered above as the CASINO_TAB field initializer; nothing to do here.
     }
 }
