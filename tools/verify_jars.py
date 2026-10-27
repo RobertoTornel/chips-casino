@@ -25,6 +25,11 @@ BLOCKS = [
     "pachinko_cabinet", "texas_holdem_floor", "exchange", "pinball_machine",
     "slot_machine",
 ]
+# Pure-Java game models. These carry the rules and the RNG, so a jar that ships a
+# screen without its model is the one failure this gate exists to catch.
+MODELS = [
+    "BaccaratTable", "BlackjackTable", "Deck", "PachinkoEngine", "PinballEngine",
+]
 SCREENS = [
     "RouletteScreen", "BlackjackScreen", "BaccaratScreen", "VideoPokerScreen",
     "PachinkoScreen", "TexasHoldemScreen", "ExchangeScreen", "PinballScreen",
@@ -82,6 +87,16 @@ def verify(jar):
         # --- item ---
         check("assets/casino/models/item/chip.json" in names, "no chip item model", jar)
         check("assets/casino/textures/item/chip.png" in names, "no chip item texture", jar)
+
+        # --- game models compile in ---
+        for m in MODELS:
+            found = any(n.endswith(f"game/{m}.class") for n in names)
+            check(found, f"missing game model {m}", jar)
+
+        # --- the baccarat table entity ships and is wired to its block ---
+        for be in ["BaccaratBlockEntity", "BlackjackBlockEntity"]:
+            found = any(n.endswith(f"block/entity/{be}.class") for n in names)
+            check(found, f"missing block entity {be}", jar)
 
         # --- screens compile in ---
         for s in SCREENS:

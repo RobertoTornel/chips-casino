@@ -6,7 +6,7 @@ plugins {
     id 'idea'
 }
 
-version = "0.1.4"
+version = "0.1.5"
 group = "dev.casino"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
