@@ -122,6 +122,33 @@ def blit_builder(recv, args):
             f"CasinoSprites.{wc}, CasinoSprites.{hc})")
 
 
+def rewrite_pose(src, alt):
+    """Strip the `.pose()` wrapper from 26.3 renderer calls.
+
+    1.20.1's GuiGraphics exposes pose-stack methods directly
+    (pushPose/popPose/translate/mulPose/...), so `e.pose().pushMatrix()` becomes
+    `e.pushPose()`. `pushMatrix`/`popMatrix` are renamed; everything else passes
+    through with `.pose()` removed.
+    """
+    pattern = re.compile(r"\b(" + alt + r")\.pose\(\)\.([A-Za-z]+)\(")
+    out = []
+    i = 0
+    count = 0
+    while True:
+        m = pattern.search(src, i)
+        if not m:
+            out.append(src[i:])
+            break
+        out.append(src[i:m.start()])
+        recv, method = m.group(1), m.group(2)
+        mapped = {"pushMatrix": "pushPose", "popMatrix": "popPose"}.get(method, method)
+        args, after = split_args(src, m.end())
+        out.append(f"{recv}.{mapped}(" + ", ".join(args) + ")")
+        count += 1
+        i = after
+    return "".join(out), count
+
+
 def port(src):
     """Rewrite a 26.3 screen source into its 1.20.1 equivalent."""
     stats = {}
@@ -156,10 +183,13 @@ def port(src):
     src, stats["centeredText"] = rewrite("centeredText", lambda r, a: f"{r}.drawCenteredString(" + ", ".join(a) + ")")
     src, stats["fill"] = rewrite("fill", lambda r, a: f"{r}.fill(" + ", ".join(a) + ")")
     src, stats["blit"] = rewrite("blit", blit_builder)
+    src, stats["pose"] = rewrite_pose(src, alt)
 
     # Anything left is a renderer call with no 1.20.1 counterpart.
     leftovers = sorted(set(re.findall(r"\b(?:" + alt + r")\.([A-Za-z]+)", src)))
-    bad = [x for x in leftovers if x not in ("fill", "drawString", "drawCenteredString")]
+    good = {"fill", "drawString", "drawCenteredString",
+            "pushPose", "popPose", "translate", "rotate", "mulPose", "scale"}
+    bad = [x for x in leftovers if x not in good]
     if bad:
         raise ValueError(f"unported renderer calls remain: {bad}")
 

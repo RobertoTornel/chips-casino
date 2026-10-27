@@ -29,6 +29,7 @@ BLOCKS = [
 # screen without its model is the one failure this gate exists to catch.
 MODELS = [
     "BaccaratTable", "BlackjackTable", "Deck", "PachinkoEngine", "PinballEngine",
+    "RouletteTable", "TexasHoldemTable",
 ]
 SCREENS = [
     "RouletteScreen", "BlackjackScreen", "BaccaratScreen", "VideoPokerScreen",
@@ -94,7 +95,7 @@ def verify(jar):
             check(found, f"missing game model {m}", jar)
 
         # --- the baccarat table entity ships and is wired to its block ---
-        for be in ["BaccaratBlockEntity", "BlackjackBlockEntity"]:
+        for be in ["BaccaratBlockEntity", "BlackjackBlockEntity", "RouletteBlockEntity", "TexasHoldemBlockEntity"]:
             found = any(n.endswith(f"block/entity/{be}.class") for n in names)
             check(found, f"missing block entity {be}", jar)
 

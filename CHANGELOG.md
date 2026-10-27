@@ -1,3 +1,34 @@
+## 0.1.6 — Multiplayer baccarat and roulette tables
+
+Every table game now shares one shoe/wheel and one dealer clock, at blackjack's standard:
+
+### New: Baccarat table (multiplayer)
+Six bettors on a semicircle facing one dealer shoe, backing PLAYER / BANKER / TIE. The
+server deals one card per beat, runs the full Punto Banco tableau (naturals stop the
+hand, the player draws 0-5 and stands 6-7, the banker's complete third-card table
+including the 3-vs-8 exception), pays 5% commission on banker and 8:1 on a tie, and
+settles each seat once per round through a payout queue that never pays twice.
+
+### New: Roulette table (multiplayer)
+Six bettors around a European single-zero wheel. Chips go down during a betting window,
+then the server spins a SecureRandom number it never sends until SETTLE, so a client
+cannot read the result out of the packet stream. Every bet is refundable while the
+window is open, the wheel angle is a pure function of the server clock so all six
+screens spin in lockstep, and house players fill empty seats without ever touching the
+economy queue.
+
+### Both tables
+- `toJson(UUID)` strips the secret (hole card / winning number) until it is revealed,
+  not merely hidden client-side.
+- `drainPayouts()` pays each human exactly once per round; bots are never queued, so
+  house players can't mint chips.
+- 26.3 `GuiGraphicsExtractor`, 1.20.1 `GuiGraphics` — ported mechanically with
+  `tools/port_screen.py`; `tools/layout_check.py` gates the panel at 400x232 with no
+  overlapping widgets.
+- 18 new JUnit tests for roulette (payouts match `RouletteEngine` byte-for-byte across
+  every bet type × number), 15 for baccarat (the full banker third-card table, pushes
+  on tie, bots excluded from the queue), all green in every tree.
+
 ## 0.1.4 — Multiplayer blackjack table
 
 The blackjack table stops being a single-player form and becomes a real table: six
