@@ -1,11 +1,55 @@
-# Casino
+# Chips Casino
 
-A casino and gambling mod for Minecraft: nine playable tables and machines, a real money
-system, and server-side bots so the tables are never empty.
+A casino and gambling mod for Minecraft: nine playable tables and machines, a real
+money economy (Chips ◈), and server-side bots so the tables are never empty.
 
-The house takes a cut in both directions — **it buys your items at 80% of base value and
-sells them back at 120%**. That spread is the whole game design: no trade loop can come out
-ahead, so money enters the world only by winning it.
+## What it does
+
+Chips Casino adds a fully-fledged casino to your world with no economy mod required:
+
+* **Blackjack** — six seats, one shared shoe, one dealer. Hit, stand, double, split. The
+  dealer's hole card is stripped from the sync packet until it is turned.
+* **Baccarat** — six bettors, full Punto Banco tableau (naturals, player draw 0-5, banker
+  third-card table including the 3-vs-8 exception), 5% banker commission, 8:1 tie.
+* **European Roulette** — single-zero wheel, SecureRandom spin the client never sees until
+  settle, inside/outside bets, chip denominations, felt grid.
+* **Texas Hold'em Poker** — six seats, blinds, betting rounds, showdown, hole cards hidden
+  until showdown.
+* **Video Poker** — Jacks or Better hold/draw against the machine.
+* **Pachinko** — Galton board with weighted pockets, binomial landing distribution.
+* **Pinball** — skill-based ball launcher, RTP curve under 1.0 even at perfect play.
+* **Slot Machine** — three weighted reels, server-owned SecureRandom seed.
+* **Exchange** — buy and sell items at 0.8x / 1.2x of base price, datapack-reloadable.
+
+Every table game is multiplayer: shared shoe/wheel/dealer, one animation clock, server-owned
+outcomes, and house bots fill empty seats so a lone player still gets a full table.
+
+## Why download it
+
+* **No economy plugin needed.** Chips is a standalone wallet — sell items to the house at
+  0.8x base, buy back at 1.2x, and the house edge means no trade loop can come out ahead.
+  Money enters the world only by winning it at the tables.
+* **Server-authoritative.** The server owns the RNG, the shoe, and every outcome; clients
+  never see hidden cards or the winning number until it is revealed. No client can cheat.
+* **Cross-platform.** Ships for Minecraft 26.3 (Fabric) and 1.20.1 (Fabric, Forge,
+  NeoForge, and Architectury multiloader) — same features on every loader.
+* **Creative Mode Tab.** "Chips Casino" tab with the slot machine icon and all nine block
+  items.
+* **Themable UI.** Every screen element is a resource-pack-overridable sprite, including a
+  built-in dark mode pack.
+
+## Critical info before downloading
+
+* **Real money.** Bets are deducted from your wallet the moment they are placed; winnings
+  are credited at settle. There is no creative-mode free play.
+* **Server-side persistence.** Balances are saved to `<world>/casino/wallets.json` on every
+  transaction and on server stop. Back up your world folder to back up your wallet.
+* **House edge.** Every machine returns less than the stake over time (Pachinko 0.891,
+  Pinball 0.920, Slot Machine calibrated ~12.8% edge, table games per standard odds). The
+  casino always wins in the long run — that is by design.
+* **Version support.** 26.3 requires Java 25; 1.20.1 requires Java 17. The Architectury
+  jar is the recommended 1.20.1 artifact as it covers Fabric, Forge, and NeoForge in one
+  download.
 
 ---
 
