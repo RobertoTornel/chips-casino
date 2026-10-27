@@ -18,6 +18,32 @@ public class TexasHoldemTable {
         SHOWDOWN
     }
 
+    /** A card plus the tick it landed on, so the client can animate its arrival. */
+    public static class Dealt {
+        public final Card card;
+        public final int tick;
+
+        public Dealt(Card card, int tick) {
+            this.card = card;
+            this.tick = tick;
+        }
+    }
+
+    /** Something that happened, for the client's ticker line. */
+    public static class TableEvent {
+        public final int tick;
+        public final String kind;
+        public final int seat;
+        public final String text;
+
+        public TableEvent(int tick, String kind, int seat, String text) {
+            this.tick = tick;
+            this.kind = kind;
+            this.seat = seat;
+            this.text = text;
+        }
+    }
+
     public static class Seat {
         public int seatIndex;
         public UUID playerId;
@@ -29,6 +55,8 @@ public class TexasHoldemTable {
         public boolean folded;
         public boolean allIn;
         public Card[] holeCards = new Card[2];
+        /** Tick each hole card landed on, -1 until dealt. */
+        public final int[] holeTicks = new int[]{-1, -1};
         public String lastAction = "";
 
         public Seat(int index) {
@@ -45,6 +73,8 @@ public class TexasHoldemTable {
             allIn = false;
             holeCards[0] = null;
             holeCards[1] = null;
+            holeTicks[0] = -1;
+            holeTicks[1] = -1;
             lastAction = "";
         }
     }
@@ -52,7 +82,7 @@ public class TexasHoldemTable {
     public static final int MAX_SEATS = 6;
     private final Seat[] seats = new Seat[MAX_SEATS];
     private final Deck deck = new Deck();
-    private final List<Card> communityCards = new ArrayList<>();
+    private final List<Dealt> communityCards = new ArrayList<>();
 
     private TablePhase phase = TablePhase.WAITING_FOR_PLAYERS;
     private long pot = 0;
@@ -61,6 +91,15 @@ public class TexasHoldemTable {
     private int currentTurnSeat = -1;
     private long smallBlind = 10;
     private long bigBlind = 20;
+
+    /**
+     * Monotonic tick counter shared by every client at the table: one per
+     * {@link #tickServer()} call. Every dealt card and every event is stamped with it,
+     * so two screens watching the same table animate the same card on the same tick.
+     */
+    private int animClock = 0;
+    private int handNumber = 0;
+    private final List<TableEvent> events = new ArrayList<>();
 
     private boolean autoFillBots = true;
     private UUID tableOwner = null;
@@ -77,11 +116,29 @@ public class TexasHoldemTable {
     }
 
     public Seat[] getSeats() { return seats; }
-    public List<Card> getCommunityCards() { return communityCards; }
+    public List<Dealt> getCommunityCards() { return communityCards; }
     public TablePhase getPhase() { return phase; }
     public long getPot() { return pot; }
     public long getCurrentHighestBet() { return currentHighestBet; }
     public int getCurrentTurnSeat() { return currentTurnSeat; }
+    public int getAnimClock() { return animClock; }
+    public int getHandNumber() { return handNumber; }
+    public List<TableEvent> getRecentEvents() { return events; }
+
+    /**
+     * The line the dealer is currently saying: the newest event, or a sensible prompt
+     * when nothing has happened yet.
+     */
+    public String getDealerSay() {
+        if (!events.isEmpty()) {
+            return events.get(events.size() - 1).text;
+        }
+        if (currentTurnSeat >= 0 && currentTurnSeat < MAX_SEATS && seats[currentTurnSeat].isOccupied()) {
+            return seats[currentTurnSeat].playerName + " to act";
+        }
+        return "Place your bets";
+    }
+
     public boolean isAutoFillBots() { return autoFillBots; }
     public void setAutoFillBots(boolean autoFill) { this.autoFillBots = autoFill; }
     public UUID getTableOwner() { return tableOwner; }
@@ -120,6 +177,7 @@ public class TexasHoldemTable {
             tableOwner = playerId;
         }
 
+        pushEvent("JOIN", seatIdx, name + " sits down");
         checkStartGame();
         return true;
     }
@@ -128,6 +186,7 @@ public class TexasHoldemTable {
         for (int i = 0; i < MAX_SEATS; i++) {
             Seat s = seats[i];
             if (s.isOccupied() && playerId.equals(s.playerId)) {
+                String who = s.playerName;
                 s.playerId = null;
                 s.playerName = null;
                 s.stack = 0;
@@ -136,6 +195,7 @@ public class TexasHoldemTable {
                 if (playerId.equals(tableOwner)) {
                     assignNewOwner();
                 }
+                pushEvent("LEAVE", i, who + " leaves");
                 break;
             }
         }
@@ -145,11 +205,13 @@ public class TexasHoldemTable {
         if (seatIdx >= 0 && seatIdx < MAX_SEATS) {
             Seat s = seats[seatIdx];
             if (s.isOccupied() && s.isBot) {
+                String who = s.playerName;
                 s.playerId = null;
                 s.playerName = null;
                 s.stack = 0;
                 s.isBot = false;
                 s.resetForNewHand();
+                pushEvent("LEAVE", seatIdx, who + " leaves");
             }
         }
     }
@@ -178,6 +240,7 @@ public class TexasHoldemTable {
                 seats[i].isBot = true;
                 seats[i].stack = 1000;
                 seats[i].resetForNewHand();
+                pushEvent("JOIN", i, seats[i].playerName + " (house) sits down");
                 botIdx++;
             }
         }
@@ -199,6 +262,7 @@ public class TexasHoldemTable {
         communityCards.clear();
         pot = 0;
         currentHighestBet = 0;
+        handNumber++;
         handSummary = "Dealing new hand...";
 
         // Advance dealer button to next occupied seat
@@ -232,16 +296,18 @@ public class TexasHoldemTable {
             for (Seat s : seats) {
                 if (s.isOccupied() && !s.folded) {
                     s.holeCards[c] = deck.draw();
+                    s.holeTicks[c] = animClock;
                 }
             }
         }
+        pushEvent("DEAL", -1, "Hand " + handNumber + ": hole cards dealt");
 
         // Post blinds
         int sbSeat = nextOccupiedSeat(dealerButton);
         int bbSeat = nextOccupiedSeat(sbSeat);
 
-        postBlind(seats[sbSeat], smallBlind);
-        postBlind(seats[bbSeat], bigBlind);
+        postBlind(seats[sbSeat], smallBlind, "small");
+        postBlind(seats[bbSeat], bigBlind, "big");
         currentHighestBet = bigBlind;
 
         phase = TablePhase.PRE_FLOP;
@@ -249,13 +315,14 @@ public class TexasHoldemTable {
         botActionDelayTicks = 20; // 1 second delay
     }
 
-    private void postBlind(Seat s, long amount) {
+    private void postBlind(Seat s, long amount, String label) {
         long actual = Math.min(s.stack, amount);
         s.stack -= actual;
         s.currentBet = actual;
         pot += actual;
         s.lastAction = "Blind (" + actual + ")";
         if (s.stack == 0) s.allIn = true;
+        pushEvent("BLIND", s.seatIndex, s.playerName + " posts " + label + " blind " + actual);
     }
 
     private int nextOccupiedSeat(int current) {
@@ -281,6 +348,7 @@ public class TexasHoldemTable {
 
     private void executeAction(Seat s, String action, long raiseAmount) {
         long callCost = currentHighestBet - s.currentBet;
+        long betBefore = s.currentBet;
 
         switch (action.toUpperCase()) {
             case "FOLD" -> {
@@ -321,6 +389,19 @@ public class TexasHoldemTable {
             }
         }
 
+        long paid = s.currentBet - betBefore;
+        String announce;
+        if (s.folded) {
+            announce = s.playerName + " folds";
+        } else if ("RAISE".equalsIgnoreCase(action)) {
+            announce = s.playerName + " raises to " + s.currentBet;
+        } else if (paid > 0) {
+            announce = s.playerName + " calls " + paid;
+        } else {
+            announce = s.playerName + " checks";
+        }
+        pushEvent("ACTION", s.seatIndex, announce);
+
         advanceTurn();
     }
 
@@ -339,6 +420,8 @@ public class TexasHoldemTable {
             // Everyone else folded, award pot immediately
             lastStanding.stack += pot;
             handSummary = lastStanding.playerName + " won " + pot + " Chips (all folded)";
+            pushEvent("SHOWDOWN", lastStanding.seatIndex, lastStanding.playerName + " takes it uncontested");
+            pushEvent("SETTLE", lastStanding.seatIndex, lastStanding.playerName + " wins " + pot + " (everyone folded)");
             phase = TablePhase.SHOWDOWN;
             showdownTimerTicks = 80; // 4 seconds delay before next hand
             return;
@@ -386,20 +469,21 @@ public class TexasHoldemTable {
         switch (phase) {
             case PRE_FLOP -> {
                 phase = TablePhase.FLOP;
-                communityCards.add(deck.draw());
-                communityCards.add(deck.draw());
-                communityCards.add(deck.draw());
+                dealCommunity(3);
                 handSummary = "Flop dealt";
+                pushEvent("FLOP", -1, "Flop: " + boardText(3));
             }
             case FLOP -> {
                 phase = TablePhase.TURN;
-                communityCards.add(deck.draw());
+                dealCommunity(1);
                 handSummary = "Turn card dealt";
+                pushEvent("TURN", -1, "Turn: " + boardText(1));
             }
             case TURN -> {
                 phase = TablePhase.RIVER;
-                communityCards.add(deck.draw());
+                dealCommunity(1);
                 handSummary = "River card dealt";
+                pushEvent("RIVER", -1, "River: " + boardText(1));
             }
             case RIVER -> {
                 phase = TablePhase.SHOWDOWN;
@@ -412,6 +496,33 @@ public class TexasHoldemTable {
 
         currentTurnSeat = nextOccupiedSeat(dealerButton);
         botActionDelayTicks = 30;
+    }
+
+    /** Draws {@code count} cards onto the board, stamped with the tick they landed on. */
+    private void dealCommunity(int count) {
+        for (int i = 0; i < count; i++) {
+            communityCards.add(new Dealt(deck.draw(), animClock));
+        }
+    }
+
+    /** The last {@code count} board cards as text, for the dealer's line. */
+    private String boardText(int count) {
+        int from = Math.max(0, communityCards.size() - count);
+        StringBuilder sb = new StringBuilder();
+        for (int i = from; i < communityCards.size(); i++) {
+            if (sb.length() > 0) sb.append(' ');
+            sb.append(communityCards.get(i).card.toShortString());
+        }
+        return sb.toString();
+    }
+
+    /** The board as plain cards, for the evaluator. */
+    private List<Card> communityCardsPlain() {
+        List<Card> plain = new ArrayList<>(communityCards.size());
+        for (Dealt d : communityCards) {
+            plain.add(d.card);
+        }
+        return plain;
     }
 
     private void evaluateShowdown() {
@@ -428,7 +539,7 @@ public class TexasHoldemTable {
         PokerHandEvaluator.HandResult bestHand = null;
 
         for (Seat s : contenders) {
-            List<Card> all7 = new ArrayList<>(communityCards);
+            List<Card> all7 = communityCardsPlain();
             all7.add(s.holeCards[0]);
             all7.add(s.holeCards[1]);
             PokerHandEvaluator.HandResult res = PokerHandEvaluator.evaluate7(all7);
@@ -440,12 +551,19 @@ public class TexasHoldemTable {
         }
 
         if (winner != null && bestHand != null) {
-            winner.stack += pot;
-            handSummary = winner.playerName + " won " + pot + " Chips with " + bestHand.description + "!";
+            long won = pot;
+            winner.stack += won;
+            handSummary = winner.playerName + " won " + won + " Chips with " + bestHand.description + "!";
+            pushEvent("SHOWDOWN", winner.seatIndex,
+                    "Showdown: " + winner.playerName + " shows " + bestHand.description);
+            pushEvent("SETTLE", winner.seatIndex,
+                    winner.playerName + " wins " + won + " with " + describeForDealer(bestHand));
         }
     }
 
     public void tickServer() {
+        animClock++;
+
         if (phase == TablePhase.SHOWDOWN) {
             if (showdownTimerTicks > 0) {
                 showdownTimerTicks--;
@@ -479,7 +597,7 @@ public class TexasHoldemTable {
         Random rng = new Random();
 
         // Evaluate bot hand strength
-        List<Card> cards = new ArrayList<>(communityCards);
+        List<Card> cards = communityCardsPlain();
         cards.add(bot.holeCards[0]);
         cards.add(bot.holeCards[1]);
 
@@ -549,6 +667,25 @@ public class TexasHoldemTable {
                     executeAction(bot, "FOLD", 0);
                 }
             }
+        }
+    }
+
+    // ---------------------------------------------------------------- narration
+
+    /** A hand described the way a dealer would say it: "a flush", "two pair". */
+    private static String describeForDealer(PokerHandEvaluator.HandResult hand) {
+        String article = switch (hand.type) {
+            case FLUSH, STRAIGHT, FULL_HOUSE, STRAIGHT_FLUSH, ROYAL_FLUSH -> "a ";
+            default -> "";
+        };
+        return article + hand.type.name.toLowerCase(Locale.ROOT);
+    }
+
+    /** Records a beat on the dealer's ticker, keeping only the newest eight. */
+    private void pushEvent(String kind, int seat, String text) {
+        events.add(new TableEvent(animClock, kind, seat, text));
+        while (events.size() > 8) {
+            events.remove(0);
         }
     }
 }

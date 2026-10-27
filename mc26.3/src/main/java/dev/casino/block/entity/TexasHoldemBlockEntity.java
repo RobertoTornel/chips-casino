@@ -11,6 +11,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class TexasHoldemBlockEntity extends BaseCasinoBlockEntity {
@@ -39,6 +40,13 @@ public class TexasHoldemBlockEntity extends BaseCasinoBlockEntity {
         if (level.isClientSide()) {
             return;
         }
+        // Clean up disconnected players from viewers
+        for (ServerPlayer p : new ArrayList<>(be.viewers)) {
+            if (p.isRemoved()) {
+                be.cleanupPlayer(p);
+            }
+        }
+
         be.table.tickServer();
         be.syncIfChanged();
     }

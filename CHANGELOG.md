@@ -1,3 +1,10 @@
+## 0.1.9 — Security hardening
+
+- **Atomic wallet saves** (`Wallet.java`): `wallets.json` is now written to a temp file and atomically renamed into place, with a `.bak` fallback for crash recovery. A crash mid-save can no longer truncate the balance file and destroy every player's money.
+- **Price cap** (`PriceTable.java`): `setPrice()` is now capped at 1 billion Chips per item, preventing `unit * count` overflow in the Exchange that could let `Wallet.withdraw(negative)` grant items for free.
+- **Disconnect cleanup** (`BaseCasinoBlockEntity`): `removeViewer()` is now called on player disconnect via `cleanupDisconnectedPlayer()`, freeing seats and refunding uncommitted bets. A mid-hand disconnect can no longer jam a blackjack table or lock chips on the felt.
+- **Disconnect check in serverTick**: Every table block entity (`serverTick`) now removes disconnected players from its viewer list and refunds their bets, so disconnected players can't block table slots indefinitely.
+
 ## 0.1.8 — Slot machine security + wallet hardening
 
 - **Slot machine now drains payouts exactly once** (`SlotMachineBlockEntity`): winnings are queued in `pendingPayouts` and credited via `serverTick` instead of being paid directly in the spin handler, so duplicate SPIN packets can no longer double-pay. Matches the table games' exactly-once guarantee.

@@ -29,6 +29,7 @@ public class PriceTable {
     /** Re-exported so existing call sites keep working; values live in PricingRules. */
     public static final double SELL_MULTIPLIER = PricingRules.SELL_MULTIPLIER;
     public static final double BUY_MULTIPLIER = PricingRules.BUY_MULTIPLIER;
+    public static final long MAX_PRICE = 1_000_000_000L; // 1 billion Chips per item
 
     static {
         registerDefaults();
@@ -129,7 +130,7 @@ public class PriceTable {
         if (value <= 0) {
             PRICES.remove(itemId);
         } else {
-            PRICES.put(itemId, value);
+            PRICES.put(itemId, Math.min(value, MAX_PRICE));
         }
         LOGGER.info("Set price for {}: {}", itemId, value);
     }

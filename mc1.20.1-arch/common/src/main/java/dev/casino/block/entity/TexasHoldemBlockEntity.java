@@ -4,17 +4,28 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import dev.casino.Casino;
 import dev.casino.economy.CasinoAccountManager;
-import dev.casino.game.Card;
 import dev.casino.game.TexasHoldemTable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.List;
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class TexasHoldemBlockEntity extends BaseCasinoBlockEntity {
+    /** Heartbeat period in ticks: 20 tps / 4 = 5 state packets per second per viewer. */
+    private static final int HEARTBEAT_TICKS = 4;
+
     private final TexasHoldemTable table = new TexasHoldemTable();
+
+    private int heartbeat;
+    private TexasHoldemTable.TablePhase lastPhase = TexasHoldemTable.TablePhase.WAITING_FOR_PLAYERS;
+    private int lastTurnSeat = -1;
+    private int lastEventCount = -1;
+    private int lastEventTick = -1;
+    private String lastEventKind = "";
 
     public TexasHoldemBlockEntity(BlockPos pos, BlockState state) {
         super(Casino.TEXAS_HOLDEM_BE_TYPE.get(), pos, state);
@@ -26,15 +37,51 @@ public class TexasHoldemBlockEntity extends BaseCasinoBlockEntity {
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, TexasHoldemBlockEntity be) {
-        if (!level.isClientSide()) {
-            TexasHoldemTable.TablePhase before = be.table.getPhase();
-            int turnBefore = be.table.getCurrentTurnSeat();
-            be.table.tickServer();
-
-            // Broadcast sync when phase or active turn changed or pot changed
-            if (be.table.getPhase() != before || be.table.getCurrentTurnSeat() != turnBefore) {
-                be.broadcastSync();
+        if (level.isClientSide()) {
+            return;
+        }
+        // Clean up disconnected players from viewers
+        for (ServerPlayer p : new ArrayList<>(be.viewers)) {
+            if (p.isRemoved()) {
+                be.cleanupPlayer(p);
             }
+        }
+
+        be.table.tickServer();
+        be.syncIfChanged();
+    }
+
+    /**
+     * Broadcasts on real beats only: phase change, turn moving, a new dealer line, or at
+     * least once every {@value #HEARTBEAT_TICKS} ticks. Sending the whole table state every
+     * tick would be 20 packets per second per viewer.
+     */
+    private void syncIfChanged() {
+        TexasHoldemTable.TablePhase phase = table.getPhase();
+        int turnSeat = table.getCurrentTurnSeat();
+        List<TexasHoldemTable.TableEvent> recent = table.getRecentEvents();
+        int eventCount = recent.size();
+        int eventTick = eventCount == 0 ? -1 : recent.get(eventCount - 1).tick;
+        String eventKind = eventCount == 0 ? "" : recent.get(eventCount - 1).kind;
+
+        // Size alone would miss a full ring buffer, where one event in evicts one event out.
+        boolean newEvent = eventCount > 0
+                && (eventCount != lastEventCount || eventTick != lastEventTick || !eventKind.equals(lastEventKind));
+        lastEventCount = eventCount;
+        lastEventTick = eventTick;
+        lastEventKind = eventKind;
+
+        boolean changed = phase != lastPhase || turnSeat != lastTurnSeat || newEvent;
+        lastPhase = phase;
+        lastTurnSeat = turnSeat;
+
+        if (++heartbeat >= HEARTBEAT_TICKS) {
+            heartbeat = 0;
+            changed = true;
+        }
+
+        if (changed) {
+            broadcastSync();
         }
     }
 
@@ -47,12 +94,18 @@ public class TexasHoldemBlockEntity extends BaseCasinoBlockEntity {
         obj.addProperty("turnSeat", table.getCurrentTurnSeat());
         obj.addProperty("summary", table.getHandSummary());
         obj.addProperty("autoFillBots", table.isAutoFillBots());
+        obj.addProperty("animClock", table.getAnimClock());
+        obj.addProperty("handNumber", table.getHandNumber());
+        obj.addProperty("dealerSay", table.getDealerSay());
         obj.addProperty("isOwner", player.getUUID().equals(table.getTableOwner()));
 
-        // Community cards
+        // Community cards, each stamped with the tick it landed on
         JsonArray commCards = new JsonArray();
-        for (Card c : table.getCommunityCards()) {
-            commCards.add(c.toShortString());
+        for (TexasHoldemTable.Dealt d : table.getCommunityCards()) {
+            JsonObject cardObj = new JsonObject();
+            cardObj.addProperty("c", d.card.toShortString());
+            cardObj.addProperty("t", d.tick);
+            commCards.add(cardObj);
         }
         obj.add("communityCards", commCards);
 
@@ -83,10 +136,27 @@ public class TexasHoldemBlockEntity extends BaseCasinoBlockEntity {
                     }
                 }
                 seatObj.add("cards", cards);
+
+                JsonArray ticks = new JsonArray();
+                ticks.add(s.holeTicks[0]);
+                ticks.add(s.holeTicks[1]);
+                seatObj.add("holeTicks", ticks);
             }
             seatsArr.add(seatObj);
         }
         obj.add("seats", seatsArr);
+
+        // Dealer ticker: the newest beats, oldest first
+        JsonArray eventsArr = new JsonArray();
+        for (TexasHoldemTable.TableEvent e : table.getRecentEvents()) {
+            JsonObject eventObj = new JsonObject();
+            eventObj.addProperty("t", e.tick);
+            eventObj.addProperty("k", e.kind);
+            eventObj.addProperty("s", e.seat);
+            eventObj.addProperty("x", e.text);
+            eventsArr.add(eventObj);
+        }
+        obj.add("events", eventsArr);
 
         return GSON.toJson(obj);
     }

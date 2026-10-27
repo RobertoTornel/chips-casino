@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -105,6 +106,13 @@ public class SlotMachineBlockEntity extends BaseCasinoBlockEntity {
         if (level.isClientSide()) {
             return;
         }
+        // Clean up disconnected players from viewers
+        for (ServerPlayer p : new ArrayList<>(be.viewers)) {
+            if (p.isRemoved()) {
+                be.cleanupPlayer(p);
+            }
+        }
+
         // Drain the payout queue exactly once per tick and credit real accounts.
         Map<UUID, Long> owed = be.pendingPayouts;
         if (!owed.isEmpty()) {

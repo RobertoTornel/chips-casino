@@ -13,6 +13,7 @@ import java.io.Writer;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -152,30 +153,6 @@ public final class Wallet {
 
     // ---------------------------------------------------------------- persistence
 
-    private static void load() {
-        if (file == null || !Files.exists(file)) {
-            return;
-        }
-        try (Reader r = Files.newBufferedReader(file)) {
-            Type type = new TypeToken<Map<String, Long>>() {}.getType();
-            Map<String, Long> raw = GSON.fromJson(r, type);
-            if (raw == null) {
-                return;
-            }
-            BALANCES.clear();
-            for (Map.Entry<String, Long> e : raw.entrySet()) {
-                try {
-                    BALANCES.put(UUID.fromString(e.getKey()), Math.max(0L, e.getValue()));
-                } catch (IllegalArgumentException ignored) {
-                    // a malformed uuid in the file should not stop the rest loading
-                }
-            }
-            LOGGER.info("Loaded {} wallet(s)", BALANCES.size());
-        } catch (Exception e) {
-            LOGGER.error("Could not read wallets.json", e);
-        }
-    }
-
     private static void save() {
         if (file == null) {
             return;
@@ -186,11 +163,80 @@ public final class Wallet {
             for (Map.Entry<UUID, Long> e : BALANCES.entrySet()) {
                 raw.put(e.getKey().toString(), e.getValue());
             }
-            try (Writer w = Files.newBufferedWriter(file)) {
+            // Atomic write: write to a temp file then rename into place, so a crash
+            // mid-write can never leave a truncated wallets.json behind. Keep one
+            // backup so we can recover from any corruption that predates the rename.
+            Path tmp = file.resolveSibling(file.getFileName() + ".tmp");
+            Path bak = file.resolveSibling(file.getFileName() + ".bak");
+            try (Writer w = Files.newBufferedWriter(tmp)) {
                 GSON.toJson(raw, w);
             }
+            if (Files.exists(file)) {
+                Files.move(file, bak, StandardCopyOption.REPLACE_EXISTING);
+            }
+            Files.move(tmp, file, StandardCopyOption.REPLACE_EXISTING);
         } catch (Exception e) {
             LOGGER.error("Could not write wallets.json", e);
+        }
+    }
+
+    /** Restore balances from the backup file if the primary is missing or unreadable. */
+    private static void loadFromBackup() {
+        if (file == null) {
+            return;
+        }
+        Path bak = file.resolveSibling(file.getFileName() + ".bak");
+        if (!Files.exists(bak)) {
+            return;
+        }
+        try (Reader r = Files.newBufferedReader(bak)) {
+            Type type = new TypeToken<Map<String, Long>>() {}.getType();
+            Map<String, Long> raw = GSON.fromJson(r, type);
+            if (raw == null) {
+                return;
+            }
+            BALANCES.clear();
+            int n = 0;
+            for (Map.Entry<String, Long> e : raw.entrySet()) {
+                try {
+                    BALANCES.put(UUID.fromString(e.getKey()), Math.max(0L, e.getValue()));
+                    n++;
+                } catch (IllegalArgumentException ignored) {
+                    // a malformed uuid in the backup should not stop the rest loading
+                }
+            }
+            LOGGER.info("Recovered {} wallet(s) from backup", n);
+        } catch (Exception e) {
+            LOGGER.error("Could not read wallets backup", e);
+        }
+    }
+
+    private static void load() {
+        if (file == null || !Files.exists(file)) {
+            loadFromBackup();
+            return;
+        }
+        try (Reader r = Files.newBufferedReader(file)) {
+            Type type = new TypeToken<Map<String, Long>>() {}.getType();
+            Map<String, Long> raw = GSON.fromJson(r, type);
+            if (raw == null || raw.isEmpty()) {
+                loadFromBackup();
+                return;
+            }
+            BALANCES.clear();
+            int n = 0;
+            for (Map.Entry<String, Long> e : raw.entrySet()) {
+                try {
+                    BALANCES.put(UUID.fromString(e.getKey()), Math.max(0L, e.getValue()));
+                    n++;
+                } catch (IllegalArgumentException ignored) {
+                    // a malformed uuid in the file should not stop the rest loading
+                }
+            }
+            LOGGER.info("Loaded {} wallet(s)", n);
+        } catch (Exception e) {
+            LOGGER.error("Could not read wallets.json", e);
+            loadFromBackup();
         }
     }
 }

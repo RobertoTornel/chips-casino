@@ -40,6 +40,17 @@ public abstract class BaseCasinoBlockEntity extends BlockEntity {
         viewers.remove(player);
     }
 
+    /**
+     * Call this when a player disconnects so their seat is freed and any uncommitted
+     * bets are refunded. Without this, a mid-hand disconnect leaves a phantom bettor
+     * blocking a seat and their chips locked on the felt until server restart.
+     */
+    public void cleanupPlayer(ServerPlayer player) {
+        if (viewers.remove(player)) {
+            removeViewer(player);
+        }
+    }
+
     public void syncTo(ServerPlayer player) {
         long balance = CasinoAccountManager.getBalance(player.getUUID());
         String state = serializeState(player);

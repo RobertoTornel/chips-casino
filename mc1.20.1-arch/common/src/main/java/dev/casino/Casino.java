@@ -35,7 +35,7 @@ import java.security.SecureRandom;
 public final class Casino {
     public static final String MOD_ID = "casino";
     public static final String MOD_NAME = "Casino";
-    public static final String VERSION = "0.1.8";
+    public static final String VERSION = "0.1.9";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     /** Cryptographically strong RNG for server-owned game seeds. */

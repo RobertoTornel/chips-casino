@@ -124,12 +124,19 @@ public class PriceTable {
     /**
      * KubeJS compatibility hook:
      * e.g. PriceTable.setPrice("minecraft:diamond", 10000);
+     *
+     * <p>Prices are capped at {@link #MAX_PRICE} to prevent {@code unit * count}
+     * overflow in {@link Exchange}: an absurd price times a stack could roll a
+     * {@code long} negative and let {@link Wallet#withdraw} grant items for free
+     * (withdrawal of a negative amount returns true with no change).
      */
+    public static final long MAX_PRICE = 1_000_000_000L; // 1 billion Chips per item
+
     public static void setPrice(String itemId, long value) {
         if (value <= 0) {
             PRICES.remove(itemId);
         } else {
-            PRICES.put(itemId, value);
+            PRICES.put(itemId, Math.min(value, MAX_PRICE));
         }
         LOGGER.info("Set price for {}: {}", itemId, value);
     }
