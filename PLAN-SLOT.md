@@ -8,7 +8,7 @@
 math engine) to the Chips Casino mod, static verification only — no client
 testing. This is the A-stage plan; the B stage (skeleton) implements from it.
 
-**Mod id:** `casino`  |  **Package:** `dev.casino`  |  **Block registry name:**
+**Mod id:** `casino`  |  **Package:** `dev.macasino`  |  **Block registry name:**
 `slot_machine`  |  **Lang:** `block.casino.slot_machine = "Slot Machine"`.
 
 ---
@@ -85,7 +85,7 @@ constructor for testability.
 
 ## 2. Java files to ADD (per tree)
 
-Common to all five trees (same package `dev.casino.*`). Where a tree differs,
+Common to all five trees (same package `dev.macasino.*`). Where a tree differs,
 it is noted.
 
 ### 2.1 game/SlotMachineEngine.java (all 5 trees)
@@ -132,7 +132,7 @@ public class SlotMachineBlock extends BaseCasinoBlock {
 }
 ```
 Extends `BaseCasinoBlock` (existing, already in every tree). One-line-per-tree
-identical except the import path is the same (`dev.casino.block.*`).
+identical except the import path is the same (`dev.macasino.block.*`).
 
 ### 2.4 block/entity/SlotMachineBlockEntity.java (all 5 trees)
 Extends `BaseCasinoBlockEntity` (existing). Pattern: copy PachinkoBlockEntity

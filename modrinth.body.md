@@ -32,7 +32,7 @@ Item prices are editable from KubeJS without a restart:
 
 ```js
 ServerEvents.loaded(event => {
-    const prices = Java.loadClass('dev.casino.api.PriceKubeJsBridge')
+    const prices = Java.loadClass('dev.macasino.api.PriceKubeJsBridge')
     prices.set('minecraft:diamond', 8192)
     prices.remove('minecraft:dirt')      // make an item untradable
 })

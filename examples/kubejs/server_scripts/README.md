@@ -9,7 +9,7 @@ no trade loop can come out ahead.
 ```js
 // examples/kubejs/server_scripts/casino.js
 ServerEvents.loaded(event => {
-    const prices = Java.loadClass('dev.casino.api.PriceKubeJsBridge')
+    const prices = Java.loadClass('dev.macasino.api.PriceKubeJsBridge')
 
     prices.set('minecraft:diamond', 8192)      // set a base value
     prices.set('minecraft:netherite_ingot', 32768)

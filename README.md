@@ -157,7 +157,7 @@ Re-applied on every `/reload`, and it persists across restarts.
 **3. KubeJS** — see [`examples/kubejs/`](examples/kubejs/):
 
 ```js
-const Casino = Java.loadClass('dev.casino.api.PriceKubeJsBridge')
+const Casino = Java.loadClass('dev.macasino.api.PriceKubeJsBridge')
 Casino.set('minecraft:diamond', 12000)
 ```
 

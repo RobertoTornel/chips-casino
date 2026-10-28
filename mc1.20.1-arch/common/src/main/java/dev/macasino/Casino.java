@@ -1,0 +1,214 @@
+package dev.macasino;
+
+import dev.architectury.event.events.common.CommandRegistrationEvent;
+import dev.architectury.event.events.common.LifecycleEvent;
+import dev.architectury.registry.registries.DeferredRegister;
+import dev.architectury.registry.registries.RegistrySupplier;
+import dev.macasino.api.CasinoConfig;
+import dev.macasino.api.PriceDataLoader;
+import dev.macasino.block.*;
+import dev.macasino.block.entity.*;
+import dev.macasino.command.CasinoCommand;
+import dev.macasino.economy.CasinoAccountManager;
+import dev.macasino.network.CasinoNetwork;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import java.security.SecureRandom;
+
+/**
+ * Platform-neutral mod core (Architectury multiloader).
+ *
+ * <p>Registration, commands, lifecycle hooks and networking descriptors all live here;
+ * the {@code fabric}, {@code forge} and {@code neoforge} modules only supply the loader
+ * entrypoint that calls {@link #init()} (plus a client entrypoint that calls
+ * {@link dev.macasino.client.CasinoClientInit#initClient()}).</p>
+ */
+public final class Casino {
+    public static final String MOD_ID = "macasino";
+    public static final String MOD_NAME = "Casino";
+    public static final String VERSION = "0.1.10";
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
+    /** Cryptographically strong RNG for server-owned game seeds. */
+    public static final SecureRandom SLOT_RANDOM = new SecureRandom();
+
+    // ---------------------------------------------------------------------
+    // Registries (Architectury wraps Fabric/Forge/NeoForge registry plumbing)
+    // ---------------------------------------------------------------------
+    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(MOD_ID, Registries.BLOCK);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(MOD_ID, Registries.ITEM);
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
+            DeferredRegister.create(MOD_ID, Registries.BLOCK_ENTITY_TYPE);
+
+    // ---- Blocks ----------------------------------------------------------
+    public static final RegistrySupplier<RouletteTableBlock> ROULETTE_BLOCK =
+            BLOCKS.register("roulette_table", RouletteTableBlock::new);
+    public static final RegistrySupplier<BlackjackTableBlock> BLACKJACK_BLOCK =
+            BLOCKS.register("blackjack_table", BlackjackTableBlock::new);
+    public static final RegistrySupplier<BaccaratTableBlock> BACCARAT_BLOCK =
+            BLOCKS.register("baccarat_table", BaccaratTableBlock::new);
+    public static final RegistrySupplier<PokerMachineBlock> POKER_MACHINE_BLOCK =
+            BLOCKS.register("poker_machine", PokerMachineBlock::new);
+    public static final RegistrySupplier<PachinkoCabinetBlock> PACHINKO_BLOCK =
+            BLOCKS.register("pachinko_cabinet", PachinkoCabinetBlock::new);
+    public static final RegistrySupplier<TexasHoldemFloorBlock> TEXAS_HOLDEM_BLOCK =
+            BLOCKS.register("texas_holdem_floor", TexasHoldemFloorBlock::new);
+    public static final RegistrySupplier<ExchangeBlock> EXCHANGE_BLOCK =
+            BLOCKS.register("exchange", ExchangeBlock::new);
+    public static final RegistrySupplier<SlotMachineBlock> SLOT_MACHINE_BLOCK =
+            BLOCKS.register("slot_machine", SlotMachineBlock::new);
+    public static final RegistrySupplier<CrapsTableBlock> CRAPS_BLOCK =
+            BLOCKS.register("craps_table", CrapsTableBlock::new);
+    public static final RegistrySupplier<WheelOfFortuneBlock> WHEEL_OF_FORTUNE_BLOCK =
+            BLOCKS.register("wheel_of_fortune", WheelOfFortuneBlock::new);
+    public static final RegistrySupplier<KenoBlock> KENO_BLOCK =
+            BLOCKS.register("keno", KenoBlock::new);
+    public static final RegistrySupplier<dev.macasino.block.PinballMachineBlock> PINBALL_BLOCK =
+            BLOCKS.register("pinball_machine", dev.macasino.block.PinballMachineBlock::new);
+
+    // ---- Block entities --------------------------------------------------
+    public static final DeferredRegister<CreativeModeTab> CREATIVE_TABS =
+            DeferredRegister.create(MOD_ID, Registries.CREATIVE_MODE_TAB);
+
+    public static final RegistrySupplier<CreativeModeTab> CASINO_TAB = CREATIVE_TABS.register("casino_tab",
+            () -> new CreativeModeTab.Builder(CreativeModeTab.Row.TOP, 0)
+                    .title(Component.literal("Chips Casino"))
+                    .icon(() -> new ItemStack(SLOT_MACHINE_BLOCK.get().asItem()))
+                    .displayItems((features, emitter) -> {
+                        emitter.accept(ROULETTE_BLOCK.get().asItem());
+                        emitter.accept(BLACKJACK_BLOCK.get().asItem());
+                        emitter.accept(BACCARAT_BLOCK.get().asItem());
+                        emitter.accept(POKER_MACHINE_BLOCK.get().asItem());
+                        emitter.accept(PACHINKO_BLOCK.get().asItem());
+                        emitter.accept(PINBALL_BLOCK.get().asItem());
+                        emitter.accept(TEXAS_HOLDEM_BLOCK.get().asItem());
+                        emitter.accept(EXCHANGE_BLOCK.get().asItem());
+                        emitter.accept(SLOT_MACHINE_BLOCK.get().asItem());
+                        emitter.accept(CRAPS_BLOCK.get().asItem());
+                        emitter.accept(WHEEL_OF_FORTUNE_BLOCK.get().asItem());
+                        emitter.accept(KENO_BLOCK.get().asItem());
+                    })
+                    .build()
+    );
+
+    public static final RegistrySupplier<BlockEntityType<RouletteBlockEntity>> ROULETTE_BE_TYPE =
+            BLOCK_ENTITIES.register("roulette_table",
+                    () -> makeType(RouletteBlockEntity::new, ROULETTE_BLOCK.get()));
+    public static final RegistrySupplier<BlockEntityType<BlackjackBlockEntity>> BLACKJACK_BE_TYPE =
+            BLOCK_ENTITIES.register("blackjack_table",
+                    () -> makeType(BlackjackBlockEntity::new, BLACKJACK_BLOCK.get()));
+    public static final RegistrySupplier<BlockEntityType<BaccaratBlockEntity>> BACCARAT_BE_TYPE =
+            BLOCK_ENTITIES.register("baccarat_table",
+                    () -> makeType(BaccaratBlockEntity::new, BACCARAT_BLOCK.get()));
+    public static final RegistrySupplier<BlockEntityType<PokerMachineBlockEntity>> POKER_MACHINE_BE_TYPE =
+            BLOCK_ENTITIES.register("poker_machine",
+                    () -> makeType(PokerMachineBlockEntity::new, POKER_MACHINE_BLOCK.get()));
+    public static final RegistrySupplier<BlockEntityType<PachinkoBlockEntity>> PACHINKO_BE_TYPE =
+            BLOCK_ENTITIES.register("pachinko_cabinet",
+                    () -> makeType(PachinkoBlockEntity::new, PACHINKO_BLOCK.get()));
+    public static final RegistrySupplier<BlockEntityType<PinballBlockEntity>> PINBALL_BE_TYPE =
+            BLOCK_ENTITIES.register("pinball_machine",
+                    () -> makeType(PinballBlockEntity::new, PINBALL_BLOCK.get()));
+    public static final RegistrySupplier<BlockEntityType<TexasHoldemBlockEntity>> TEXAS_HOLDEM_BE_TYPE =
+            BLOCK_ENTITIES.register("texas_holdem_floor",
+                    () -> makeType(TexasHoldemBlockEntity::new, TEXAS_HOLDEM_BLOCK.get()));
+    public static final RegistrySupplier<BlockEntityType<ExchangeBlockEntity>> EXCHANGE_BE_TYPE =
+            BLOCK_ENTITIES.register("exchange",
+                    () -> makeType(ExchangeBlockEntity::new, EXCHANGE_BLOCK.get()));
+    public static final RegistrySupplier<BlockEntityType<SlotMachineBlockEntity>> SLOT_MACHINE_BE_TYPE =
+            BLOCK_ENTITIES.register("slot_machine",
+                    () -> makeType(SlotMachineBlockEntity::new, SLOT_MACHINE_BLOCK.get()));
+    public static final RegistrySupplier<BlockEntityType<CrapsBlockEntity>> CRAPS_BE_TYPE =
+            BLOCK_ENTITIES.register("craps_table",
+                    () -> makeType(CrapsBlockEntity::new, CRAPS_BLOCK.get()));
+    public static final RegistrySupplier<BlockEntityType<WheelOfFortuneBlockEntity>> WHEEL_OF_FORTUNE_BE_TYPE =
+            BLOCK_ENTITIES.register("wheel_of_fortune",
+                    () -> makeType(WheelOfFortuneBlockEntity::new, WHEEL_OF_FORTUNE_BLOCK.get()));
+    public static final RegistrySupplier<BlockEntityType<KenoBlockEntity>> KENO_BE_TYPE =
+            BLOCK_ENTITIES.register("keno",
+                    () -> makeType(KenoBlockEntity::new, KENO_BLOCK.get()));
+
+    // ---- Block items -----------------------------------------------------
+    public static final RegistrySupplier<Item> ROULETTE_ITEM =
+            ITEMS.register("roulette_table", () -> new BlockItem(ROULETTE_BLOCK.get(), new Item.Properties()));
+    public static final RegistrySupplier<Item> BLACKJACK_ITEM =
+            ITEMS.register("blackjack_table", () -> new BlockItem(BLACKJACK_BLOCK.get(), new Item.Properties()));
+    public static final RegistrySupplier<Item> BACCARAT_ITEM =
+            ITEMS.register("baccarat_table", () -> new BlockItem(BACCARAT_BLOCK.get(), new Item.Properties()));
+    public static final RegistrySupplier<Item> POKER_MACHINE_ITEM =
+            ITEMS.register("poker_machine", () -> new BlockItem(POKER_MACHINE_BLOCK.get(), new Item.Properties()));
+    public static final RegistrySupplier<Item> PACHINKO_ITEM =
+            ITEMS.register("pachinko_cabinet", () -> new BlockItem(PACHINKO_BLOCK.get(), new Item.Properties()));
+    public static final RegistrySupplier<Item> PINBALL_ITEM =
+            ITEMS.register("pinball_machine", () -> new BlockItem(PINBALL_BLOCK.get(), new Item.Properties()));
+    public static final RegistrySupplier<Item> TEXAS_HOLDEM_ITEM =
+            ITEMS.register("texas_holdem_floor", () -> new BlockItem(TEXAS_HOLDEM_BLOCK.get(), new Item.Properties()));
+    public static final RegistrySupplier<Item> EXCHANGE_ITEM =
+            ITEMS.register("exchange", () -> new BlockItem(EXCHANGE_BLOCK.get(), new Item.Properties()));
+    public static final RegistrySupplier<Item> SLOT_MACHINE_ITEM =
+            ITEMS.register("slot_machine", () -> new BlockItem(SLOT_MACHINE_BLOCK.get(), new Item.Properties()));
+
+    private static boolean initialized;
+
+    private Casino() {
+    }
+
+    /** Called once from every loader's mod entrypoint. */
+    public static void init() {
+        if (initialized) {
+            return;
+        }
+        initialized = true;
+        LOGGER.info("Initializing {} v{} (Architectury multiloader)", MOD_NAME, VERSION);
+
+        // Order matters: blocks -> block entities (reference blocks) -> block items.
+        BLOCKS.register();
+        BLOCK_ENTITIES.register();
+        ITEMS.register();
+        CREATIVE_TABS.register();
+
+        // Creative Mode Tab (stub — registration filled in by C stage)
+        registerCreativeTab();
+
+        // Common (C2S) packet handler.
+        CasinoNetwork.initCommon();
+
+        // Commands: /casino balance|give|setprice|price|reload
+        CommandRegistrationEvent.EVENT.register(
+                (dispatcher, registryAccess, environment) -> CasinoCommand.register(dispatcher));
+
+        // World-scoped Chips account persistence.
+        LifecycleEvent.SERVER_STARTED.register(server -> {
+            CasinoAccountManager.init(server);
+            CasinoConfig.instance();
+            PriceDataLoader.reload(server.getResourceManager());
+        });
+        LifecycleEvent.SERVER_STOPPING.register(server -> CasinoAccountManager.saveNow());
+
+        LOGGER.info("{} core registered: 6 blocks, 6 block entities, 6 items", MOD_NAME);
+    }
+
+    /** Id helper that keeps every registry/asset id in the {@code casino} namespace. */
+    public static ResourceLocation id(String path) {
+        return new ResourceLocation(MOD_ID, path);
+    }
+
+    private static <T extends BlockEntity> BlockEntityType<T> makeType(
+            BlockEntityType.BlockEntitySupplier<T> supplier, Block block) {
+        return BlockEntityType.Builder.of(supplier, block).build(null);
+    }
+
+    private static void registerCreativeTab() {
+        // Eagerly registered above as the CASINO_TAB field initializer; nothing to do here.
+    }
+}

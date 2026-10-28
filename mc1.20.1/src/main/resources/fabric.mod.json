@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "casino",
+  "id": "macasino",
   "version": "${version}",
   "name": "Casino",
   "description": "Casino and gambling machines for your server: real money, six games, a themable UI, and server-side bots so the tables are never empty.",
@@ -11,10 +11,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "dev.casino.Casino"
+      "dev.macasino.Casino"
     ],
     "client": [
-      "dev.casino.CasinoClient"
+      "dev.macasino.CasinoClient"
     ]
   },
   "depends": {

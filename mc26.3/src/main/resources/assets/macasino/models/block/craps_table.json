@@ -1,0 +1,23 @@
+{
+  "textures": {
+    "particle": "macasino:block/craps_table",
+    "face": "macasino:block/craps_table",
+    "wood": "macasino:block/casino_body_side",
+    "trim": "macasino:block/casino_body_top"
+  },
+  "elements": [
+    {
+      "name": "body",
+      "from": [0, 0, 0],
+      "to": [16, 16, 16],
+      "faces": {
+        "up": { "uv": [0, 0, 16, 16], "texture": "macasino:block/casino_body_top" },
+        "down": { "uv": [0, 0, 16, 16], "texture": "macasino:block/casino_body_side" },
+        "north": { "uv": [0, 0, 16, 16], "texture": "macasino:block/craps_table" },
+        "south": { "uv": [0, 0, 16, 16], "texture": "macasino:block/casino_body_side" },
+        "east": { "uv": [0, 0, 16, 16], "texture": "macasino:block/casino_body_side" },
+        "west": { "uv": [0, 0, 16, 16], "texture": "macasino:block/casino_body_side" }
+      }
+    }
+  ]
+}

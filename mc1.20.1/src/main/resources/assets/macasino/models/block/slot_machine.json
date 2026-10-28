@@ -1,0 +1,403 @@
+{
+  "textures": {
+    "particle": "macasino:block/slot_machine",
+    "face": "macasino:block/slot_machine",
+    "wood": "macasino:block/casino_body_side",
+    "trim": "macasino:block/casino_body_top"
+  },
+  "elements": [
+    {
+      "name": "body",
+      "from": [
+        1,
+        0,
+        1
+      ],
+      "to": [
+        15,
+        13,
+        15
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            14,
+            14
+          ],
+          "texture": "macasino:block/casino_body_top"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            14,
+            14
+          ],
+          "texture": "macasino:block/casino_body_side"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            14,
+            13
+          ],
+          "texture": "macasino:block/slot_machine"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            14,
+            13
+          ],
+          "texture": "macasino:block/casino_body_side"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            14,
+            13
+          ],
+          "texture": "macasino:block/casino_body_side"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            14,
+            13
+          ],
+          "texture": "macasino:block/casino_body_side"
+        }
+      }
+    },
+    {
+      "name": "marquee",
+      "from": [
+        0.0,
+        13.0,
+        0.0
+      ],
+      "to": [
+        16.0,
+        18.0,
+        16.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "macasino:block/casino_body_top"
+        }
+      }
+    },
+    {
+      "name": "marquee_light",
+      "from": [
+        2,
+        14,
+        1
+      ],
+      "to": [
+        14,
+        17,
+        15
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            12,
+            14
+          ],
+          "texture": "macasino:block/casino_body_top"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            12,
+            14
+          ],
+          "texture": "macasino:block/casino_body_top"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            12,
+            3
+          ],
+          "texture": "macasino:block/casino_body_top"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            12,
+            3
+          ],
+          "texture": "macasino:block/casino_body_top"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            14,
+            3
+          ],
+          "texture": "macasino:block/casino_body_top"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            14,
+            3
+          ],
+          "texture": "macasino:block/casino_body_top"
+        }
+      }
+    },
+    {
+      "name": "reel_bezel",
+      "from": [
+        2,
+        3,
+        -0.5
+      ],
+      "to": [
+        14,
+        11,
+        0.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            12,
+            8
+          ],
+          "texture": "macasino:block/casino_body_side"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            12,
+            8
+          ],
+          "texture": "macasino:block/casino_body_side"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            12,
+            1
+          ],
+          "texture": "macasino:block/casino_body_side"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            12,
+            1
+          ],
+          "texture": "macasino:block/casino_body_side"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            1,
+            8
+          ],
+          "texture": "macasino:block/casino_body_side"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            1,
+            8
+          ],
+          "texture": "macasino:block/casino_body_side"
+        }
+      }
+    },
+    {
+      "name": "controls",
+      "from": [
+        2,
+        1,
+        -1
+      ],
+      "to": [
+        14,
+        3,
+        1
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            12,
+            2
+          ],
+          "texture": "macasino:block/casino_body_top"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            12,
+            2
+          ],
+          "texture": "macasino:block/casino_body_side"
+        },
+        "north": {
+          "uv": [
+            0,
+            0,
+            12,
+            2
+          ],
+          "texture": "macasino:block/slot_machine"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "macasino:block/casino_body_side"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "macasino:block/casino_body_side"
+        }
+      }
+    },
+    {
+      "name": "spin_button",
+      "from": [
+        7,
+        1.5,
+        1
+      ],
+      "to": [
+        9,
+        2.5,
+        2
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            2,
+            1
+          ],
+          "texture": "macasino:block/casino_body_top"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            2,
+            1
+          ],
+          "texture": "macasino:block/casino_body_side"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            2,
+            1
+          ],
+          "texture": "macasino:block/casino_body_top"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            2,
+            1
+          ],
+          "texture": "macasino:block/casino_body_side"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "texture": "macasino:block/casino_body_side"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "texture": "macasino:block/casino_body_side"
+        }
+      }
+    },
+    {
+      "name": "highlight",
+      "from": [
+        1.0,
+        17.0,
+        1.0
+      ],
+      "to": [
+        15.0,
+        17.5,
+        2.75
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            14,
+            1
+          ],
+          "texture": "macasino:block/casino_body_top"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            14,
+            1
+          ],
+          "texture": "macasino:block/casino_body_top"
+        }
+      }
+    }
+  ]
+}

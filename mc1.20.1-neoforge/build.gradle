@@ -7,7 +7,7 @@ plugins {
 }
 
 version = "0.1.11"
-group = "dev.casino"
+group = "dev.macasino"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
@@ -23,7 +23,7 @@ legacyForge {
         data { data() }
     }
     mods {
-        "casino" { sourceSet sourceSets.main }
+        "macasino" { sourceSet sourceSets.main }
     }
 }
 
