@@ -5,7 +5,10 @@ build/
 !tools/
 !dist/
 !examples/
-!build-art-preview/
+
+# Promotional assets (not part of the git repo)
+build-art-preview/
+promo/
 
 # IDE
 .idea/
@@ -23,3 +26,6 @@ Thumbs.db
 logs/
 run/
 .env
+
+# Gradle cache / build artifacts
+.gradle/
