@@ -1,5 +1,6 @@
 package dev.casino;
 
+import dev.casino.api.CasinoConfig;
 import dev.casino.api.PriceDataLoader;
 import dev.casino.api.PriceTable;
 import dev.casino.block.*;
@@ -183,6 +184,7 @@ public class Casino implements ModInitializer {
         // 5. Lifecycle events
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             CasinoAccountManager.init(server);
+            CasinoConfig.instance();
             ProgressiveJackpot.init(server);
             PlayerStats.init(server);
             LoanManager.init(server);

@@ -48,8 +48,8 @@ public class ExchangeBlockEntity extends BaseCasinoBlockEntity {
     public String serializeState(ServerPlayer player) {
         JsonObject obj = new JsonObject();
         obj.addProperty("balance", Wallet.getBalance(player.getUUID()));
-        obj.addProperty("sellMultiplier", PriceTable.SELL_MULTIPLIER);
-        obj.addProperty("buyMultiplier", PriceTable.BUY_MULTIPLIER);
+        obj.addProperty("sellMultiplier", PriceTable.sellMultiplier());
+        obj.addProperty("buyMultiplier", PriceTable.buyMultiplier());
         obj.addProperty("currency", Wallet.CURRENCY);
         obj.addProperty("symbol", Wallet.SYMBOL);
 

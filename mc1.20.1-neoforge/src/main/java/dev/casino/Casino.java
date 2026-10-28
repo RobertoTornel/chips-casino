@@ -1,5 +1,6 @@
 package dev.casino;
 
+import dev.casino.api.CasinoConfig;
 import dev.casino.block.*;
 import dev.casino.block.entity.*;
 import dev.casino.command.CasinoCommand;
@@ -157,6 +158,7 @@ public class Casino {
 
     private void onServerStarted(ServerStartedEvent event) {
         CasinoAccountManager.init(event.getServer());
+        CasinoConfig.instance();
     }
 
     private void onServerStopping(ServerStoppingEvent event) {

@@ -1,5 +1,6 @@
 package dev.casino.game;
 
+import dev.casino.api.CasinoConfig;
 import java.util.Random;
 
 /**
@@ -27,6 +28,8 @@ import java.util.Random;
  * </table>
  *
  * <p>Calibrated house edge: ~11% (RTP ~89%), in the same band as Pachinko (10.9%).
+ * The {@link CasinoConfig#slotPayoutMultiplier} scales all payouts, allowing
+ * operators to tune the effective RTP without changing the symbol weights.
  */
 public final class SlotMachineEngine {
 
@@ -119,11 +122,11 @@ public final class SlotMachineEngine {
     /** Payout for one centre row. */
     private static long calcPayout(int a, int b, int c, long bet) {
         if (a == b && b == c) {
-            return PAYOUT_3[a] * bet;
+            return (long) (PAYOUT_3[a] * bet * CasinoConfig.instance().slotPayoutMultiplier);
         }
         // two left-aligned cherries (three-of-a-kind already handled above)
         if (a == Symbol.CHERRY.ordinal() && b == Symbol.CHERRY.ordinal()) {
-            return PAYOUT_2_CHERRY * bet;
+            return (long) (PAYOUT_2_CHERRY * bet * CasinoConfig.instance().slotPayoutMultiplier);
         }
         return 0;
     }

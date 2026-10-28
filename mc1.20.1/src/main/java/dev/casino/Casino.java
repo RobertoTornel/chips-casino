@@ -1,5 +1,6 @@
 package dev.casino;
 
+import dev.casino.api.CasinoConfig;
 import dev.casino.block.*;
 import dev.casino.block.entity.*;
 import dev.casino.command.CasinoCommand;
@@ -192,7 +193,10 @@ public class Casino implements ModInitializer {
         });
 
         // 4. Lifecycle events
-        ServerLifecycleEvents.SERVER_STARTED.register(CasinoAccountManager::init);
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            CasinoAccountManager.init(server);
+            CasinoConfig.instance();
+        });
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> CasinoAccountManager.saveNow());
         ServerTickEvents.END_SERVER_TICK.register(server -> CasinoAccountManager.tick());
 

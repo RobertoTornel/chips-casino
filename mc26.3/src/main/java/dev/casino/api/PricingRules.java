@@ -5,24 +5,37 @@ package dev.casino.api;
  *
  * <p>This is the balancing rule the whole economy rests on:
  * <ul>
- *   <li>selling an item to the house pays {@literal 0.8x} of its base price</li>
- *   <li>buying an item from the house costs {@literal 1.2x} of its base price</li>
+ *   <li>selling an item to the house pays {@literal sellMultiplier}x of its base price</li>
+ *   <li>buying an item from the house costs {@literal buyMultiplier}x of its base price</li>
  * </ul>
  *
  * <p>Both round <em>against</em> the player (sell rounds down, buy rounds up) and both
  * clamp to at least 1, so a cheap item can never become free and no trade can produce
  * money from nothing. Keeping this in a Minecraft-free class means the invariant is
  * covered by a plain JVM test rather than only being verified by reading the code.
+ *
+ * <p>Multipliers are read from {@link CasinoConfig} on each call, so server operators can
+ * tune the house edge by editing {@code config/casino/casino.json} without restarting.
  */
 public final class PricingRules {
 
-    /** Fraction of base price paid when the player sells to the house. */
-    public static final double SELL_MULTIPLIER = 0.8;
-
-    /** Fraction of base price charged when the player buys from the house. */
-    public static final double BUY_MULTIPLIER = 1.2;
-
     private PricingRules() {
+    }
+
+    /**
+     * Fraction of base price paid when the player sells to the house.
+     * Read from {@link CasinoConfig#sellMultiplier} on each call.
+     */
+    public static double sellMultiplier() {
+        return CasinoConfig.instance().sellMultiplier;
+    }
+
+    /**
+     * Fraction of base price charged when the player buys from the house.
+     * Read from {@link CasinoConfig#buyMultiplier} on each call.
+     */
+    public static double buyMultiplier() {
+        return CasinoConfig.instance().buyMultiplier;
     }
 
     /**
@@ -35,7 +48,7 @@ public final class PricingRules {
             return 0L;
         }
         // Round down: the fractional remainder stays with the house.
-        return Math.max(1L, (long) Math.floor(basePrice * SELL_MULTIPLIER));
+        return Math.max(1L, (long) Math.floor(basePrice * sellMultiplier()));
     }
 
     /**
@@ -48,7 +61,7 @@ public final class PricingRules {
             return 0L;
         }
         // Round up: the fractional remainder is charged to the player.
-        return Math.max(1L, (long) Math.ceil(basePrice * BUY_MULTIPLIER));
+        return Math.max(1L, (long) Math.ceil(basePrice * buyMultiplier()));
     }
 
     /** {@link #sell(long)} scaled by a stack count. */

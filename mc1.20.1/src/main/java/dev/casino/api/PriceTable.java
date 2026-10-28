@@ -27,8 +27,14 @@ public class PriceTable {
     private static final Map<String, Long> PRICES = new ConcurrentHashMap<>();
 
     /** Re-exported so existing call sites keep working; values live in PricingRules. */
-    public static final double SELL_MULTIPLIER = PricingRules.SELL_MULTIPLIER;
-    public static final double BUY_MULTIPLIER = PricingRules.BUY_MULTIPLIER;
+    public static double sellMultiplier() {
+        return PricingRules.sellMultiplier();
+    }
+
+    /** Re-exported so existing call sites keep working; values live in PricingRules. */
+    public static double buyMultiplier() {
+        return PricingRules.buyMultiplier();
+    }
     public static final long MAX_PRICE = 1_000_000_000L; // 1 billion Chips per item
 
     static {

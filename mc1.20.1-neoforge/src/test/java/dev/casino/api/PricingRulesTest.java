@@ -79,8 +79,8 @@ class PricingRulesTest {
     @Test
     @DisplayName("multipliers are the documented 0.8 and 1.2")
     void multipliersMatchTheDesign() {
-        assertEquals(0.8, PricingRules.SELL_MULTIPLIER, 1e-9);
-        assertEquals(1.2, PricingRules.BUY_MULTIPLIER, 1e-9);
+        assertEquals(0.8, PricingRules.sellMultiplier(), 1e-9);
+        assertEquals(1.2, PricingRules.buyMultiplier(), 1e-9);
     }
 
     @Test

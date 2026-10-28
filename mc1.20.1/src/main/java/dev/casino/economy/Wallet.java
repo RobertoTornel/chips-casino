@@ -102,6 +102,13 @@ public final class Wallet {
         dirty = true;
     }
 
+    /** Clear all in-memory balances and reset the dirty flag. Test-only. */
+    static void clearForTesting() {
+        BALANCES.clear();
+        dirty = false;
+        ticksSinceSave = 0;
+    }
+
     // ---------------------------------------------------------------- queries
 
     /** Balance of a player, or 0 if they have no account yet. */
@@ -123,15 +130,15 @@ public final class Wallet {
 
     /** Creates an account with {@code starting} (0 if none). Returns false if one existed. */
     public static boolean createAccount(UUID id, long starting) {
-        if (BALANCES.containsKey(id)) {
-            return false;
-        }
         if (starting < 0) {
             LOGGER.warn("createAccount called with negative starting amount {} for {}, clamping to 0", starting, id);
         }
-        BALANCES.put(id, Math.max(0L, starting));
-        markDirty();
-        return true;
+        Long existing = BALANCES.putIfAbsent(id, Math.max(0L, starting));
+        if (existing == null) {
+            markDirty();
+            return true;
+        }
+        return false;
     }
 
     public static boolean createAccount(UUID id) {
@@ -156,13 +163,15 @@ public final class Wallet {
         if (amount <= 0) {
             return true;
         }
-        long current = getBalance(id);
-        if (current < amount) {
-            return false;
+        synchronized (BALANCES) {
+            long current = getBalance(id);
+            if (current < amount) {
+                return false;
+            }
+            BALANCES.put(id, current - amount);
+            markDirty();
+            return true;
         }
-        BALANCES.put(id, current - amount);
-        markDirty();
-        return true;
     }
 
     /** Sets a balance outright. Admin/debug use. */

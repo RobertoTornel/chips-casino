@@ -4,6 +4,7 @@ import dev.architectury.event.events.common.CommandRegistrationEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
+import dev.casino.api.CasinoConfig;
 import dev.casino.api.PriceDataLoader;
 import dev.casino.block.*;
 import dev.casino.block.entity.*;
@@ -189,6 +190,7 @@ public final class Casino {
         // World-scoped Chips account persistence.
         LifecycleEvent.SERVER_STARTED.register(server -> {
             CasinoAccountManager.init(server);
+            CasinoConfig.instance();
             PriceDataLoader.reload(server.getResourceManager());
         });
         LifecycleEvent.SERVER_STOPPING.register(server -> CasinoAccountManager.saveNow());

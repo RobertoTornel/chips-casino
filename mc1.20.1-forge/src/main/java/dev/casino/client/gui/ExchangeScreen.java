@@ -20,8 +20,8 @@ public class ExchangeScreen extends BaseCasinoScreen {
     }
 
     private final List<Row> rows = new ArrayList<>();
-    private double sellMultiplier = PriceTable.SELL_MULTIPLIER;
-    private double buyMultiplier = PriceTable.BUY_MULTIPLIER;
+    private double sellMultiplier = PriceTable.sellMultiplier();
+    private double buyMultiplier = PriceTable.buyMultiplier();
     private String currency = "Chips";
     private String symbol = "\u25C8";
 
