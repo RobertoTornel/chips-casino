@@ -57,7 +57,7 @@ public class RouletteEngine {
         }
     }
 
-    private final Random random = new Random();
+    private final java.security.SecureRandom random = new java.security.SecureRandom();
 
     public SpinResult spin(List<Bet> bets) {
         int winningNumber = random.nextInt(37); // 0 to 36

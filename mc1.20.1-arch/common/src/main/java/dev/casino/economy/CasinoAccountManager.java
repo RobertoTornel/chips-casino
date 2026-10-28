@@ -24,6 +24,17 @@ public final class CasinoAccountManager {
         Wallet.init(server);
     }
 
+    /** Call once per server tick. Flushes dirty wallet balances to disk on a schedule
+     *  instead of writing on every mutation. */
+    public static void tick() {
+        Wallet.tick();
+    }
+
+    /** Force an immediate wallet flush. Call on server stop. */
+    public static void saveNow() {
+        Wallet.saveNow();
+    }
+
     public static long getBalance(UUID uuid) {
         return Wallet.getBalance(uuid);
     }

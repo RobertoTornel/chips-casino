@@ -41,6 +41,10 @@ public class CasinoNetwork {
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), msg);
     }
 
+    public static void sendSync(ServerPlayer player, BlockPos pos, String gameType, String stateJson, long balance) {
+        sendToPlayer(player, new SyncPacket(pos, gameType, stateJson, balance));
+    }
+
     public static class ActionPacket {
         public final BlockPos pos;
         public final String action;

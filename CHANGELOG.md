@@ -1,3 +1,11 @@
+## 0.1.11 — Performance + asset hardening
+
+- **Wallet batch saves**: `Wallet.save()` no longer runs on every balance mutation. Mutations mark the store dirty and `tick()` flushes to disk every 30 seconds (600 ticks), plus an immediate flush on server stop. A busy table no longer does 20+ disk writes per second.
+- **Network state caching**: `BaseCasinoBlockEntity` caches serialized JSON per player UUID. `broadcastSync()` invalidates the cache so viewers always get fresh state, but heartbeat beats hit the cache instead of regenerating GSON 5 times/sec per viewer.
+- **Ghost blocks removed**: `craps_table`, `wheel_of_fortune`, `keno` were registered with no textures, models, blockstates or lang entries — they showed as purple checkered blocks with `item.casino.*` names. Removed along with their dead game engines (CrapsEngine, CrapsTable, WheelOfFortuneEngine, KenoEngine). The mod now ships exactly 9 blocks, all with textures, models, blockstates and item names.
+- **Duplicate creative tab removed**: mc1.20.1 Fabric registered `CASINO_TAB` twice; the second registration overwrote the first. Now registered once.
+- **Forge/NeoForge CasinoNetwork**: added missing `sendSync()` convenience method so server-side block entities can send sync packets through the same path as Fabric.
+
 ## 0.1.10 — Sprite + wallet security fixes
 
 - **Sprite rendering fixed**: All GUI sprites (roulette wheel, slot reels, chips, buttons, card backs/fronts, casino frame, header bar, balance bar, pachinko board) now use correct pixel UV coordinates instead of normalized 0-1 values. Sprites no longer appear stretched or corrupted.

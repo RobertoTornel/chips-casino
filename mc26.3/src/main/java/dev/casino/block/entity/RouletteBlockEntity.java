@@ -153,6 +153,7 @@ public class RouletteBlockEntity extends BaseCasinoBlockEntity {
                 try {
                     table.join(uuid, player.getName().getString());
                     broadcastSync();
+                    invalidateState(uuid);
                 } catch (Exception e) {
                     Casino.LOGGER.warn("roulette action {} failed for {}", action, player.getName().getString(), e);
                 }

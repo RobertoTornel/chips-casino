@@ -52,7 +52,7 @@ public final class PriceDataLoader implements IdentifiableResourceReloadListener
         // listResources(path, selector) where path = "prices"
         Map<Identifier, Resource> found = manager.listResources(
                 "prices",
-                id -> id.getNamespace().equals("casino") && id.getPath().endsWith(".json")
+                id -> id.getPath().endsWith(".json")
         );
 
         int applied = 0;

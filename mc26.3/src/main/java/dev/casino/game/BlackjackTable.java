@@ -488,9 +488,17 @@ public class BlackjackTable {
 
     private void startRound() {
         fillBots();
-        // Reshuffle between rounds, never mid-hand: a shoe with fewer than 52 cards left
-        // would otherwise run dry during the dealer's draw and silently re-deal the table.
-        if (!shoePinned && deck.remaining() < 52) {
+        // Reshuffle between rounds, never mid-hand. Calculate worst-case cards needed:
+        // 6 seats × 2 initial cards + dealer 2 + up to 6 hits per seat + dealer draws.
+        // Cap at a safe threshold so the shoe never runs dry mid-hand.
+        int neededCards = 0;
+        for (Seat s : seats) {
+            if (s.isOccupied() && s.hasBet()) neededCards += 2; // initial deal
+        }
+        neededCards += 2; // dealer up + hole
+        neededCards += 6 * 4; // max hits per seat (4 extra cards each)
+        neededCards += 6; // dealer draws
+        if (!shoePinned && deck.remaining() < neededCards) {
             deck.reset();
         }
         dealerHand.cards.clear();

@@ -323,7 +323,14 @@ public class TexasHoldemScreen extends BaseCasinoScreen {
     }
 
     private static String fitTable(String text, int maxW) {
-        return text;
+        if (text == null || text.isEmpty()) return "";
+        int approxCharW = 6;
+        if (text.length() * approxCharW <= maxW) return text;
+        String cut = text;
+        while (cut.length() > 1 && cut.length() * approxCharW > maxW) {
+            cut = cut.substring(0, cut.length() - 1);
+        }
+        return cut + "…";
     }
 
     private int myTurnIndex() {

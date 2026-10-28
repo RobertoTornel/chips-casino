@@ -173,7 +173,7 @@ public final class Casino {
             CasinoAccountManager.init(server);
             PriceDataLoader.reload(server.getResourceManager());
         });
-        LifecycleEvent.SERVER_STOPPING.register(server -> CasinoAccountManager.save());
+        LifecycleEvent.SERVER_STOPPING.register(server -> CasinoAccountManager.saveNow());
 
         LOGGER.info("{} core registered: 6 blocks, 6 block entities, 6 items", MOD_NAME);
     }

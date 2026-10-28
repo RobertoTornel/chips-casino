@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -94,6 +95,7 @@ public class ExchangeBlockEntity extends BaseCasinoBlockEntity {
                     Exchange.sellFromSlot(player, slot, count);
                 } catch (Exception ignored) {
                     // a malformed payload must not take the block entity down
+                    player.sendSystemMessage(Component.literal("§6[Casino] §cInvalid request — the exchange could not process that action"));
                 }
                 broadcastSync();
             }
@@ -135,6 +137,7 @@ public class ExchangeBlockEntity extends BaseCasinoBlockEntity {
                         Exchange.buyFor(player, item, count);
                     }
                 } catch (Exception ignored) {
+                    player.sendSystemMessage(Component.literal("§6[Casino] §cInvalid request — the exchange could not process that action"));
                 }
                 broadcastSync();
             }

@@ -19,6 +19,8 @@ import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -143,7 +145,14 @@ public class Casino {
     }
 
     private void onServerStopping(ServerStoppingEvent event) {
-        CasinoAccountManager.save();
+        CasinoAccountManager.saveNow();
+    }
+
+    @SubscribeEvent
+    public void onServerTick(TickEvent.ServerTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) {
+            CasinoAccountManager.tick();
+        }
     }
 
     // Creative Mode Tab is registered above via CREATIVE_TABS.register(modBus) —

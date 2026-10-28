@@ -4,6 +4,9 @@ import dev.casino.api.PriceDataLoader;
 import dev.casino.api.PriceTable;
 import dev.casino.block.*;
 import dev.casino.block.entity.*;
+import dev.casino.jackpot.ProgressiveJackpot;
+import dev.casino.stats.PlayerStats;
+import dev.casino.loan.LoanManager;
 import dev.casino.command.CasinoCommand;
 import dev.casino.economy.CasinoAccountManager;
 import dev.casino.network.CasinoActionPayload;
@@ -12,6 +15,7 @@ import dev.casino.network.OpenCasinoScreenPayload;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
@@ -153,8 +157,19 @@ public class Casino implements ModInitializer {
         });
 
         // 5. Lifecycle events
-        ServerLifecycleEvents.SERVER_STARTED.register(CasinoAccountManager::init);
-        ServerLifecycleEvents.SERVER_STOPPING.register(server -> CasinoAccountManager.save());
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            CasinoAccountManager.init(server);
+            ProgressiveJackpot.init(server);
+            PlayerStats.init(server);
+            LoanManager.init(server);
+        });
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+            CasinoAccountManager.saveNow();
+            ProgressiveJackpot.save();
+            PlayerStats.save();
+            LoanManager.save();
+        });
+        ServerTickEvents.END_SERVER_TICK.register(server -> CasinoAccountManager.tick());
 
         // 6. Commands
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
@@ -199,7 +214,7 @@ public class Casino implements ModInitializer {
         // 10. Creative Mode Tab stub (no-op — registration happens above)
         registerCreativeTab();
 
-        LOGGER.info("Casino ready: 6 games, sell at 0.8x / buy at 1.2x, bots active");
+        LOGGER.info("Casino ready: 9 games, sell at 0.8x / buy at 1.2x, bots active");
     }
 
     private static void registerBlock(String name, Block block) {

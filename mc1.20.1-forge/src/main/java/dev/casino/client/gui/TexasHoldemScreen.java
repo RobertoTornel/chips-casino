@@ -196,7 +196,17 @@ public class TexasHoldemScreen extends BaseCasinoScreen {
 
         // Summary banner at bottom
         if (!summary.isEmpty()) {
-            graphics.drawCenteredString(this.font, "§e" + summary, centerX, contentY() + 136, COLOR_TEXT_GOLD);
+            graphics.drawCenteredString(this.font, "§e" + fitSummary(summary, contentW() - 10), centerX, contentY() + 136, COLOR_TEXT_GOLD);
         }
+    }
+    private String fitSummary(String text, int maxW) {
+        if (text == null || text.isEmpty()) return "";
+        int approxCharW = 6;
+        if (text.length() * approxCharW <= maxW) return text;
+        String cut = text;
+        while (cut.length() > 1 && cut.length() * approxCharW > maxW) {
+            cut = cut.substring(0, cut.length() - 1);
+        }
+        return cut + "\u2026";
     }
 }

@@ -36,7 +36,7 @@ public final class PriceDataLoader {
         try {
             found = manager.listResources(
                     "prices",
-                    id -> id.getNamespace().equals("casino") && id.getPath().endsWith(".json"));
+                    id -> id.getPath().endsWith(".json"));
         } catch (Exception ex) {
             PriceTable.LOGGER.warn("Failed to enumerate Chips data files", ex);
             return;

@@ -7,6 +7,7 @@ import dev.casino.economy.CasinoAccountManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
@@ -81,6 +82,27 @@ public class Casino implements ModInitializer {
         registerBlock("exchange", EXCHANGE_BLOCK);
         registerBlock("slot_machine", SLOT_MACHINE_BLOCK);
 
+        // Register Creative Mode Tab
+        CASINO_TAB = Registry.register(
+                BuiltInRegistries.CREATIVE_MODE_TAB,
+                id("casino_tab"),
+                new CreativeModeTab.Builder(CreativeModeTab.Row.TOP, 0)
+                        .title(Component.literal("Chips Casino"))
+                        .icon(() -> new ItemStack(SLOT_MACHINE_BLOCK.asItem()))
+                        .displayItems((features, emitter) -> {
+                            emitter.accept(ROULETTE_BLOCK.asItem());
+                            emitter.accept(BLACKJACK_BLOCK.asItem());
+                            emitter.accept(BACCARAT_BLOCK.asItem());
+                            emitter.accept(POKER_MACHINE_BLOCK.asItem());
+                            emitter.accept(PACHINKO_BLOCK.asItem());
+                            emitter.accept(PINBALL_BLOCK.asItem());
+                            emitter.accept(TEXAS_HOLDEM_BLOCK.asItem());
+                            emitter.accept(EXCHANGE_BLOCK.asItem());
+                            emitter.accept(SLOT_MACHINE_BLOCK.asItem());
+                        })
+                        .build()
+        );
+
         // 2. Register Block Entity Types
         ROULETTE_BE_TYPE = Registry.register(
                 BuiltInRegistries.BLOCK_ENTITY_TYPE,
@@ -144,7 +166,8 @@ public class Casino implements ModInitializer {
 
         // 4. Lifecycle events
         ServerLifecycleEvents.SERVER_STARTED.register(CasinoAccountManager::init);
-        ServerLifecycleEvents.SERVER_STOPPING.register(server -> CasinoAccountManager.save());
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> CasinoAccountManager.saveNow());
+        ServerTickEvents.END_SERVER_TICK.register(server -> CasinoAccountManager.tick());
 
         // 5. Commands
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
@@ -163,31 +186,6 @@ public class Casino implements ModInitializer {
 
         // 7. Data-driven Chips table (data/<ns>/prices/*.json, reloadable via /reload)
         dev.casino.api.PriceDataLoader.register();
-
-        // 8. Creative Mode Tab — registered here (not as a static field) because
-        // Block.asItem() requires the block to be registered first.
-        CASINO_TAB = Registry.register(
-                BuiltInRegistries.CREATIVE_MODE_TAB,
-                id("casino_tab"),
-                new CreativeModeTab.Builder(CreativeModeTab.Row.TOP, 0)
-                        .title(Component.literal("Chips Casino"))
-                        .icon(() -> new ItemStack(SLOT_MACHINE_BLOCK.asItem()))
-                        .displayItems((features, emitter) -> {
-                            emitter.accept(ROULETTE_BLOCK.asItem());
-                            emitter.accept(BLACKJACK_BLOCK.asItem());
-                            emitter.accept(BACCARAT_BLOCK.asItem());
-                            emitter.accept(POKER_MACHINE_BLOCK.asItem());
-                            emitter.accept(PACHINKO_BLOCK.asItem());
-                            emitter.accept(PINBALL_BLOCK.asItem());
-                            emitter.accept(TEXAS_HOLDEM_BLOCK.asItem());
-                            emitter.accept(EXCHANGE_BLOCK.asItem());
-                            emitter.accept(SLOT_MACHINE_BLOCK.asItem());
-                        })
-                        .build()
-        );
-
-        // 9. Creative Mode Tab stub (no-op — registration happens above)
-        registerCreativeTab();
 
         LOGGER.info("Casino 1.20.1 initialized successfully!");
     }

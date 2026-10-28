@@ -30,12 +30,27 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>All amounts are whole units. Withdrawals are atomic: {@link #withdraw(UUID, long)}
  * returns {@code false} and changes nothing if the player cannot cover the amount, which is
  * what stops a bet from going through twice or a purchase from going negative.
+ *
+ * <p><b>Persistence is batched.</b> Mutations mark the store dirty and {@link #tick()}
+ * flushes to disk every {@code SAVE_INTERVAL_TICKS} (default 600 ticks = 30 s at 20 TPS).
+ * {@link #save()} forces an immediate write and is only called on server stop. This avoids
+ * one disk write per bet — under load a busy table can easily do 20+ balance mutations per
+ * second, and writing the whole wallet file for each one would tank TPS.
  */
 public final class Wallet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("CasinoWallet");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Map<UUID, Long> BALANCES = new ConcurrentHashMap<>();
+
+    /** Dirty flag: true when an in-memory balance differs from what is on disk. */
+    private static volatile boolean dirty = false;
+
+    /** Ticks since the last successful disk flush. */
+    private static int ticksSinceSave = 0;
+
+    /** Flush the wallet file at least this often, even if no change occurred (defensive). */
+    private static final int SAVE_INTERVAL_TICKS = 600; // 30 s @ 20 TPS
 
     private static Path file = null;
 
@@ -55,9 +70,36 @@ public final class Wallet {
             Files.createDirectories(dir);
             file = dir.resolve("wallets.json");
             load();
+            dirty = false;
+            ticksSinceSave = 0;
         } catch (Exception e) {
-            LOGGER.error("Could not initialise the wallet store", e);
+            throw new IllegalStateException("Could not initialise the wallet store", e);
         }
+    }
+
+    /** Call once per server tick from {@link CasinoAccountManager#tick()}. Flushes dirty
+     *  balances to disk on a schedule so the file is never more than {@code SAVE_INTERVAL_TICKS}
+     *  behind memory. */
+    public static void tick() {
+        if (file == null) {
+            return;
+        }
+        ticksSinceSave++;
+        if (dirty && ticksSinceSave >= SAVE_INTERVAL_TICKS) {
+            save();
+        }
+    }
+
+    /** Force an immediate disk flush. Called on server stop so nothing is lost. */
+    public static void saveNow() {
+        if (dirty) {
+            save();
+        }
+    }
+
+    /** Mark the store dirty without writing. Use this for bulk operations. */
+    static void markDirty() {
+        dirty = true;
     }
 
     // ---------------------------------------------------------------- queries
@@ -84,8 +126,11 @@ public final class Wallet {
         if (BALANCES.containsKey(id)) {
             return false;
         }
+        if (starting < 0) {
+            LOGGER.warn("createAccount called with negative starting amount {} for {}, clamping to 0", starting, id);
+        }
         BALANCES.put(id, Math.max(0L, starting));
-        save();
+        markDirty();
         return true;
     }
 
@@ -99,7 +144,7 @@ public final class Wallet {
             return;
         }
         BALANCES.merge(id, amount, Long::sum);
-        save();
+        markDirty();
     }
 
     /**
@@ -116,14 +161,17 @@ public final class Wallet {
             return false;
         }
         BALANCES.put(id, current - amount);
-        save();
+        markDirty();
         return true;
     }
 
     /** Sets a balance outright. Admin/debug use. */
     public static void setBalance(UUID id, long amount) {
+        if (amount < 0) {
+            LOGGER.warn("setBalance called with negative amount {} for {}, clamping to 0", amount, id);
+        }
         BALANCES.put(id, Math.max(0L, amount));
-        save();
+        markDirty();
     }
 
     /**
@@ -135,20 +183,22 @@ public final class Wallet {
         if (amount <= 0 || from.equals(to)) {
             return false;
         }
-        long source = getBalance(from);
-        if (source < amount) {
-            return false;
+        synchronized (BALANCES) {
+            long source = getBalance(from);
+            if (source < amount) {
+                return false;
+            }
+            BALANCES.put(from, source - amount);
+            BALANCES.merge(to, amount, Long::sum);
+            markDirty();
+            return true;
         }
-        BALANCES.put(from, source - amount);
-        BALANCES.merge(to, amount, Long::sum);
-        save();
-        return true;
     }
 
     /** Wipes every balance. Used by {@code /casino wallet reset <player>}. */
     public static void clear(UUID id) {
-        BALANCES.remove(id);
-        save();
+        BALANCES.put(id, 0L);
+        markDirty();
     }
 
     // ---------------------------------------------------------------- persistence
@@ -175,8 +225,10 @@ public final class Wallet {
                 Files.move(file, bak, StandardCopyOption.REPLACE_EXISTING);
             }
             Files.move(tmp, file, StandardCopyOption.REPLACE_EXISTING);
+            dirty = false;
+            ticksSinceSave = 0;
         } catch (Exception e) {
-            LOGGER.error("Could not write wallets.json", e);
+            throw new IllegalStateException("Could not write wallets.json", e);
         }
     }
 
@@ -199,7 +251,11 @@ public final class Wallet {
             int n = 0;
             for (Map.Entry<String, Long> e : raw.entrySet()) {
                 try {
-                    BALANCES.put(UUID.fromString(e.getKey()), Math.max(0L, e.getValue()));
+                    long v = e.getValue();
+                    if (v < 0) {
+                        LOGGER.warn("Loaded negative balance {} for {}, clamping to 0", v, e.getKey());
+                    }
+                    BALANCES.put(UUID.fromString(e.getKey()), Math.max(0L, v));
                     n++;
                 } catch (IllegalArgumentException ignored) {
                     // a malformed uuid in the backup should not stop the rest loading
@@ -227,7 +283,11 @@ public final class Wallet {
             int n = 0;
             for (Map.Entry<String, Long> e : raw.entrySet()) {
                 try {
-                    BALANCES.put(UUID.fromString(e.getKey()), Math.max(0L, e.getValue()));
+                    long v = e.getValue();
+                    if (v < 0) {
+                        LOGGER.warn("Loaded negative balance {} for {}, clamping to 0", v, e.getKey());
+                    }
+                    BALANCES.put(UUID.fromString(e.getKey()), Math.max(0L, v));
                     n++;
                 } catch (IllegalArgumentException ignored) {
                     // a malformed uuid in the file should not stop the rest loading

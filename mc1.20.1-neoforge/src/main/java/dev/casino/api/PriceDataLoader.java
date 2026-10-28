@@ -36,7 +36,7 @@ public final class PriceDataLoader implements ResourceManagerReloadListener {
     public void onResourceManagerReload(ResourceManager manager) {
         Map<ResourceLocation, Resource> found = manager.listResources(
                 "prices",
-                id -> id.getNamespace().equals("casino") && id.getPath().endsWith(".json")
+                id -> id.getPath().endsWith(".json")
         );
 
         int applied = 0;

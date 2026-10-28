@@ -132,6 +132,9 @@ public class PinballBlockEntity extends BaseCasinoBlockEntity {
         } catch (Exception e) {
             power = 0.5;
         }
+        // Clamp client-supplied power into [0,1] so a doctored client cannot
+        // request a save chance above the tuned 72% perfect-flip ceiling.
+        power = Math.max(0.0, Math.min(1.0, power));
 
         boolean alive = run.engine.tick(power);
         if (!alive) {
