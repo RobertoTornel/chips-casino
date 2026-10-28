@@ -335,49 +335,6 @@ public class BaccaratScreen extends BaseCasinoScreen {
         }
     }
 
-    private static String str(JsonObject o, String key, String fallback) {
-        if (o.has(key) && !o.get(key).isJsonNull()) {
-            try {
-                return o.get(key).getAsString();
-            } catch (RuntimeException ignored) {
-                return fallback;
-            }
-        }
-        return fallback;
-    }
-
-    private static int num(JsonObject o, String key, int fallback) {
-        if (o.has(key) && !o.get(key).isJsonNull()) {
-            try {
-                return o.get(key).getAsInt();
-            } catch (RuntimeException ignored) {
-                return fallback;
-            }
-        }
-        return fallback;
-    }
-
-    private static long lng(JsonObject o, String key, long fallback) {
-        if (o.has(key) && !o.get(key).isJsonNull()) {
-            try {
-                return o.get(key).getAsLong();
-            } catch (RuntimeException ignored) {
-                return fallback;
-            }
-        }
-        return fallback;
-    }
-
-    private static boolean bool(JsonObject o, String key, boolean fallback) {
-        if (o.has(key) && !o.get(key).isJsonNull()) {
-            try {
-                return o.get(key).getAsBoolean();
-            } catch (RuntimeException ignored) {
-                return fallback;
-            }
-        }
-        return fallback;
-    }
 
     // ================================================================= tick ===
 

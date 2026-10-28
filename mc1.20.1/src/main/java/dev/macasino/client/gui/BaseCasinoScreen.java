@@ -82,6 +82,7 @@ public abstract class BaseCasinoScreen extends Screen {
     public static int COLOR_EXCHANGE    = 0xFFB8862C; // brass
     public static int COLOR_SLOT_NEON   = 0xFF00E5FF; // neon cyan
     public static int COLOR_SLOT_MAG    = 0xFFFF00FF; // magenta
+    public static int COLOR_MARQUEE     = 0xFF00E5FF; // neon cyan marquee rail
 
     public BaseCasinoScreen(Component title, BlockPos pos, String initialStateJson, long playerBalance) {
         super(title);
@@ -184,6 +185,10 @@ public abstract class BaseCasinoScreen extends Screen {
         graphics.drawString(this.font, this.title.getString(), contentX(), topPos + 8, COLOR_TEXT_GOLD, false);
         String balStr = "Chips: §e" + playerBalance + " §7(sell 0.8x / buy 1.2x)";
         graphics.drawString(this.font, balStr, contentX(), topPos + 20, COLOR_TEXT_WHITE, false);
+
+        // Marquee rail + CHIPS label beneath the header bar
+        graphics.fill(contentX(), topPos + 30, contentX() + contentW(), topPos + 32, COLOR_MARQUEE);
+        graphics.drawString(this.font, "CHIPS ◈", contentX() + 2, topPos + 31, COLOR_TEXT_WHITE, false);
 
         // Inner glow line below the header bar — subtle highlight under the header.
         graphics.fill(contentX(), topPos + 32, contentX() + contentW(), topPos + 33, 0x30FFFFFF);
@@ -307,6 +312,34 @@ public abstract class BaseCasinoScreen extends Screen {
     /**
      * Fit text to a width by truncating with ellipsis.
      */
+    protected static String str(JsonObject o, String key, String fallback) {
+        if (o.has(key) && !o.get(key).isJsonNull()) {
+            try { return o.get(key).getAsString(); } catch (RuntimeException ignored) { return fallback; }
+        }
+        return fallback;
+    }
+
+    protected static int num(JsonObject o, String key, int fallback) {
+        if (o.has(key) && !o.get(key).isJsonNull()) {
+            try { return o.get(key).getAsInt(); } catch (RuntimeException ignored) { return fallback; }
+        }
+        return fallback;
+    }
+
+    protected static long lng(JsonObject o, String key, long fallback) {
+        if (o.has(key) && !o.get(key).isJsonNull()) {
+            try { return o.get(key).getAsLong(); } catch (RuntimeException ignored) { return fallback; }
+        }
+        return fallback;
+    }
+
+    protected static boolean bool(JsonObject o, String key, boolean fallback) {
+        if (o.has(key) && !o.get(key).isJsonNull()) {
+            try { return o.get(key).getAsBoolean(); } catch (RuntimeException ignored) { return fallback; }
+        }
+        return fallback;
+    }
+
     protected static String fit(String text, int maxW) {
         if (text == null || text.isEmpty()) return "";
         int approxCharW = 6;
@@ -316,10 +349,5 @@ public abstract class BaseCasinoScreen extends Screen {
             cut = cut.substring(0, cut.length() - 1);
         }
         return cut + "…";
-    }
-
-    @Override
-    public boolean isPauseScreen() {
-        return false;
     }
 }

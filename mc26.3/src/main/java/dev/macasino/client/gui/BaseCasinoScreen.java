@@ -66,6 +66,7 @@ public abstract class BaseCasinoScreen extends Screen {
     public static int COLOR_EXCHANGE    = 0xFFB8862C;
     public static int COLOR_SLOT_NEON   = 0xFF00E5FF;
     public static int COLOR_SLOT_MAG    = 0xFFFF00FF;
+    public static int COLOR_MARQUEE     = 0xFF00E5FF;
 
     public BaseCasinoScreen(Component title, BlockPos pos, String initialStateJson, long playerBalance) {
         super(title);
@@ -130,6 +131,10 @@ public abstract class BaseCasinoScreen extends Screen {
         String balStr = "◈ " + playerBalance;
         extractor.text(this.font, balStr, contentX() + this.font.width(this.title.getString()) + 10, topPos + 8, COLOR_TEXT_WHITE);
         extractor.text(this.font, "Sell §a0.8x§7 · Buy §c1.2x", contentX(), topPos + 20, COLOR_TEXT_GREY);
+
+        // Marquee rail + CHIPS label beneath the header bar
+        extractor.fill(contentX(), topPos + 30, contentX() + contentW(), topPos + 32, COLOR_MARQUEE);
+        extractor.text(this.font, "CHIPS ◈", contentX() + 2, topPos + 31, COLOR_TEXT_WHITE);
 
         extractor.fill(contentX(), topPos + 32, contentX() + contentW(), topPos + 33, 0x30FFFFFF);
 
