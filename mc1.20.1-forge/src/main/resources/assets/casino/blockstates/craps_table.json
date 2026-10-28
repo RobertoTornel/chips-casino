@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "casino:block/craps_table" }
+  }
+}

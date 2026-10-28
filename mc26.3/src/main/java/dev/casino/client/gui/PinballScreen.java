@@ -68,8 +68,7 @@ public class PinballScreen extends BaseCasinoScreen {
             sendAction("PINBALL_LAUNCH", json.toString());
         }));
 
-        // Left / right flipper. Power is taken from the charge meter, so the player is
-        // rewarded for holding and releasing rather than mashing.
+        // Left / right flipper. Power is taken from the charge meter.
         addRenderableWidget(SpriteButton.of(contentX() + 96, rowY, 56, 20, "L FLIP",
                 b -> sendFlip()));
         addRenderableWidget(SpriteButton.of(contentX() + 156, rowY, 56, 20, "R FLIP",
@@ -82,7 +81,6 @@ public class PinballScreen extends BaseCasinoScreen {
 
     private void sendFlip() {
         JsonObject json = new JsonObject();
-        // A held flipper builds power; an instant click is a weak, mistimed flip.
         json.addProperty("power", Math.max(0.05, Math.min(1.0, charge)));
         sendAction("PINBALL_FLIP", json.toString());
         charge = 0f;
@@ -92,8 +90,6 @@ public class PinballScreen extends BaseCasinoScreen {
     public void tick() {
         super.tick();
         clientClock++;
-        // Charge the flipper while the mouse is down over the machine, so holding builds
-        // a stronger flip. Decays when released.
         if (inPlay) {
             if (charging) {
                 charge = Math.min(1.0f, charge + 0.05f);
@@ -105,8 +101,6 @@ public class PinballScreen extends BaseCasinoScreen {
         }
     }
 
-    // 26.3 passes a MouseButtonEvent rather than raw (x, y, button); the coordinates are
-    // available from the record's accessors.
     @Override
     public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubled) {
         charging = true;
@@ -121,14 +115,13 @@ public class PinballScreen extends BaseCasinoScreen {
 
     @Override
     protected void renderGameContent(GuiGraphicsExtractor ex, int mouseX, int mouseY, float partialTick) {
-        // ---- readouts -------------------------------------------------------
-        ex.text(this.font, "TILT THE MACHINE", contentX(), contentY() + 2, COLOR_PINBALL);
-        ex.text(this.font, "Stake: §e" + bet + " Chips", contentX(), contentY() + 2, COLOR_TEXT_WHITE);
-        ex.text(this.font, "Score: §e" + score, contentX() + 110, contentY() + 2, COLOR_TEXT_WHITE);
-        String st = inPlay ? "§aBALL IN PLAY" : "§7" + stateName;
-        ex.text(this.font, st, contentX() + 210, contentY() + 2, COLOR_TEXT_GOLD);
+        // ----- header: status -----
+        String stateTag = inPlay ? "\u00a7aBALL IN PLAY" : "\u00a77" + stateName;
+        ex.text(this.font, "PINBALL  \u00a77|  " + stateTag, contentX(), contentY() + 2, COLOR_PINBALL);
+        ex.text(this.font, "Stake: §e" + bet + " Chips", contentX() + 110, contentY() + 2, COLOR_TEXT_WHITE);
+        ex.text(this.font, "Score: §e" + score, contentX() + 200, contentY() + 2, COLOR_TEXT_WHITE);
 
-        // ---- playfield ------------------------------------------------------
+        // ----- playfield -----
         int px0 = contentX();
         int pw = bgWidth - 20;
         ex.fill(px0, topPos + PLAYFIELD_TOP - 2, px0 + pw, topPos + PLAYFIELD_TOP + PLAYFIELD_HEIGHT + 2,
@@ -136,8 +129,7 @@ public class PinballScreen extends BaseCasinoScreen {
         ex.fill(px0 + 1, topPos + PLAYFIELD_TOP - 1, px0 + pw - 1,
                 topPos + PLAYFIELD_TOP + PLAYFIELD_HEIGHT + 1, 0xFF14100C);
 
-        // Bumpers across the playfield. A lit bumper is one the ball has already struck in
-        // this run, so the player can read their progress.
+        // Bumpers across the playfield
         int bumperY = topPos + PLAYFIELD_TOP + 18;
         for (int i = 0; i < PinballEngine.BUMPERS; i++) {
             int bx = px0 + 14 + i * 26;
@@ -150,40 +142,37 @@ public class PinballScreen extends BaseCasinoScreen {
                     hit ? 0xFF2A1B10 : 0xFF6B5B45);
         }
 
-        // Ball: its horizontal position across the playfield maps to the engine's bounce index.
+        // Ball
         int ballX = px0 + 14 + Math.min(bounce, PinballEngine.BUMPERS - 1) * 26 + 7;
         int ballY = bumperY + 22;
         if (inPlay) {
             ex.fill(ballX - 3, ballY - 3, ballX + 3, ballY + 3, 0xFFE0E0E0);
             ex.fill(ballX - 1, ballY - 1, ballX + 1, ballY + 1, 0xFFFFFFFF);
         } else {
-            // Drained: draw an empty cradle where the ball would be.
             ex.fill(ballX - 3, ballY - 1, ballX + 3, ballY + 3, 0xFF2A2018);
         }
 
-        // ---- timing meter ---------------------------------------------------
+        // ----- charge meter -----
         int meterY = contentY() + 80;
-        ex.text(this.font, "TIMING", contentX(), meterY, COLOR_TEXT_GOLD);
+        ex.text(this.font, "FLIP POWER", contentX(), meterY, COLOR_TEXT_GOLD);
         int mx0 = contentX() + 46;
         int mw = 150;
         ex.fill(mx0, meterY, mx0 + mw, meterY + 6, 0xFF1A1410);
         int filled = (int) (mw * charge);
         if (filled > 0) {
-            // Green through gold as the meter fills, so a "perfect" release reads instantly.
             int col = charge > 0.8f ? 0xFFFFE9A8 : (charge > 0.5f ? 0xFFFFD86B : 0xFF7DDE7D);
             ex.fill(mx0, meterY, mx0 + filled, meterY + 6, col);
         }
-        ex.text(this.font, String.format("§7%d%%", (int) (charge * 100)),
+        ex.text(this.font, "\u00a77" + (int) (charge * 100) + "%",
                 mx0 + mw + 6, meterY - 1, COLOR_TEXT_WHITE);
 
-        // ---- last ball / odds ----------------------------------------------
+        // ----- last ball / odds -----
         String last = lastPayout > 0
                 ? "§aLast: +§e" + lastPayout + " §aChips §7(" + lastBumpers + " bumpers)"
                 : "§7No completed ball yet";
         ex.text(this.font, last, contentX(), contentY() + 120, COLOR_TEXT_WHITE);
 
-        // The machine's tuned return, shown honestly rather than hidden.
-        String odds = String.format("§7Return: §e%.0f%%§7 at perfect timing, §e%.0f%%§7 casual",
+        String odds = String.format("§7Return: §e%.0f%%§7 perfect, §e%.0f%%§7 casual",
                 rtpSkilled * 100, rtpCasual * 100);
         ex.text(this.font, odds, contentX(), contentY() + 132, 0xFFAAAAAA);
     }

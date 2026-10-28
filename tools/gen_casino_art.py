@@ -131,6 +131,10 @@ DARK = {
 
 CLEAR = (0, 0, 0, 0)
 
+# Render scale: 2x gives crisp 32x32 block textures and sharper GUI sprites
+# while keeping all drawing code at the original 16x16 coordinate space.
+SCALE = 2
+
 # active theme, swapped by the build loop
 _P = LIGHT
 _SNAP: dict = {}
@@ -1368,6 +1372,74 @@ def casino_body_top(p) -> Image.Image:
     return img
 
 
+def craps_table(p) -> Image.Image:
+    """Craps layout: green felt with pass/don't pass lines, field, and dice."""
+    img = _wood_rim(p)
+    _felt_well(img, 2, 2, 13, 13, p["GREEN_FELT"], p["GREEN_FELT_D"], p["GREEN_FELT_L"], 57)
+    # Pass line (bottom) and Don't Pass (top)
+    hline(img, 3, 3, 12, p["CREAM"])
+    hline(img, 12, 3, 12, p["CREAM"])
+    # Field (center strip)
+    box(img, 6, 6, 9, 9, p["RED_D"])
+    # Two dice near center
+    for (dx, dy) in ((5, 5), (10, 10)):
+        box(img, dx, dy, dx + 2, dy + 2, p["CREAM"])
+        put(img, dx + 1, dy + 1, p["RED"])
+        put(img, dx + 2, dy + 2, p["RED"])
+    return img
+
+
+def wheel_of_fortune(p) -> Image.Image:
+    """Wheel of Fortune: large spinning wheel with colored segments and pointer."""
+    img = new(16, 16)
+    # Wheel body
+    vramp(img, 0, 0, 15, 15, [p["WOOD_HI"], p["WOOD_M"], p["WOOD_D"]])
+    border(img, 0, 0, 15, 15, p["INK"])
+    hline(img, 1, 1, 14, p["WOOD_HI"])
+    vline(img, 1, 1, 14, mix(p["WOOD_HI"], p["WOOD_M"], 0.4))
+    hline(img, 14, 1, 14, p["WOOD_D"])
+    vline(img, 14, 1, 14, p["WOOD_D"])
+    # Eight segments around center
+    cx, cy = 8.0, 8.0
+    colors = [p["RED"], p["BLACK"], p["GOLD"], p["BRASS"], p["GREEN_FELT"], p["WOOD_HI"], p["STEEL_L"], p["CREAM"]]
+    for y in range(16):
+        for x in range(16):
+            dx, dy = x + 0.5 - cx, y + 0.5 - cy
+            r = math.hypot(dx, dy)
+            if r > 5.5 or r < 2.5:
+                continue
+            ang = math.atan2(dy, dx)
+            segment = int((ang + math.pi) / (2 * math.pi / 8)) % 8
+            lit = (dx + dy) < 0
+            put(img, x, y, colors[segment] if not lit else mul(colors[segment], 1.2))
+    # Pointer at top
+    box(img, 7, 0, 8, 2, p["BRASS"])
+    put(img, 7, 0, p["GOLD_HI"])
+    put(img, 8, 0, p["GOLD_HI"])
+    return img
+
+
+def keno_board(p) -> Image.Image:
+    """Keno board: 8x10 grid of numbers with selected highlights."""
+    img = new(16, 16)
+    vramp(img, 0, 0, 15, 15, [p["WOOD_M"], p["WOOD_D"], mul(p["WOOD_D"], 0.85)])
+    border(img, 0, 0, 15, 15, p["INK"])
+    # Draw a 5x4 grid of number squares
+    for row in range(4):
+        for col in range(5):
+            x0 = 2 + col * 2
+            y0 = 3 + row * 2
+            lit = (col + row) % 3 == 0
+            fill_c = p["BRASS"] if lit else p["BG_PANEL"]
+            box(img, x0, y0, x0 + 1, y0 + 1, fill_c)
+            gfill_c = p["GOLD_HI"] if lit else p["CREAM"]
+            put(img, x0, y0, gfill_c)
+    # Keno balls dropping
+    put(img, 4, 12, p["WHITE"])
+    put(img, 11, 12, p["WHITE"])
+    return img
+
+
 # ==========================================================================
 # slot_spin_button.png / slot_spin_button_hover.png — 64x20
 # ==========================================================================
@@ -1545,6 +1617,9 @@ BLOCK_ASSETS = [
     ("exchange.png",          exchange_block),
     ("pinball_machine.png",   pinball_machine),
     ("slot_machine.png",      slot_machine),
+    ("craps_table.png",       craps_table),
+    ("wheel_of_fortune.png",  wheel_of_fortune),
+    ("keno_board.png",        keno_board),
     ("slot_machine_side.png", slot_machine_side),
     ("slot_machine_top.png",  slot_machine_top),
     ("casino_body_side.png",  casino_body_side),
@@ -1588,6 +1663,10 @@ WRITTEN: list = []
 def save(img: Image.Image, path: str, theme: str) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
     assert img.mode == "RGBA", f"{path}: mode {img.mode}"
+    # Upscale by SCALE using nearest-neighbor so pixel art stays crisp:
+    # every source pixel becomes an SCALE x SCALE block of identical colour.
+    if SCALE > 1:
+        img = img.resize((img.width * SCALE, img.height * SCALE), Image.NEAREST)
     # hard guarantee: binary alpha + every colour on the palette
     allowed = {tuple(v[:3]) + (255,) for v in (LIGHT if theme == "light" else DARK).values()}
     px = img.load()
@@ -1633,21 +1712,29 @@ def contact_sheet(images, zoom, path, title=""):
 
 def verify() -> int:
     """Independent on-disk check: dimensions, mode, binary alpha, palette."""
+    # All dimensions scaled by SCALE (2x) for crisp HD pixel art.
     expected_gui = {
-        "casino_frame.png": (256, 256), "header_bar.png": (256, 32),
-        "button.png": (64, 20), "button_hover.png": (64, 20),
-        "balance_bar.png": (256, 16), "chip.png": (16, 16),
-        "roulette_wheel.png": (64, 64), "pachinko_board.png": (128, 128),
-        "cards/card_front.png": (20, 28), "cards/card_back.png": (20, 28),
-        "slot_reel_window.png": (96, 96),
-        "slot_symbol_cherry.png": (16, 16), "slot_symbol_lemon.png": (16, 16),
-        "slot_symbol_bell.png": (16, 16), "slot_symbol_bar.png": (16, 16),
-        "slot_symbol_seven.png": (16, 16),
-        "slot_spin_button.png": (64, 20),
-        "slot_spin_button_hover.png": (64, 20),
-        "slot_reel_strip.png": (16, 64),
+        "casino_frame.png": (256 * SCALE, 256 * SCALE),
+        "header_bar.png": (256 * SCALE, 32 * SCALE),
+        "button.png": (64 * SCALE, 20 * SCALE),
+        "button_hover.png": (64 * SCALE, 20 * SCALE),
+        "balance_bar.png": (256 * SCALE, 16 * SCALE),
+        "chip.png": (16 * SCALE, 16 * SCALE),
+        "roulette_wheel.png": (64 * SCALE, 64 * SCALE),
+        "pachinko_board.png": (128 * SCALE, 128 * SCALE),
+        "cards/card_front.png": (20 * SCALE, 28 * SCALE),
+        "cards/card_back.png": (20 * SCALE, 28 * SCALE),
+        "slot_reel_window.png": (96 * SCALE, 96 * SCALE),
+        "slot_symbol_cherry.png": (16 * SCALE, 16 * SCALE),
+        "slot_symbol_lemon.png": (16 * SCALE, 16 * SCALE),
+        "slot_symbol_bell.png": (16 * SCALE, 16 * SCALE),
+        "slot_symbol_bar.png": (16 * SCALE, 16 * SCALE),
+        "slot_symbol_seven.png": (16 * SCALE, 16 * SCALE),
+        "slot_spin_button.png": (64 * SCALE, 20 * SCALE),
+        "slot_spin_button_hover.png": (64 * SCALE, 20 * SCALE),
+        "slot_reel_strip.png": (16 * SCALE, 64 * SCALE),
     }
-    expected_block = {n: (16, 16) for n, _ in BLOCK_ASSETS}
+    expected_block = {n: (16 * SCALE, 16 * SCALE) for n, _ in BLOCK_ASSETS}
     problems = []
     checks = []
     for gui_light, gui_dark, block_dir in trees():

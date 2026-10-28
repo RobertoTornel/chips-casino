@@ -54,6 +54,9 @@ public class Casino {
     public static final RegistryObject<Block> TEXAS_HOLDEM_BLOCK = BLOCKS.register("texas_holdem_floor", TexasHoldemFloorBlock::new);
     public static final RegistryObject<Block> EXCHANGE_BLOCK = BLOCKS.register("exchange", ExchangeBlock::new);
     public static final RegistryObject<Block> SLOT_MACHINE_BLOCK = BLOCKS.register("slot_machine", SlotMachineBlock::new);
+    public static final RegistryObject<Block> CRAPS_BLOCK = BLOCKS.register("craps_table", CrapsTableBlock::new);
+    public static final RegistryObject<Block> WHEEL_OF_FORTUNE_BLOCK = BLOCKS.register("wheel_of_fortune", WheelOfFortuneBlock::new);
+    public static final RegistryObject<Block> KENO_BLOCK = BLOCKS.register("keno", KenoBlock::new);
 
     // Creative mode tab: "Chips Casino" with slot_machine icon, holding all 9 block items.
     public static final DeferredRegister<CreativeModeTab> CREATIVE_TABS =
@@ -73,6 +76,9 @@ public class Casino {
                         emitter.accept(TEXAS_HOLDEM_BLOCK.get().asItem());
                         emitter.accept(EXCHANGE_BLOCK.get().asItem());
                         emitter.accept(SLOT_MACHINE_BLOCK.get().asItem());
+                        emitter.accept(CRAPS_BLOCK.get().asItem());
+                        emitter.accept(WHEEL_OF_FORTUNE_BLOCK.get().asItem());
+                        emitter.accept(KENO_BLOCK.get().asItem());
                     })
                     .build()
     );
@@ -87,6 +93,9 @@ public class Casino {
     public static final RegistryObject<Item> TEXAS_HOLDEM_ITEM = ITEMS.register("texas_holdem_floor", () -> new BlockItem(TEXAS_HOLDEM_BLOCK.get(), new Item.Properties()));
     public static final RegistryObject<Item> EXCHANGE_ITEM = ITEMS.register("exchange", () -> new BlockItem(EXCHANGE_BLOCK.get(), new Item.Properties()));
     public static final RegistryObject<Item> SLOT_MACHINE_ITEM = ITEMS.register("slot_machine", () -> new BlockItem(SLOT_MACHINE_BLOCK.get(), new Item.Properties()));
+    public static final RegistryObject<Item> CRAPS_ITEM = ITEMS.register("craps_table", () -> new BlockItem(CRAPS_BLOCK.get(), new Item.Properties()));
+    public static final RegistryObject<Item> WHEEL_OF_FORTUNE_ITEM = ITEMS.register("wheel_of_fortune", () -> new BlockItem(WHEEL_OF_FORTUNE_BLOCK.get(), new Item.Properties()));
+    public static final RegistryObject<Item> KENO_ITEM = ITEMS.register("keno", () -> new BlockItem(KENO_BLOCK.get(), new Item.Properties()));
 
     // Block Entities
     public static final RegistryObject<BlockEntityType<RouletteBlockEntity>> ROULETTE_BE_TYPE = BLOCK_ENTITIES.register("roulette_table",
@@ -108,6 +117,12 @@ public class Casino {
             () -> BlockEntityType.Builder.of(ExchangeBlockEntity::new, EXCHANGE_BLOCK.get()).build(null));
     public static final RegistryObject<BlockEntityType<SlotMachineBlockEntity>> SLOT_MACHINE_BE_TYPE = BLOCK_ENTITIES.register("slot_machine",
             () -> BlockEntityType.Builder.of(SlotMachineBlockEntity::new, SLOT_MACHINE_BLOCK.get()).build(null));
+    public static final RegistryObject<BlockEntityType<CrapsBlockEntity>> CRAPS_BE_TYPE = BLOCK_ENTITIES.register("craps_table",
+            () -> BlockEntityType.Builder.of(CrapsBlockEntity::new, CRAPS_BLOCK.get()).build(null));
+    public static final RegistryObject<BlockEntityType<WheelOfFortuneBlockEntity>> WHEEL_OF_FORTUNE_BE_TYPE = BLOCK_ENTITIES.register("wheel_of_fortune",
+            () -> BlockEntityType.Builder.of(WheelOfFortuneBlockEntity::new, WHEEL_OF_FORTUNE_BLOCK.get()).build(null));
+    public static final RegistryObject<BlockEntityType<KenoBlockEntity>> KENO_BE_TYPE = BLOCK_ENTITIES.register("keno",
+            () -> BlockEntityType.Builder.of(KenoBlockEntity::new, KENO_BLOCK.get()).build(null));
 
     public Casino() {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();

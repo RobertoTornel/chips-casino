@@ -65,6 +65,8 @@ public abstract class BaseCasinoScreen extends Screen {
     public static int COLOR_TEXT_WHITE   = 0xFFEEEEEE;
     public static int COLOR_TEXT_GREEN   = 0xFF55FF55;
     public static int COLOR_TEXT_RED     = 0xFFFF5555;
+    public static int COLOR_TEXT_GREY    = 0xFF8A8A8A;
+    public static int COLOR_TEXT_DIM     = 0xFF6B6B6B;
 
     // Per-screen theme accent colors (neon/casino palette)
     public static int COLOR_ROULETTE    = 0xFFB32630; // red
@@ -293,6 +295,20 @@ public abstract class BaseCasinoScreen extends Screen {
         RenderSystem.defaultBlendFunc();
         graphics.blit(texture, x, y, w, h, 0f, 0f, texW, texH, texW, texH);
         RenderSystem.disableBlend();
+    }
+
+    /**
+     * Fit text to a width by truncating with ellipsis.
+     */
+    protected static String fit(String text, int maxW) {
+        if (text == null || text.isEmpty()) return "";
+        int approxCharW = 6;
+        if (text.length() * approxCharW <= maxW) return text;
+        String cut = text;
+        while (cut.length() > 1 && cut.length() * approxCharW > maxW) {
+            cut = cut.substring(0, cut.length() - 1);
+        }
+        return cut + "…";
     }
 
     @Override

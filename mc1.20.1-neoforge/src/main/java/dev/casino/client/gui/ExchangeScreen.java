@@ -5,24 +5,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import dev.casino.api.PriceTable;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * The Exchange screen: sell items for money, buy items with money.
- *
- * <p>Layout is two columns — "Sell" on the left, "Buy" on the right — because the whole
- * point is the spread between them. Both columns list the same items side by side so the
- * player can see, on one row, that selling a diamond pays less than buying one costs.
- * That visual adjacency is the economy lesson.
- *
- * <p>All textures come from {@link CasinoSprites}, so a resource pack can retheme the
- * whole thing.
- */
 public class ExchangeScreen extends BaseCasinoScreen {
 
     private static final int ROW_H = 14;
@@ -46,14 +34,14 @@ public class ExchangeScreen extends BaseCasinoScreen {
     @Override
     protected void initGameWidgets() {
         int bottom = topPos + bgHeight - 42;
-
-        addRenderableWidget(SpriteButton.of(contentX(), bottom, 80, 18, "Sell Hand", b ->sendAction("SELL_MAIN_HAND", "{}")));
-
-        addRenderableWidget(SpriteButton.of(contentX() + 84, bottom, 60, 18, "Buy x1", b ->buy("minecraft:diamond", 1)));
-
-        addRenderableWidget(SpriteButton.of(contentX() + 148, bottom, 62, 18, "Buy x16", b ->buy("minecraft:diamond", 16)));
-
-        addRenderableWidget(SpriteButton.of(contentX() + 214, bottom, 60, 18, "Refresh", b ->sendAction("EXCHANGE_REFRESH", "{}")));
+        addRenderableWidget(SpriteButton.of(contentX(), bottom, 72, 18, "\u00a7aSell Hand",
+                b -> sendAction("SELL_MAIN_HAND", "{}")));
+        addRenderableWidget(SpriteButton.of(contentX() + 78, bottom, 68, 18, "\u00a7aSell All",
+                b -> sendAction("SELL_ALL_TRADABLE", "{}")));
+        addRenderableWidget(SpriteButton.of(contentX() + 152, bottom, 68, 18, "\u00a7bDiamond",
+                b -> buy("minecraft:diamond", 1)));
+        addRenderableWidget(SpriteButton.of(contentX() + 226, bottom, 62, 18, "\u00a7bEmerald",
+                b -> buy("minecraft:emerald", 1)));
     }
 
     private void buy(String itemId, int count) {
@@ -67,24 +55,12 @@ public class ExchangeScreen extends BaseCasinoScreen {
     protected void onStateUpdated() {
         try {
             JsonObject obj = GSON.fromJson(lastStateJson, JsonObject.class);
-            if (obj == null) {
-                return;
-            }
-            if (obj.has("balance")) {
-                playerBalance = obj.get("balance").getAsLong();
-            }
-            if (obj.has("sellMultiplier")) {
-                sellMultiplier = obj.get("sellMultiplier").getAsDouble();
-            }
-            if (obj.has("buyMultiplier")) {
-                buyMultiplier = obj.get("buyMultiplier").getAsDouble();
-            }
-            if (obj.has("currency")) {
-                currency = obj.get("currency").getAsString();
-            }
-            if (obj.has("symbol")) {
-                symbol = obj.get("symbol").getAsString();
-            }
+            if (obj == null) return;
+            if (obj.has("balance")) playerBalance = obj.get("balance").getAsLong();
+            if (obj.has("sellMultiplier")) sellMultiplier = obj.get("sellMultiplier").getAsDouble();
+            if (obj.has("buyMultiplier")) buyMultiplier = obj.get("buyMultiplier").getAsDouble();
+            if (obj.has("currency")) currency = obj.get("currency").getAsString();
+            if (obj.has("symbol")) symbol = obj.get("symbol").getAsString();
             rows.clear();
             JsonArray arr = obj.has("showcase") ? obj.getAsJsonArray("showcase") : null;
             if (arr != null) {
@@ -97,67 +73,55 @@ public class ExchangeScreen extends BaseCasinoScreen {
                             o.get("buy").getAsLong()));
                 }
             }
-        } catch (Exception ignored) {
-            // a malformed state packet should leave the last good render on screen
-        }
+        } catch (Exception ignored) {}
     }
 
     @Override
-    protected void renderGameContent(GuiGraphics ex, int mouseX, int mouseY, float partial) {
-        int contentTop = topPos + 34;
+    protected void renderGameContent(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        int contentTop = contentY() + 14;
+        g.drawString(this.font, "\u00a7eEXCHANGE", contentX(), contentTop, COLOR_TEXT_GOLD, false);
+        g.drawString(this.font, "The house buys at 0.8x and sells at 1.2x — the spread is the game.",
+                contentX(), contentY() + 16, COLOR_EXCHANGE, false);
 
-        // --- column headings, and the spread explained right on the panel ---
-        ex.drawString(this.font, "\u00a7aTHE HOUSE BUYS", contentX() + 2, contentTop, COLOR_TEXT_GREEN, false);
-        ex.drawString(this.font, "\u00a7cTHE HOUSE SELLS", contentX() + 2 + COL_W + 8, contentTop, COLOR_TEXT_RED, false);
-        ex.drawString(this.font, "BUY HIGH SELL LOW", contentX(), contentY() + 16, COLOR_EXCHANGE, false);
+        int headY = contentTop + 30;
+        g.drawString(this.font, "\u00a7aSELL", contentX(), headY, COLOR_TEXT_GREEN, false);
+        g.drawString(this.font, "\u00a7cBUY", contentX() + COL_W + 8, headY, COLOR_TEXT_RED, false);
 
-        int y = contentTop + 14;
-        int maxRows = Math.min(rows.size(), 12);
+        int y = headY + ROW_H + 2;
+        int maxRows = Math.min(rows.size(), 10);
         for (int i = 0; i < maxRows; i++) {
             Row r = rows.get(i);
             int rowY = y + i * ROW_H;
-
-            // alternating row tint so long lists stay readable
             if (i % 2 == 0) {
-                ex.fill(contentX(), rowY - 2, contentX() + COL_W, rowY + ROW_H - 3, 0x22FFFFFF);
-                ex.fill(contentX() + COL_W + 8, rowY - 2,
+                g.fill(contentX(), rowY - 2, contentX() + COL_W, rowY + ROW_H - 3, 0x22FFFFFF);
+                g.fill(contentX() + COL_W + 8, rowY - 2,
                         contentX() + COL_W + 8 + COL_W, rowY + ROW_H - 3, 0x22FFFFFF);
             }
-
             String label = shortId(r.id());
-
-            // sell column
-            ex.drawString(this.font, label, contentX() + 2, rowY, COLOR_TEXT_WHITE, false);
-            String sellTxt = "\u00a7a+\u00a7e" + r.sell();
-            ex.drawString(this.font, sellTxt, contentX() + COL_W - 40, rowY, COLOR_TEXT_GREEN, false);
-
-            // buy column
-            ex.drawString(this.font, label, contentX() + 2 + COL_W + 8, rowY, COLOR_TEXT_WHITE, false);
-            String buyTxt = "\u00a7c-\u00a7e" + r.buy();
-            ex.drawString(this.font, buyTxt, contentX() + COL_W + 8 + COL_W - 40, rowY, COLOR_TEXT_RED, false);
+            g.drawString(this.font, label, contentX(), rowY, COLOR_TEXT_WHITE, false);
+            g.drawString(this.font, "\u00a7a+" + r.sell(), contentX() + COL_W - 40, rowY, COLOR_TEXT_GREEN, false);
+            g.drawString(this.font, label, contentX() + COL_W + 8, rowY, COLOR_TEXT_WHITE, false);
+            g.drawString(this.font, "\u00a7c-" + r.buy(), contentX() + COL_W + 8 + COL_W - 40, rowY, COLOR_TEXT_RED, false);
         }
-
         if (rows.isEmpty()) {
-            ex.drawString(this.font, "\u00a77No prices loaded \u2014 check data/casino/prices/",
-                    contentX() + 2, y, 0xFF888888, false);
+            g.drawString(this.font, "\u00a77No prices loaded", contentX(), y, 0xFF888888, false);
         }
 
-        // --- the spread, stated plainly ---
-        int footY = topPos + bgHeight - 58;
-        ex.drawString(this.font, "\u00a77Sell at \u00a7a" + fmtPercent(sellMultiplier)
-                        + "\u00a77  \u00b7  Buy at \u00a7c" + fmtPercent(buyMultiplier),
-                contentX() + 2, footY, COLOR_TEXT_WHITE, false);
-        ex.drawString(this.font, "\u00a77The difference is the house edge \u2014 that is what makes it a game.",
-                contentX() + 2, footY + 10, 0xFF999999, false);
+        int footY = topPos + bgHeight - 40;
+        g.drawString(this.font,
+                "\u00a77Sell at \u00a7a" + fmtPercent(sellMultiplier)
+                        + "\u00a77   \u00b7   Buy at \u00a7c" + fmtPercent(buyMultiplier),
+                contentX(), footY, COLOR_TEXT_WHITE, false);
+        g.drawString(this.font,
+                "\u00a77Sell then buy back always loses — that is the house edge.",
+                contentX(), footY + 12, 0xFF999999, false);
     }
 
     private static String shortId(String id) {
         int i = id.indexOf(':');
         String path = i >= 0 ? id.substring(i + 1) : id;
         path = path.replace('_', ' ');
-        if (path.length() > 16) {
-            path = path.substring(0, 15) + "\u2026";
-        }
+        if (path.length() > 16) path = path.substring(0, 15) + "\u2026";
         return path;
     }
 

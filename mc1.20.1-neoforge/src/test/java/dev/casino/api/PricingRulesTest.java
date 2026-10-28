@@ -90,4 +90,39 @@ class PricingRulesTest {
         assertEquals(6553L, PricingRules.sell(8192L));
         assertEquals(9831L, PricingRules.buy(8192L));
     }
+
+    @Test
+    @DisplayName("large base prices do not overflow")
+    void largePricesDoNotOverflow() {
+        long huge = 1_000_000_000L;
+        long sell = PricingRules.sell(huge);
+        long buy = PricingRules.buy(huge);
+        assertTrue(sell > 0, "sell of huge price should be positive");
+        assertTrue(buy > sell, "buy of huge price should exceed sell");
+        assertTrue(sell < huge, "sell should be less than base");
+        assertTrue(buy > huge, "buy should exceed base");
+    }
+
+    @Test
+    @DisplayName("maximum long base price is handled safely")
+    void maxLongBasePriceIsSafe() {
+        long max = Long.MAX_VALUE;
+        long sell = PricingRules.sell(max);
+        long buy = PricingRules.buy(max);
+        assertTrue(sell > 0, "sell of max long should be positive");
+        assertTrue(buy > sell, "buy of max long should exceed sell");
+        assertTrue(sell < max || sell == max, "sell of max long should not exceed max");
+    }
+
+    @Test
+    @DisplayName("round trip loss is at least 1 Chips at every base value")
+    void roundTripAlwaysLosesAtLeastOneChip() {
+        for (long base : new long[]{1, 2, 3, 7, 10, 64, 100, 1000, 8192, 65536, 1_000_000}) {
+            long cost = PricingRules.buy(base);
+            long refund = PricingRules.sell(base);
+            assertTrue(cost - refund >= 1,
+                    "base " + base + ": round trip must lose at least 1 Chips "
+                            + "(cost=" + cost + ", refund=" + refund + ")");
+        }
+    }
 }

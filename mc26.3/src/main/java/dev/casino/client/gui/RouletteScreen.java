@@ -20,11 +20,6 @@ public class RouletteScreen extends BaseCasinoScreen {
 
     private String phase = "BETTING";
     private long pot = 0;
-    private int turnSeat = -1;
-    private String summary = "";
-    private boolean autoFillBots = true;
-    private boolean isOwner = false;
-    private int animClock = 0;
     private int roundNumber = 0;
     private String dealerSay = "";
     private int winningNumber = -1;
@@ -54,7 +49,7 @@ public class RouletteScreen extends BaseCasinoScreen {
     }
 
     public RouletteScreen(BlockPos pos, String initialStateJson, long playerBalance) {
-        super(Component.literal("European Roulette (Multiplayer)"), pos, initialStateJson, playerBalance);
+        super(Component.literal("European Roulette"), pos, initialStateJson, playerBalance);
         this.bgWidth = 400;
         this.bgHeight = 232;
         for (int i = 0; i < SEAT_COUNT; i++) {
@@ -78,20 +73,25 @@ public class RouletteScreen extends BaseCasinoScreen {
     private void addGameButtons() {
         int top = contentY() + 14;
 
+        // Chip selector row - compact, left side
         int cx = contentX() + 4;
         addRenderableWidget(SpriteButton.of(cx, top, 28, 16, "10", b -> selectedChip = 10));
         addRenderableWidget(SpriteButton.of(cx + 32, top, 28, 16, "50", b -> selectedChip = 50));
         addRenderableWidget(SpriteButton.of(cx + 64, top, 32, 16, "100", b -> selectedChip = 100));
         addRenderableWidget(SpriteButton.of(cx + 100, top, 32, 16, "500", b -> selectedChip = 500));
 
-        boolean canSpin = !spinning && myStake > 0;
+        // Table controls - right side
+        boolean canBet = !spinning && myStake < 10_000;
         addRenderableWidget(SpriteButton.of(contentX() + 204, top, 44, 16, "CLEAR",
                 b -> sendAction("CLEAR", "{}")));
         addRenderableWidget(SpriteButton.of(contentX() + 252, top, 44, 16, "UNDO",
                 b -> sendAction("UNDO", "{}")));
         addRenderableWidget(SpriteButton.primary(contentX() + 300, top, 48, 16, "SPIN",
-                b -> { JsonObject json = new JsonObject(); json.addProperty("amount", selectedChip);
-                    sendAction("BET", GSON.toJson(json)); }));
+                b -> {
+                    JsonObject json = new JsonObject();
+                    json.addProperty("amount", selectedChip);
+                    sendAction("BET", GSON.toJson(json));
+                }));
     }
 
     @Override
@@ -111,8 +111,12 @@ public class RouletteScreen extends BaseCasinoScreen {
             if (obj.has("spinning")) spinning = obj.get("spinning").getAsBoolean();
             if (obj.has("myStake")) myStake = obj.get("myStake").getAsLong();
             if (obj.has("mySeat")) mySeat = obj.get("mySeat").getAsInt();
-            if (obj.has("autoFillBots")) autoFillBots = obj.get("autoFillBots").getAsBoolean();
-            if (obj.has("isOwner")) isOwner = obj.get("isOwner").getAsBoolean();
+            if (obj.has("autoFillBots")) {
+                // autoFillBots handled by base screen
+            }
+            if (obj.has("isOwner")) {
+                // isOwner handled by base screen
+            }
 
             myBets.clear();
             if (obj.has("myBets")) {
@@ -159,12 +163,18 @@ public class RouletteScreen extends BaseCasinoScreen {
     protected void renderGameContent(GuiGraphicsExtractor e, int mouseX, int mouseY, float partialTick) {
         int cx = contentX() + contentW() / 2;
 
-        // ----- header -----
-        e.text(this.font, "EUROPEAN ROULETTE", contentX(), contentY() + 2, COLOR_ROULETTE);
+        // ----- header: phase indicator -----
+        String phaseTag = switch (phase) {
+            case "BETTING" -> "§aBETTING";
+            case "SPINNING" -> "§eSPINNING";
+            case "SETTLE" -> "§cSETTLED";
+            default -> "§7" + phase;
+        };
+        e.text(this.font, "EUROPEAN ROULETTE  §7|  " + phaseTag, contentX(), contentY() + 2, COLOR_ROULETTE);
         e.text(this.font, "Round " + roundNumber, cx - 24, contentY() + 2, COLOR_TEXT_WHITE);
         e.text(this.font, fit(dealerSay, 200), contentX() + 236, contentY() + 2, COLOR_TEXT_GOLD);
 
-        // Chip selector
+        // ----- chip selector -----
         e.text(this.font, "Chip §e" + selectedChip, contentX(), contentY() + 18, COLOR_TEXT_WHITE);
 
         // ----- wheel, left -----
@@ -173,7 +183,7 @@ public class RouletteScreen extends BaseCasinoScreen {
         drawWheel(e, wheelX, wheelY, wheelAngle);
 
         // Dealer plate under the wheel.
-        String dealer = phase.equals("SETTLE") ? "Pays " + lastWinningNumber : "Croupier";
+        String dealer = "SETTLE".equals(phase) ? "Pays " + lastWinningNumber : "Croupier";
         e.centeredText(this.font, "§7" + dealer, wheelX + WHEEL_W / 2, wheelY + WHEEL_H + 2,
                 COLOR_TEXT_WHITE);
 
@@ -182,15 +192,18 @@ public class RouletteScreen extends BaseCasinoScreen {
         int railY = contentY() + 34;
         drawResultRail(e, railX, railY);
 
-        // ----- number grid -----
+        // ----- number grid, bottom-left -----
         drawGrid(e);
 
-        // ----- seats, bottom rail -----
+        // ----- seats, bottom-right -----
         drawSeats(e);
 
         // ----- summary banner -----
-        if (!summary.isEmpty()) {
-            e.centeredText(this.font, "§e" + summary, cx, contentY() + 158, COLOR_TEXT_GOLD);
+        if (winningNumber >= 0 && "SETTLE".equals(phase)) {
+            String res = winningNumber + " (" +
+                    (RouletteTable.isGreen(winningNumber) ? "green" :
+                            RouletteTable.isRed(winningNumber) ? "red" : "black") + ")";
+            e.centeredText(this.font, "§e" + res + " - " + dealerSay, cx, contentY() + 158, COLOR_TEXT_GOLD);
         }
     }
 
@@ -213,7 +226,7 @@ public class RouletteScreen extends BaseCasinoScreen {
     private void drawResultRail(GuiGraphicsExtractor e, int x, int y) {
         e.fill(x, y, x + 80, y + 56, 0xFF111111);
         e.fill(x + 1, y + 1, x + 79, y + 55, 0xFF1A1616);
-        if (winningNumber >= 0 && phase.equals("SETTLE")) {
+        if (winningNumber >= 0 && "SETTLE".equals(phase)) {
             int colour = RouletteTable.isGreen(winningNumber) ? 0xFF00FF00
                     : (RouletteTable.isRed(winningNumber) ? 0xFFFF4444 : 0xFFFFFFFF);
             e.centeredText(this.font, String.valueOf(winningNumber), x + 40, y + 12, colour);

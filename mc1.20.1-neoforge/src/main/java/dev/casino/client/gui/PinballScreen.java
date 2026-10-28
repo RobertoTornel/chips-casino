@@ -6,17 +6,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 
-/**
- * Pinball playfield screen.
- *
- * <p>The layout follows a real machine, top to bottom: a score readout and tilt meter under
- * the header, the bumpers down the playfield, then the flippers and the launch button at the
- * bottom where the player's hands would be.
- *
- * <p>The flipper buttons send the ball's skill input as {@code power} (0..1). A wider
- * "TIMING" bar sits beside them and fills while a flip is held, so the player can see the
- * input they are about to send rather than guessing.
- */
 public class PinballScreen extends BaseCasinoScreen {
 
     private static final int PLAYFIELD_TOP = 44;
@@ -33,9 +22,9 @@ public class PinballScreen extends BaseCasinoScreen {
     private double rtpSkilled = 0.92;
     private double rtpCasual = 0.26;
 
-    /** Rises while the player holds a flipper; this becomes the next flip's power. */
     private float charge = 0f;
     private boolean charging = false;
+    private int clientClock = 0;
 
     public PinballScreen(BlockPos pos, String initialStateJson, long playerBalance) {
         super(Component.literal("Pinball"), pos, initialStateJson, playerBalance);
@@ -64,28 +53,21 @@ public class PinballScreen extends BaseCasinoScreen {
             if (obj.has("lastBumpers")) lastBumpers = obj.get("lastBumpers").getAsInt();
             if (obj.has("rtpSkilled")) rtpSkilled = obj.get("rtpSkilled").getAsDouble();
             if (obj.has("rtpCasual")) rtpCasual = obj.get("rtpCasual").getAsDouble();
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
     }
 
     @Override
     protected void initGameWidgets() {
         int rowY = contentY() + 96;
-
-        // Launch: only meaningful when no ball is in play.
         addRenderableWidget(SpriteButton.primary(contentX(), rowY, 92, 20, "LAUNCH", b -> {
             JsonObject json = new JsonObject();
             json.addProperty("bet", 100L);
             sendAction("PINBALL_LAUNCH", json.toString());
         }));
-
-        // Left / right flipper. Power is taken from the charge meter, so the player is
-        // rewarded for holding and releasing rather than mashing.
         addRenderableWidget(SpriteButton.of(contentX() + 96, rowY, 56, 20, "L FLIP",
                 b -> sendFlip()));
         addRenderableWidget(SpriteButton.of(contentX() + 156, rowY, 56, 20, "R FLIP",
                 b -> sendFlip()));
-
         addRenderableWidget(SpriteButton.of(contentX() + 216, rowY, 76, 20, "Drain", b -> {
             if (inPlay) sendAction("PINBALL_DRAIN", "{}");
         }));
@@ -93,7 +75,6 @@ public class PinballScreen extends BaseCasinoScreen {
 
     private void sendFlip() {
         JsonObject json = new JsonObject();
-        // A held flipper builds power; an instant click is a weak, mistimed flip.
         json.addProperty("power", Math.max(0.05, Math.min(1.0, charge)));
         sendAction("PINBALL_FLIP", json.toString());
         charge = 0f;
@@ -102,8 +83,7 @@ public class PinballScreen extends BaseCasinoScreen {
     @Override
     public void tick() {
         super.tick();
-        // Charge the flipper while the mouse is down over the machine, so holding builds
-        // a stronger flip. Decays when released.
+        clientClock++;
         if (inPlay) {
             if (charging) {
                 charge = Math.min(1.0f, charge + 0.05f);
@@ -116,83 +96,72 @@ public class PinballScreen extends BaseCasinoScreen {
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
         charging = true;
-        return super.mouseClicked(mx, my, button);
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
-    public boolean mouseReleased(double mx, double my, int button) {
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
         charging = false;
-        return super.mouseReleased(mx, my, button);
+        return super.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
-    protected void renderGameContent(GuiGraphics ex, int mouseX, int mouseY, float partialTick) {
-        // ---- readouts -------------------------------------------------------
-        ex.drawString(this.font, "TILT THE MACHINE", contentX(), contentY() + 16, COLOR_PINBALL, false);
-        ex.drawString(this.font, "Stake: §e" + bet + " Chips", contentX(), contentY() + 2, COLOR_TEXT_WHITE, false);
-        ex.drawString(this.font, "Score: §e" + score, contentX() + 110, contentY() + 2, COLOR_TEXT_WHITE, false);
-        String st = inPlay ? "§aBALL IN PLAY" : "§7" + stateName;
-        ex.drawString(this.font, st, contentX() + 210, contentY() + 2, COLOR_TEXT_GOLD, false);
+    protected void renderGameContent(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        String stateTag = inPlay ? "\u00a7aBALL IN PLAY" : "\u00a77" + stateName;
+        g.drawString(this.font, "PINBALL  \u00a77|  " + stateTag, contentX(), contentY() + 2, COLOR_PINBALL, false);
+        g.drawString(this.font, "Stake: §e" + bet + " Chips", contentX() + 110, contentY() + 2, COLOR_TEXT_WHITE, false);
+        g.drawString(this.font, "Score: §e" + score, contentX() + 200, contentY() + 2, COLOR_TEXT_WHITE, false);
 
-        // ---- playfield ------------------------------------------------------
         int px0 = contentX();
         int pw = bgWidth - 20;
-        ex.fill(px0, topPos + PLAYFIELD_TOP - 2, px0 + pw, topPos + PLAYFIELD_TOP + PLAYFIELD_HEIGHT + 2,
+        g.fill(px0, topPos + PLAYFIELD_TOP - 2, px0 + pw, topPos + PLAYFIELD_TOP + PLAYFIELD_HEIGHT + 2,
                 0xFF0A0807);
-        ex.fill(px0 + 1, topPos + PLAYFIELD_TOP - 1, px0 + pw - 1,
+        g.fill(px0 + 1, topPos + PLAYFIELD_TOP - 1, px0 + pw - 1,
                 topPos + PLAYFIELD_TOP + PLAYFIELD_HEIGHT + 1, 0xFF14100C);
 
-        // Bumpers across the playfield. A lit bumper is one the ball has already struck in
-        // this run, so the player can read their progress.
         int bumperY = topPos + PLAYFIELD_TOP + 18;
         for (int i = 0; i < PinballEngine.BUMPERS; i++) {
             int bx = px0 + 14 + i * 26;
             boolean hit = i < bumpers;
             int outer = hit ? 0xFFFFD86B : 0xFF3A2E20;
             int inner = hit ? 0xFFFFF0B0 : 0xFF221A12;
-            ex.fill(bx, bumperY, bx + 14, bumperY + 14, outer);
-            ex.fill(bx + 2, bumperY + 2, bx + 12, bumperY + 12, inner);
-            ex.drawCenteredString(this.font, String.valueOf(i + 1), bx + 7, bumperY + 4,
+            g.fill(bx, bumperY, bx + 14, bumperY + 14, outer);
+            g.fill(bx + 2, bumperY + 2, bx + 12, bumperY + 12, inner);
+            g.drawCenteredString(this.font, String.valueOf(i + 1), bx + 7, bumperY + 4,
                     hit ? 0xFF2A1B10 : 0xFF6B5B45);
         }
 
-        // Ball: its horizontal position across the playfield maps to the engine's bounce index.
         int ballX = px0 + 14 + Math.min(bounce, PinballEngine.BUMPERS - 1) * 26 + 7;
         int ballY = bumperY + 22;
         if (inPlay) {
-            ex.fill(ballX - 3, ballY - 3, ballX + 3, ballY + 3, 0xFFE8E8E8);
-            ex.fill(ballX - 1, ballY - 1, ballX + 1, ballY + 1, 0xFFFFFFFF);
+            g.fill(ballX - 3, ballY - 3, ballX + 3, ballY + 3, 0xFFE0E0E0);
+            g.fill(ballX - 1, ballY - 1, ballX + 1, ballY + 1, 0xFFFFFFFF);
         } else {
-            // Drained: draw an empty cradle where the ball would be.
-            ex.fill(ballX - 3, ballY - 1, ballX + 3, ballY + 3, 0xFF2A2018);
+            g.fill(ballX - 3, ballY - 1, ballX + 3, ballY + 3, 0xFF2A2018);
         }
 
-        // ---- timing meter ---------------------------------------------------
         int meterY = contentY() + 80;
-        ex.drawString(this.font, "TIMING", contentX(), meterY, COLOR_TEXT_GOLD, false);
+        g.drawString(this.font, "FLIP POWER", contentX(), meterY, COLOR_TEXT_GOLD, false);
         int mx0 = contentX() + 46;
         int mw = 150;
-        ex.fill(mx0, meterY, mx0 + mw, meterY + 6, 0xFF1A1410);
+        g.fill(mx0, meterY, mx0 + mw, meterY + 6, 0xFF1A1410);
         int filled = (int) (mw * charge);
         if (filled > 0) {
-            // Green through gold as the meter fills, so a "perfect" release reads instantly.
             int col = charge > 0.8f ? 0xFFFFE9A8 : (charge > 0.5f ? 0xFFFFD86B : 0xFF7DDE7D);
-            ex.fill(mx0, meterY, mx0 + filled, meterY + 6, col);
+            g.fill(mx0, meterY, mx0 + filled, meterY + 6, col);
         }
-        ex.drawString(this.font, String.format("§7%d%%", (int) (charge * 100)),
+        g.drawString(this.font, "\u00a77" + (int) (charge * 100) + "%",
                 mx0 + mw + 6, meterY - 1, COLOR_TEXT_WHITE, false);
 
-        // ---- last ball / odds ----------------------------------------------
         String last = lastPayout > 0
-                ? "§aLast: +" + lastPayout + " Chips §7(" + lastBumpers + " bumpers)"
+                ? "§aLast: +§e" + lastPayout + " §aChips §7(" + lastBumpers + " bumpers)"
                 : "§7No completed ball yet";
-        ex.drawString(this.font, last, contentX(), contentY() + 126, COLOR_TEXT_WHITE, false);
+        g.drawString(this.font, last, contentX(), contentY() + 120, COLOR_TEXT_WHITE, false);
 
-        // The machine's tuned return, shown honestly rather than hidden.
-        String odds = String.format("§7Return: §e%.0f%%§7 at perfect timing, §e%.0f%%§7 casual",
+        String odds = String.format("§7Return: §e%.0f%%§7 perfect, §e%.0f%%§7 casual",
                 rtpSkilled * 100, rtpCasual * 100);
-        ex.drawString(this.font, odds, contentX(), contentY() + 138, 0xFFAAAAAA, false);
+        g.drawString(this.font, odds, contentX(), contentY() + 132, 0xFFAAAAAA, false);
     }
 }

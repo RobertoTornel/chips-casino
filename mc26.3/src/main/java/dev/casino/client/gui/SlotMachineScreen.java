@@ -26,15 +26,15 @@ public class SlotMachineScreen extends BaseCasinoScreen {
     protected void initGameWidgets() {
         onStateUpdated();
 
-        // Chip denominations, top-left.
-        int betY = contentY();
+        // Bet selector - left side, clearly labelled
+        int betY = contentY() + 4;
         addRenderableWidget(SpriteButton.of(contentX(), betY, 26, 16, "10", b -> betAmount = 10));
         addRenderableWidget(SpriteButton.of(contentX() + 30, betY, 26, 16, "50", b -> betAmount = 50));
         addRenderableWidget(SpriteButton.of(contentX() + 60, betY, 30, 16, "100", b -> betAmount = 100));
 
-        // Spin action button
-        int actY = contentY() + 20;
-        addRenderableWidget(SpriteButton.primary(contentX() + contentW() - 92, actY, 80, 16, "SPIN",
+        // Spin button - prominent, right side
+        int actY = contentY() + 26;
+        addRenderableWidget(SpriteButton.primary(contentX() + contentW() - 92, actY, 80, 20, "SPIN",
                 b -> {
                     JsonObject json = new JsonObject();
                     json.addProperty("bet", betAmount);
@@ -81,20 +81,22 @@ public class SlotMachineScreen extends BaseCasinoScreen {
 
     @Override
     protected void renderGameContent(GuiGraphicsExtractor extractor, int mouseX, int mouseY, float partialTick) {
-        extractor.text(this.font, "SPIN TO WIN (OR LOSE)", contentX(), contentY() + 16, COLOR_SLOT_NEON);
-        // Bet label
-        extractor.text(this.font, "Bet: §e" + betAmount + " Chips", contentX(), contentY() + 54, COLOR_TEXT_WHITE);
+        // Header
+        extractor.text(this.font, "SPIN TO WIN", contentX(), contentY() + 2, COLOR_SLOT_NEON);
 
-        // Payout result banner
-        int bannerY = contentY() + 114;
+        // Bet display - prominent
+        extractor.text(this.font, "Bet: §e" + betAmount + " §7Chips", contentX(), contentY() + 20, COLOR_TEXT_WHITE);
+
+        // Payout result banner - center, high contrast
+        int bannerY = contentY() + 100;
         if (lastWon) {
-            extractor.text(this.font, "§a§lWon +§e" + lastPayout + " §aChips!", contentX(), bannerY, COLOR_TEXT_GREEN);
+            extractor.text(this.font, "§a§lWIN +§e" + lastPayout + " §aChips!", contentX(), bannerY, COLOR_TEXT_GREEN);
         } else if (lastPayout == 0 && !spinning) {
             extractor.text(this.font, "§cNo win.", contentX(), bannerY, COLOR_TEXT_RED);
         }
 
         // Three reel strips on the right half
-        int reelBaseY = contentY() + 22;
+        int reelBaseY = contentY() + 40;
         int reelX0 = contentX() + 150;
         int reelW = 40;
         int reelH = 92;

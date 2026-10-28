@@ -81,14 +81,18 @@ public class ExchangeScreen extends BaseCasinoScreen {
     protected void renderGameContent(GuiGraphicsExtractor e, int mouseX, int mouseY, float partialTick) {
         int contentTop = contentY() + 14;
 
-        // Column headings
-        e.text(this.font, "\u00a7aSELL", contentX(), contentTop, COLOR_TEXT_GREEN);
-        e.text(this.font, "\u00a7cBUY", contentX() + COL_W + 8, contentTop, COLOR_TEXT_RED);
+        // Header
+        e.text(this.font, "\u00a7eEXCHANGE", contentX(), contentTop, COLOR_TEXT_GOLD);
         e.text(this.font, "The house buys at 0.8x and sells at 1.2x — the spread is the game.",
                 contentX(), contentY() + 16, COLOR_EXCHANGE);
 
-        int y = contentTop + 14;
-        int maxRows = Math.min(rows.size(), 12);
+        // Column headings
+        int headY = contentTop + 30;
+        e.text(this.font, "\u00a7aSELL", contentX(), headY, COLOR_TEXT_GREEN);
+        e.text(this.font, "\u00a7cBUY", contentX() + COL_W + 8, headY, COLOR_TEXT_RED);
+
+        int y = headY + ROW_H + 2;
+        int maxRows = Math.min(rows.size(), 10);
         for (int i = 0; i < maxRows; i++) {
             Row r = rows.get(i);
             int rowY = y + i * ROW_H;
@@ -118,14 +122,14 @@ public class ExchangeScreen extends BaseCasinoScreen {
         }
 
         // Footer: spread summary
-        int footY = topPos + bgHeight - 58;
+        int footY = topPos + bgHeight - 40;
         e.text(this.font,
                 "\u00a77Sell at \u00a7a" + fmtPercent(sellMultiplier)
                         + "\u00a77   \u00b7   Buy at \u00a7c" + fmtPercent(buyMultiplier),
                 contentX(), footY, COLOR_TEXT_WHITE);
         e.text(this.font,
-                "\u00a77The spread is the house edge — that is what makes it a game.",
-                contentX(), footY + 10, 0xFF999999);
+                "\u00a77Sell then buy back always loses — that is the house edge.",
+                contentX(), footY + 12, 0xFF999999);
     }
 
     private static String shortId(String id) {

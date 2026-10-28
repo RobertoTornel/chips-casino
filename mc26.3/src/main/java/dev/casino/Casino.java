@@ -58,6 +58,9 @@ public class Casino implements ModInitializer {
     public static final TexasHoldemFloorBlock TEXAS_HOLDEM_BLOCK = new TexasHoldemFloorBlock();
     public static final ExchangeBlock EXCHANGE_BLOCK = new ExchangeBlock();
     public static final SlotMachineBlock SLOT_MACHINE_BLOCK = new SlotMachineBlock();
+    public static final CrapsTableBlock CRAPS_BLOCK = new CrapsTableBlock();
+    public static final WheelOfFortuneBlock WHEEL_OF_FORTUNE_BLOCK = new WheelOfFortuneBlock();
+    public static final KenoBlock KENO_BLOCK = new KenoBlock();
 
     // Creative mode tab placeholder — registered in onInitialize() after blocks exist,
     // because Block.asItem() requires the block to be registered first.
@@ -75,6 +78,9 @@ public class Casino implements ModInitializer {
     public static BlockEntityType<TexasHoldemBlockEntity> TEXAS_HOLDEM_BE_TYPE;
     public static BlockEntityType<ExchangeBlockEntity> EXCHANGE_BE_TYPE;
     public static BlockEntityType<SlotMachineBlockEntity> SLOT_MACHINE_BE_TYPE;
+    public static BlockEntityType<CrapsBlockEntity> CRAPS_BE_TYPE;
+    public static BlockEntityType<WheelOfFortuneBlockEntity> WHEEL_OF_FORTUNE_BE_TYPE;
+    public static BlockEntityType<KenoBlockEntity> KENO_BE_TYPE;
 
     @Override
     public void onInitialize() {
@@ -90,6 +96,9 @@ public class Casino implements ModInitializer {
         registerBlock("texas_holdem_floor", TEXAS_HOLDEM_BLOCK);
         registerBlock("exchange", EXCHANGE_BLOCK);
         registerBlock("slot_machine", SLOT_MACHINE_BLOCK);
+        registerBlock("craps_table", CRAPS_BLOCK);
+        registerBlock("wheel_of_fortune", WHEEL_OF_FORTUNE_BLOCK);
+        registerBlock("keno", KENO_BLOCK);
 
         // 2. Register Block Entity Types
         ROULETTE_BE_TYPE = Registry.register(
@@ -137,6 +146,21 @@ public class Casino implements ModInitializer {
                 BuiltInRegistries.BLOCK_ENTITY_TYPE,
                 id("slot_machine"),
                 new BlockEntityType<>(SlotMachineBlockEntity::new, Set.of(SLOT_MACHINE_BLOCK))
+        );
+        CRAPS_BE_TYPE = Registry.register(
+                BuiltInRegistries.BLOCK_ENTITY_TYPE,
+                id("craps_table"),
+                new BlockEntityType<>(CrapsBlockEntity::new, Set.of(CRAPS_BLOCK))
+        );
+        WHEEL_OF_FORTUNE_BE_TYPE = Registry.register(
+                BuiltInRegistries.BLOCK_ENTITY_TYPE,
+                id("wheel_of_fortune"),
+                new BlockEntityType<>(WheelOfFortuneBlockEntity::new, Set.of(WHEEL_OF_FORTUNE_BLOCK))
+        );
+        KENO_BE_TYPE = Registry.register(
+                BuiltInRegistries.BLOCK_ENTITY_TYPE,
+                id("keno"),
+                new BlockEntityType<>(KenoBlockEntity::new, Set.of(KENO_BLOCK))
         );
 
         // 3. Register Packets
@@ -207,6 +231,9 @@ public class Casino implements ModInitializer {
                             emitter.accept(TEXAS_HOLDEM_BLOCK.asItem());
                             emitter.accept(EXCHANGE_BLOCK.asItem());
                             emitter.accept(SLOT_MACHINE_BLOCK.asItem());
+                            emitter.accept(CRAPS_BLOCK.asItem());
+                            emitter.accept(WHEEL_OF_FORTUNE_BLOCK.asItem());
+                            emitter.accept(KENO_BLOCK.asItem());
                         })
                         .build()
         );
@@ -214,7 +241,7 @@ public class Casino implements ModInitializer {
         // 10. Creative Mode Tab stub (no-op — registration happens above)
         registerCreativeTab();
 
-        LOGGER.info("Casino ready: 9 games, sell at 0.8x / buy at 1.2x, bots active");
+        LOGGER.info("Casino ready: 12 games, sell at 0.8x / buy at 1.2x, bots active");
     }
 
     private static void registerBlock(String name, Block block) {

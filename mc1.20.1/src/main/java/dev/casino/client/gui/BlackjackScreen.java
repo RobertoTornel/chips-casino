@@ -797,20 +797,6 @@ public class BlackjackScreen extends BaseCasinoScreen {
         return trimmed.length() > 8 ? trimmed.substring(0, 8) + "…" : trimmed;
     }
 
-    private String fit(String text, int maxWidth) {
-        if (text == null) {
-            return "";
-        }
-        if (this.font.width(text) <= maxWidth) {
-            return text;
-        }
-        String cut = text;
-        while (cut.length() > 1 && this.font.width(cut + "…") > maxWidth) {
-            cut = cut.substring(0, cut.length() - 1);
-        }
-        return cut + "…";
-    }
-
     private static int badgeColor(ClientHand hand) {
         if (hand == null) {
             return FELT_DARK;

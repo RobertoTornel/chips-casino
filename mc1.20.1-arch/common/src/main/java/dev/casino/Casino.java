@@ -66,6 +66,12 @@ public final class Casino {
             BLOCKS.register("exchange", ExchangeBlock::new);
     public static final RegistrySupplier<SlotMachineBlock> SLOT_MACHINE_BLOCK =
             BLOCKS.register("slot_machine", SlotMachineBlock::new);
+    public static final RegistrySupplier<CrapsTableBlock> CRAPS_BLOCK =
+            BLOCKS.register("craps_table", CrapsTableBlock::new);
+    public static final RegistrySupplier<WheelOfFortuneBlock> WHEEL_OF_FORTUNE_BLOCK =
+            BLOCKS.register("wheel_of_fortune", WheelOfFortuneBlock::new);
+    public static final RegistrySupplier<KenoBlock> KENO_BLOCK =
+            BLOCKS.register("keno", KenoBlock::new);
     public static final RegistrySupplier<dev.casino.block.PinballMachineBlock> PINBALL_BLOCK =
             BLOCKS.register("pinball_machine", dev.casino.block.PinballMachineBlock::new);
 
@@ -87,6 +93,9 @@ public final class Casino {
                         emitter.accept(TEXAS_HOLDEM_BLOCK.get().asItem());
                         emitter.accept(EXCHANGE_BLOCK.get().asItem());
                         emitter.accept(SLOT_MACHINE_BLOCK.get().asItem());
+                        emitter.accept(CRAPS_BLOCK.get().asItem());
+                        emitter.accept(WHEEL_OF_FORTUNE_BLOCK.get().asItem());
+                        emitter.accept(KENO_BLOCK.get().asItem());
                     })
                     .build()
     );
@@ -118,6 +127,15 @@ public final class Casino {
     public static final RegistrySupplier<BlockEntityType<SlotMachineBlockEntity>> SLOT_MACHINE_BE_TYPE =
             BLOCK_ENTITIES.register("slot_machine",
                     () -> makeType(SlotMachineBlockEntity::new, SLOT_MACHINE_BLOCK.get()));
+    public static final RegistrySupplier<BlockEntityType<CrapsBlockEntity>> CRAPS_BE_TYPE =
+            BLOCK_ENTITIES.register("craps_table",
+                    () -> makeType(CrapsBlockEntity::new, CRAPS_BLOCK.get()));
+    public static final RegistrySupplier<BlockEntityType<WheelOfFortuneBlockEntity>> WHEEL_OF_FORTUNE_BE_TYPE =
+            BLOCK_ENTITIES.register("wheel_of_fortune",
+                    () -> makeType(WheelOfFortuneBlockEntity::new, WHEEL_OF_FORTUNE_BLOCK.get()));
+    public static final RegistrySupplier<BlockEntityType<KenoBlockEntity>> KENO_BE_TYPE =
+            BLOCK_ENTITIES.register("keno",
+                    () -> makeType(KenoBlockEntity::new, KENO_BLOCK.get()));
 
     // ---- Block items -----------------------------------------------------
     public static final RegistrySupplier<Item> ROULETTE_ITEM =
