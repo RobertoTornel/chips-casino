@@ -12,14 +12,24 @@ import java.util.List;
 /**
  * Six-seat multiplayer blackjack table.
  *
- * <p>The layout is a real table seen from the dealer's side of the shoe: the dealer's fan and
- * the shoe sit at the top, the six seats hang off an ellipse under them, and the player's
- * controls are two rows at the bottom of the interior. Every element is positioned from
- * {@link #contentX()}/{@link #contentY()}, so the whole table moves with the cabinet.
+ * <p>The table is seen from the dealer's side of the shoe: the dealer's hand and shoe sit
+ * at the top of the felt, six seats fan across the middle, and betting/table verbs sit in two
+ * compact rows at the bottom. Every element is positioned from {@code contentX()}/{@code
+ * contentY()}, so the whole table moves with the cabinet inside a fixed {@code 352 x 168}
+ * interior.
+ *
+ * <h2>Vertical budget (interior 352 x 168)</h2>
+ * <pre>
+ *   +0   .. +14   header: pot, hand #, dealer's line, ticker
+ *   +18  .. +46   dealer's hand + shoe (left)
+ *   +48  .. +82   six seats on a shallow arc
+ *   +88  .. +104  four chip denomination buttons + DEAL
+ *   +106 .. +122  HIT / STAND / DOUBLE / SPLIT / SIT OUT / BOTS
+216:  * </pre>
  *
  * <h2>Animation</h2>
- * Cards carry the server tick they landed on ({@code t}), so the client can slide each one out
- * of the shoe and fade it in without any per-card packets. A local {@link #clientClock} runs at
+ * Every card carries the server tick it landed on ({@code t}), so the client can slide each one
+ * out of the shoe and fade it in with no per-card packets. A local {@link #clientClock} runs at
  * 20 Hz and is seeded from the server's {@code animClock} the first time state arrives; the
  * render clock is {@code max(clientClock, serverAnimClock)} so a client that fell behind
  * (a lag spike, a resize) never shows a stale or negative card age.
@@ -28,21 +38,18 @@ public class BlackjackScreen extends BaseCasinoScreen {
 
     // ---------------------------------------------------------------- geometry
     private static final int SEAT_COUNT = 6;
-    /** The table's shoe is a single 52-card deck; the gauge is drawn against this. */
     private static final int SHOE_SIZE = 52;
     private static final int CARD_W = 20;
     private static final int CARD_H = 28;
     /** Horizontal offset between the dealer's fanned cards. */
     private static final int DEALER_STEP = 14;
     /** Horizontal offset between a seat's fanned cards. */
-    private static final int SEAT_STEP = 10;
+    private static final int SEAT_STEP = 8;
     private static final int SLIDE_TICKS = 10;
     private static final int FLIP_TICKS = 6;
     private static final int CHIP_TICKS = 6;
 
     // Seat arc: an ellipse under the dealer. Angles run 200 deg .. 340 deg in six steps.
-    private static final int ARC_CX = 184;
-    private static final int ARC_CY = 104;
     private static final int ARC_RX = 150;
     private static final int ARC_RY = 28;
     private static final int ARC_STEP_DEG = 28;
@@ -140,8 +147,8 @@ public class BlackjackScreen extends BaseCasinoScreen {
     private SpriteButton botsButton;
 
     public BlackjackScreen(BlockPos pos, String initialStateJson, long playerBalance) {
-        super(Component.literal("Blackjack - Six Seat Table (Pays 3:2)"), pos, initialStateJson, playerBalance);
-        this.bgWidth = 416;
+        super(Component.literal("Blackjack - Six Seat Table"), pos, initialStateJson, playerBalance);
+        this.bgWidth = 400;
         this.bgHeight = 232;
         for (int i = 0; i < SEAT_COUNT; i++) {
             seats[i] = new Seat();
@@ -154,27 +161,28 @@ public class BlackjackScreen extends BaseCasinoScreen {
     @Override
     protected void initGameWidgets() {
         // Row 1 (betting): four chip denominations then DEAL, centred in the interior.
-        int row1 = contentY() + 132;
-        betTen = addRenderableWidget(SpriteButton.of(contentX() + 92, row1, 30, 16, "10", b -> placeBet(10)));
-        betFifty = addRenderableWidget(SpriteButton.of(contentX() + 126, row1, 30, 16, "50", b -> placeBet(50)));
-        betHundred = addRenderableWidget(SpriteButton.of(contentX() + 160, row1, 30, 16, "100", b -> placeBet(100)));
-        betFiveHundred = addRenderableWidget(SpriteButton.of(contentX() + 194, row1, 30, 16, "500", b -> placeBet(500)));
-        dealButton = addRenderableWidget(SpriteButton.primary(contentX() + 232, row1, 44, 16, "DEAL",
+        int row1Y = contentY() + 130;
+        int row1CenterX = contentX() + contentW() / 2 - 2 * 30 - 3 * 10 - 44 - 10;
+        betTen = addRenderableWidget(SpriteButton.of(contentX() + 92, row1Y, 30, 16, "10", b -> placeBet(10)));
+        betFifty = addRenderableWidget(SpriteButton.of(contentX() + 126, row1Y, 30, 16, "50", b -> placeBet(50)));
+        betHundred = addRenderableWidget(SpriteButton.of(contentX() + 160, row1Y, 30, 16, "100", b -> placeBet(100)));
+        betFiveHundred = addRenderableWidget(SpriteButton.of(contentX() + 194, row1Y, 30, 16, "500", b -> placeBet(500)));
+        dealButton = addRenderableWidget(SpriteButton.primary(contentX() + 232, row1Y, 44, 16, "DEAL",
                 b -> sendAction("DEAL", "{}")));
 
         // Row 2 (play): the five table verbs plus the house's bot toggle.
-        int row2 = contentY() + 152;
-        hitButton = addRenderableWidget(SpriteButton.of(contentX() + 42, row2, 44, 16, "HIT",
+        int row2Y = contentY() + 152;
+        hitButton = addRenderableWidget(SpriteButton.colored(contentX() + 42, row2Y, 44, 16, "HIT",
                 SpriteButton.LABEL_GREEN, b -> sendAction("HIT", "{}")));
-        standButton = addRenderableWidget(SpriteButton.of(contentX() + 90, row2, 44, 16, "STAND",
+        standButton = addRenderableWidget(SpriteButton.colored(contentX() + 90, row2Y, 44, 16, "STAND",
                 SpriteButton.LABEL_NORMAL, b -> sendAction("STAND", "{}")));
-        doubleButton = addRenderableWidget(SpriteButton.of(contentX() + 138, row2, 44, 16, "DOUBLE",
+        doubleButton = addRenderableWidget(SpriteButton.colored(contentX() + 138, row2Y, 44, 16, "DOUBLE",
                 SpriteButton.LABEL_PRIMARY, b -> sendAction("DOUBLE", "{}")));
-        splitButton = addRenderableWidget(SpriteButton.of(contentX() + 186, row2, 44, 16, "SPLIT",
+        splitButton = addRenderableWidget(SpriteButton.colored(contentX() + 186, row2Y, 44, 16, "SPLIT",
                 SpriteButton.LABEL_PRIMARY, b -> sendAction("SPLIT", "{}")));
-        leaveButton = addRenderableWidget(SpriteButton.of(contentX() + 234, row2, 44, 16, "SIT OUT",
+        leaveButton = addRenderableWidget(SpriteButton.colored(contentX() + 234, row2Y, 44, 16, "SIT OUT",
                 SpriteButton.LABEL_RED, b -> sendAction("LEAVE", "{}")));
-        botsButton = addRenderableWidget(SpriteButton.of(contentX() + 282, row2, 44, 16, "BOTS",
+        botsButton = addRenderableWidget(SpriteButton.colored(contentX() + 282, row2Y, 44, 16, "BOTS",
                 botsOn ? SpriteButton.LABEL_GREEN : SpriteButton.LABEL_BLACK,
                 b -> sendAction("TOGGLE_BOTS", "{}")));
 
@@ -565,7 +573,7 @@ public class BlackjackScreen extends BaseCasinoScreen {
             say = "Dealer shuffles the shoe...";
             e.centeredText(this.font, fit(say, bw - 40), cx + 6, by + 3, GREY);
         } else {
-            e.centeredText(this.font, fit(say, bw - 40), cx + 6, by + 3, COLOR_TEXT_WHITE);
+            e.text(this.font, say, bx + 3, by + 3, COLOR_TEXT_WHITE);
         }
     }
 
@@ -743,8 +751,8 @@ public class BlackjackScreen extends BaseCasinoScreen {
      * clamped into the interior so the outer seats never touch the frame.
      */
     private int[] seatPoint(int index) {
-        int cx = contentX() + ARC_CX;
-        int cy = contentY() + ARC_CY;
+        int cx = contentX() + contentW() / 2;
+        int cy = contentY() + 104;
         double theta = Math.toRadians(ARC_FIRST_DEG + index * ARC_STEP_DEG);
         int x = cx + (int) (ARC_RX * Math.cos(theta));
         int y = cy + (int) (ARC_RY * Math.sin(theta));
@@ -795,20 +803,6 @@ public class BlackjackScreen extends BaseCasinoScreen {
         }
         String trimmed = name.trim();
         return trimmed.length() > 8 ? trimmed.substring(0, 8) + "…" : trimmed;
-    }
-
-    private String fit(String text, int maxWidth) {
-        if (text == null) {
-            return "";
-        }
-        if (this.font.width(text) <= maxWidth) {
-            return text;
-        }
-        String cut = text;
-        while (cut.length() > 1 && this.font.width(cut + "…") > maxWidth) {
-            cut = cut.substring(0, cut.length() - 1);
-        }
-        return cut + "…";
     }
 
     private static int badgeColor(ClientHand hand) {

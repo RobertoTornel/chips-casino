@@ -10,21 +10,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Six-seat multiplayer baccarat (punto banco).
+ * Six-seat multiplayer baccarat table.
  *
  * <p>The tableau is the same table as {@link BlackjackScreen}, seen from the same side of the
  * shoe: the dealer's tray sits at the top right, the two hands are fanned down the middle of
  * the felt, and the six bettors share one row of plates across it under them. The croupier has
  * no speech bubble of her own: what she says sits on the header line, clear of the seats.
  * Every element is placed from {@link #contentX()}/{@link #contentY()}, so the whole table
- * travels with the cabinet inside a fixed 352 x 168 interior.
+ * travels with the cabinet inside a fixed {@code 352 x 168} interior.
+ *
+ * <h2>Vertical budget (interior 352 x 168)</h2>
+ * <pre>
+ *   +0   .. +14   header: totals, stake, round, the croupier's line, the ticker
+ *   +18  .. +46   banker fan
+ *   +50  .. +78   player fan
+ *   +82  .. +106  six seat plates (24px each)
+ *   +110 .. +126  stake buttons
+ *   +132 .. +148  line / verb buttons
+ * </pre>
  *
  * <h2>Animation</h2>
- * Every card carries the server tick it landed on ({@code t}), so a card can be slid out of the
- * shoe and faded in with no per-card packets: the local {@link #clientClock} runs at 20 Hz and
- * is seeded from the server's {@code animClock} the first time state arrives, and the render
- * clock is {@code max(clientClock, serverAnimClock)} so a client that fell behind never shows a
- * stale or negative card age.
+ * Every card carries the server tick it landed on ({@code t}), so the client can slide each one
+ * out of the shoe and fade it in with no per-card packets. A local {@link #clientClock} runs at
+ * 20 Hz and is seeded from the server's {@code animClock} the first time state arrives; the
+ * render clock is {@code max(clientClock, serverAnimClock)} so a client that fell behind
+ * (a lag spike, a resize) never shows a stale or negative card age.
  *
  * <p>Unlike blackjack there are no decisions after the deal — a bettor picks PLAYER, BANKER or
  * TIE and watches — so the only controls are the line, the stake, and the house's own buttons.
@@ -43,30 +53,10 @@ public class BaccaratScreen extends BaseCasinoScreen {
     /** Mirrors {@code BaccaratTable.BETTING_TICKS}: the door shuts 20 s after it opens. */
     private static final int BET_WINDOW_TICKS = 400;
 
-    /*
-     * The vertical budget, relative to contentY(): 168px of interior, 4px of air between the
-     * bands, and nothing drawn outside it.
-     *
-     *   +0   .. +16    header: totals, stake, round, the croupier's line
-     *   +18  .. +46    banker fan
-     *   +50  .. +78    player fan
-     *   +82  .. +106   the six seat plates (24px each)
-     *   +110 .. +126   stake buttons
-     *   +132 .. +148   line / verb buttons
-     */
-    /**
-     * Seat arc: six plates spread across the felt, 200 deg .. 340 deg in steps. A plate is 24px
-     * tall and the seat band is exactly 24px, so the arc keeps only its horizontal spread: the
-     * row shares one baseline and every block sits inside +82 .. +106.
-     */
-    private static final int ARC_CY = 106;
-    /**
-     * Vertical radius of the seat arc, in pixels.
-     *
-     * <p>A flat row of six plates reads as a list, not a table: the seats have to dip at the
-     * ends and rise in the middle to look like a semicircle of people leaning in. The plate
-     * is 24px tall in a 32px band, which is exactly 8px of headroom to spend here.
-     */
+    // Seat arc: six plates spread across the felt, 200 deg .. 340 deg in steps. A plate is 24px
+    // tall and the seat band is exactly 24px, so the arc keeps only its horizontal spread: the
+    // row shares one baseline and every block sits inside +82 .. +106.
+    private static final int ARC_CY = 98;
     private static final int ARC_RY = 8;
     private static final int ARC_RX = 140;
     private static final int ARC_FIRST_DEG = 200;
@@ -110,17 +100,18 @@ public class BaccaratScreen extends BaseCasinoScreen {
     private int serverAnimClock;
     private int phaseTicks;
     private int round;
-    private int shoe;
-    private boolean seated;
-    private boolean owner;
-    private boolean botsOn = true;
-    private long minBet = 10;
-    private long maxBet = 10_000;
     private String dealerSay = "";
     private String outcome = "NONE";
     private String ticker = "";
     private int playerTotal;
     private int bankerTotal;
+    private boolean seated;
+    private boolean botsOn = true;
+    private boolean owner;
+    private long minBet = 10;
+    private long maxBet = 10_000;
+    private int shoe = 52;
+    private final List<Integer> history = new ArrayList<>();
     private final List<ClientCard> playerHand = new ArrayList<>();
     private final List<ClientCard> bankerHand = new ArrayList<>();
     private final ClientSeat[] seats = new ClientSeat[SEAT_COUNT];
@@ -176,18 +167,18 @@ public class BaccaratScreen extends BaseCasinoScreen {
 
         // Row 2: the three lines, then the table verbs.
         int row2Y = contentY() + 146;
-        linePlayer = addRenderableWidget(SpriteButton.of(contentX() + 4, row2Y, 60, 16, "PLAYER",
+        linePlayer = addRenderableWidget(SpriteButton.colored(contentX() + 4, row2Y, 60, 16, "PLAYER",
                 SpriteButton.LABEL_NORMAL, b -> selectLine("PLAYER")));
-        lineBanker = addRenderableWidget(SpriteButton.of(contentX() + 68, row2Y, 60, 16, "BANKER",
+        lineBanker = addRenderableWidget(SpriteButton.colored(contentX() + 68, row2Y, 60, 16, "BANKER",
                 SpriteButton.LABEL_RED, b -> selectLine("BANKER")));
-        lineTie = addRenderableWidget(SpriteButton.of(contentX() + 132, row2Y, 44, 16, "TIE",
+        lineTie = addRenderableWidget(SpriteButton.colored(contentX() + 132, row2Y, 44, 16, "TIE",
                 SpriteButton.LABEL_GREEN, b -> selectLine("TIE")));
         dealButton = addRenderableWidget(SpriteButton.primary(contentX() + 180, row2Y, 52, 16, "DEAL",
                 b -> sendAction("DEAL", "{}")));
-        botsButton = addRenderableWidget(SpriteButton.of(contentX() + 236, row2Y, 44, 16, "BOTS",
+        botsButton = addRenderableWidget(SpriteButton.colored(contentX() + 236, row2Y, 44, 16, "BOTS",
                 botsOn ? SpriteButton.LABEL_GREEN : SpriteButton.LABEL_BLACK,
                 b -> sendAction("TOGGLE_BOTS", "{}")));
-        sitOutButton = addRenderableWidget(SpriteButton.of(contentX() + 284, row2Y, 56, 16, "SIT OUT",
+        sitOutButton = addRenderableWidget(SpriteButton.colored(contentX() + 284, row2Y, 56, 16, "SIT OUT",
                 SpriteButton.LABEL_RED, b -> sendAction("LEAVE", "{}")));
 
         applyEnablement();
@@ -335,50 +326,6 @@ public class BaccaratScreen extends BaseCasinoScreen {
         }
     }
 
-    private static String str(JsonObject o, String key, String fallback) {
-        if (o.has(key) && !o.get(key).isJsonNull()) {
-            try {
-                return o.get(key).getAsString();
-            } catch (RuntimeException ignored) {
-                return fallback;
-            }
-        }
-        return fallback;
-    }
-
-    private static int num(JsonObject o, String key, int fallback) {
-        if (o.has(key) && !o.get(key).isJsonNull()) {
-            try {
-                return o.get(key).getAsInt();
-            } catch (RuntimeException ignored) {
-                return fallback;
-            }
-        }
-        return fallback;
-    }
-
-    private static long lng(JsonObject o, String key, long fallback) {
-        if (o.has(key) && !o.get(key).isJsonNull()) {
-            try {
-                return o.get(key).getAsLong();
-            } catch (RuntimeException ignored) {
-                return fallback;
-            }
-        }
-        return fallback;
-    }
-
-    private static boolean bool(JsonObject o, String key, boolean fallback) {
-        if (o.has(key) && !o.get(key).isJsonNull()) {
-            try {
-                return o.get(key).getAsBoolean();
-            } catch (RuntimeException ignored) {
-                return fallback;
-            }
-        }
-        return fallback;
-    }
-
     // ================================================================= tick ===
 
     @Override
@@ -400,7 +347,7 @@ public class BaccaratScreen extends BaseCasinoScreen {
     }
 
     /**
-     * The navy baize, in two soft bands: one behind the two fans, one behind the seat plates
+     * The navy baize, in two bands: one behind the two fans, one behind the seat plates
      * and the buttons. The seam sits at +82, the top of the seat band, so no fold ever cuts
      * through a plate.
      */
@@ -464,59 +411,26 @@ public class BaccaratScreen extends BaseCasinoScreen {
             e.text(this.font, fit(ticker, 100), contentX() + 2, low, GREY);
         }
 
-        // The shoe: card backs plus a gauge that empties as the deck is dealt.
+        // The shoe: card backs plus a gauge that empties as the shoe empties.
         drawShoe(e, shoeX() - 1, contentY() + 4, 22, 30);
     }
 
-    private String winnerWord() {
-        return switch (outcome == null ? "NONE" : outcome) {
-            case "PLAYER_WIN" -> "PLAYER WINS";
-            case "BANKER_WIN" -> "BANKER WINS";
-            case "TIE" -> "TIE";
-            default -> "";
-        };
-    }
-
-    private int winnerColor() {
-        return switch (outcome == null ? "NONE" : outcome) {
-            case "PLAYER_WIN" -> PLAYER_BLUE;
-            case "BANKER_WIN" -> BANKER_CORAL;
-            case "TIE" -> TIE_MINT;
-            default -> GREY;
-        };
-    }
-
-    private void drawShoe(GuiGraphicsExtractor e, int x, int y, int w, int h) {
-        e.fill(x, y, x + w, y + h, 0xFF0B1220);
-        e.fill(x, y, x + w, y + 1, GOLD);
-        e.fill(x, y + h - 1, x + w, y + h, 0x60FFFFD8);
-        e.fill(x, y, x + 1, y + h, GOLD);
-        e.fill(x + w - 1, y, x + w, y + h, GOLD);
-
-        // The stack of card backs still in the shoe.
-        int backs = Math.max(0, Math.min(4, shoe / 13));
-        for (int i = 0; i < backs; i++) {
-            int bx = x + 3 + i;
-            int by = y + 3 + i;
-            e.fill(bx, by, bx + CARD_W - 6, by + CARD_H - 6, 0xFF1B2B4A);
-            e.fill(bx, by, bx + CARD_W - 6, by + 1, 0xFF2F4A7A);
-        }
-
-        // Depth gauge: fills from the bottom as the shoe empties.
-        int gx = x + w - 8;
-        e.fill(gx, y + 4, gx + 4, y + h - 4, 0xFF1A1207);
-        double depth = Math.max(0.0, Math.min(1.0, shoe / (double) SHOE_SIZE));
-        int filled = (int) Math.round((h - 8) * depth);
-        if (filled > 0) {
-            e.fill(gx + 1, y + h - 4 - filled, gx + 3, y + h - 4, GOLD_LIGHT);
+    /** The last few settled numbers, as coloured chips, flush with the right edge. */
+    private void drawHistoryRail(GuiGraphicsExtractor e, int right, int y) {
+        int shown = Math.min(5, history.size());
+        for (int i = 0; i < shown; i++) {
+            int number = history.get(history.size() - shown + i);
+            int x = right - (shown - i) * 14;
+            e.fill(x, y, x + 12, y + 11, colourOf(number));
+            e.fill(x, y, x + 12, y + 1, 0x40FFFFFF);
+            String text = String.valueOf(number);
+            e.text(this.font, text, x + 6 - this.font.width(text) / 2, y + 2, 0xFFFFFFFF);
         }
     }
 
-    /**
-     * One hand: a fan of cards stepping right from the centre, its name to the left of the fan
-     * and its total in a gold badge to the right — the label sits outside the fan so the cards
-     * never cover it.
-     */
+    /** One hand: a fan of cards stepping right from the centre, its name to the left of the fan
+     *  and its total in a gold badge to the right — the label sits outside the fan so the cards
+     *  never cover it. */
     private void drawHand(GuiGraphicsExtractor e, List<ClientCard> cards, int fanY, String label,
                           int total, int accent, int clock) {
         int cx = contentX() + contentW() / 2;
@@ -525,7 +439,7 @@ public class BaccaratScreen extends BaseCasinoScreen {
         int fanX = cx - fanW / 2;
 
         // A shallow felt shadow anchors the fan to the table.
-        e.fill(fanX - 6, fanY + CARD_H - 2, fanX + fanW + 6, fanY + CARD_H, 0x30000000);
+        e.fill(fanX - 6, fanY + CARD_H - 2, fanX + fanW + 6, fanY + CARD_H + 2, 0x30000000);
 
         if (count == 0) {
             e.fill(fanX, fanY, fanX + CARD_W, fanY + CARD_H, 0x18FFFFFF);
@@ -585,9 +499,9 @@ public class BaccaratScreen extends BaseCasinoScreen {
     private int[] seatPoint(int index) {
         int cx = contentX() + contentW() / 2;
         double theta = Math.toRadians(ARC_FIRST_DEG + index * ARC_STEP_DEG);
-        int x = cx + (int) (ARC_RX * Math.cos(theta));
+        int x = cx + (int) Math.round(ARC_RX * Math.cos(theta));
         x = Math.max(contentX() + 30, Math.min(contentX() + contentW() - 70, x));
-        int y = contentY() + ARC_CY + (int) (ARC_RY * Math.sin(theta));
+        int y = contentY() + ARC_CY + (int) Math.round(ARC_RY * Math.sin(theta));
         // Keep every 24px plate inside the seat band (+82..+114).
         y = Math.max(contentY() + 98, Math.min(contentY() + 114, y));
         return new int[]{x, y};
@@ -602,7 +516,7 @@ public class BaccaratScreen extends BaseCasinoScreen {
         int nameColor = seat.mine ? COLOR_TEXT_GOLD : (seat.bot ? BOT_GREY : COLOR_TEXT_WHITE);
         String name = shortName(seat.name);
         e.centeredText(this.font, name, sx, sy - 9, nameColor);
-        // The backed line used to be a row of its own; a dot beside the name costs three pixels.
+        // The backed line used to be a row of its own; a coloured dot beside the name costs three pixels.
         int dotX = sx + this.font.width(name) / 2 + 3;
         e.fill(dotX, sy - 7, dotX + 3, sy - 4, lineColor(seat.target));
 
@@ -627,7 +541,7 @@ public class BaccaratScreen extends BaseCasinoScreen {
         tx += this.font.width(stakeText) + 5;
         if (!result.isEmpty()) {
             e.text(this.font, result, tx, sy, resultColor(seat.net));
-            tx += this.font.width(result) + 2;
+            tx += this.font.width(result) + 5;
         }
         if (!net.isEmpty()) {
             e.text(this.font, net, tx, sy, seat.net > 0 ? WIN_GREEN : LOSE_RED);
@@ -695,7 +609,7 @@ public class BaccaratScreen extends BaseCasinoScreen {
         e.centeredText(this.font, text, x + w / 2, y + (h - 8) / 2, GOLD_LIGHT);
     }
 
-    // ------------------------------------------------------------- geometry ---
+    // ---------------------------------------------------------------- geometry ---
 
     private int shoeX() {
         return contentX() + contentW() - 29;
@@ -729,17 +643,40 @@ public class BaccaratScreen extends BaseCasinoScreen {
         return trimmed.length() > 8 ? trimmed.substring(0, 8) + "\u2026" : trimmed;
     }
 
-    private String fit(String text, int maxWidth) {
-        if (text == null) {
-            return "";
+    private String winnerWord() {
+        return switch (outcome) {
+            case "PLAYER" -> "PLAYER WINS";
+            case "BANKER" -> "BANKER WINS";
+            case "TIE" -> "TIE";
+            default -> "SETTLED";
+        };
+    }
+
+    private int winnerColor() {
+        return switch (outcome) {
+            case "PLAYER" -> PLAYER_BLUE;
+            case "BANKER" -> BANKER_CORAL;
+            case "TIE" -> TIE_MINT;
+            default -> GREY;
+        };
+    }
+
+    private void drawShoe(GuiGraphicsExtractor e, int x, int y, int w, int h) {
+        e.fill(x, y, x + w, y + h, 0xFF140F0A);
+        e.fill(x, y, x + w, y + 1, GOLD);
+        e.fill(x, y + h - 1, x + w, y + h, 0x60FFFFD8);
+        e.fill(x, y, x + 1, y + h, GOLD);
+        e.fill(x + w - 1, y, x + w, y + h, GOLD);
+
+        int depth = Math.max(0, Math.min(SHOE_SIZE, shoe));
+        int filled = (int) Math.round(h * depth / (double) SHOE_SIZE);
+        if (filled > 0) {
+            e.fill(x + 2, y + h - filled, x + w - 2, y + h - 2, GOLD_LIGHT);
         }
-        if (this.font.width(text) <= maxWidth) {
-            return text;
-        }
-        String cut = text;
-        while (cut.length() > 1 && this.font.width(cut + "\u2026") > maxWidth) {
-            cut = cut.substring(0, cut.length() - 1);
-        }
-        return cut + "\u2026";
+    }
+
+    private static int colourOf(int number) {
+        if (number == 0) return 0xFF00FF00;
+        return (number % 2 == 0) ? 0xFFFF4444 : 0xFFFFFFFF;
     }
 }

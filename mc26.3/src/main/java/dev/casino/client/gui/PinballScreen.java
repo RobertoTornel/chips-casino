@@ -6,17 +6,6 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 
-/**
- * Pinball playfield screen.
- *
- * <p>The layout follows a real machine, top to bottom: a score readout and tilt meter under
- * the header, the bumpers down the playfield, then the flippers and the launch button at the
- * bottom where the player's hands would be.
- *
- * <p>The flipper buttons send the ball's skill input as {@code power} (0..1). A wider
- * "TIMING" bar sits beside them and fills while a flip is held, so the player can see the
- * input they are about to send rather than guessing.
- */
 public class PinballScreen extends BaseCasinoScreen {
 
     private static final int PLAYFIELD_TOP = 44;
@@ -36,6 +25,7 @@ public class PinballScreen extends BaseCasinoScreen {
     /** Rises while the player holds a flipper; this becomes the next flip's power. */
     private float charge = 0f;
     private boolean charging = false;
+    private int clientClock = 0;
 
     public PinballScreen(BlockPos pos, String initialStateJson, long playerBalance) {
         super(Component.literal("Pinball"), pos, initialStateJson, playerBalance);
@@ -64,8 +54,7 @@ public class PinballScreen extends BaseCasinoScreen {
             if (obj.has("lastBumpers")) lastBumpers = obj.get("lastBumpers").getAsInt();
             if (obj.has("rtpSkilled")) rtpSkilled = obj.get("rtpSkilled").getAsDouble();
             if (obj.has("rtpCasual")) rtpCasual = obj.get("rtpCasual").getAsDouble();
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
     }
 
     @Override
@@ -102,6 +91,7 @@ public class PinballScreen extends BaseCasinoScreen {
     @Override
     public void tick() {
         super.tick();
+        clientClock++;
         // Charge the flipper while the mouse is down over the machine, so holding builds
         // a stronger flip. Decays when released.
         if (inPlay) {
@@ -132,7 +122,7 @@ public class PinballScreen extends BaseCasinoScreen {
     @Override
     protected void renderGameContent(GuiGraphicsExtractor ex, int mouseX, int mouseY, float partialTick) {
         // ---- readouts -------------------------------------------------------
-        ex.text(this.font, "TILT THE MACHINE", contentX(), contentY() + 16, COLOR_PINBALL);
+        ex.text(this.font, "TILT THE MACHINE", contentX(), contentY() + 2, COLOR_PINBALL);
         ex.text(this.font, "Stake: §e" + bet + " Chips", contentX(), contentY() + 2, COLOR_TEXT_WHITE);
         ex.text(this.font, "Score: §e" + score, contentX() + 110, contentY() + 2, COLOR_TEXT_WHITE);
         String st = inPlay ? "§aBALL IN PLAY" : "§7" + stateName;
@@ -164,7 +154,7 @@ public class PinballScreen extends BaseCasinoScreen {
         int ballX = px0 + 14 + Math.min(bounce, PinballEngine.BUMPERS - 1) * 26 + 7;
         int ballY = bumperY + 22;
         if (inPlay) {
-            ex.fill(ballX - 3, ballY - 3, ballX + 3, ballY + 3, 0xFFE8E8E8);
+            ex.fill(ballX - 3, ballY - 3, ballX + 3, ballY + 3, 0xFFE0E0E0);
             ex.fill(ballX - 1, ballY - 1, ballX + 1, ballY + 1, 0xFFFFFFFF);
         } else {
             // Drained: draw an empty cradle where the ball would be.
@@ -188,7 +178,7 @@ public class PinballScreen extends BaseCasinoScreen {
 
         // ---- last ball / odds ----------------------------------------------
         String last = lastPayout > 0
-                ? "§aLast: +" + lastPayout + " Chips §7(" + lastBumpers + " bumpers)"
+                ? "§aLast: +§e" + lastPayout + " §aChips §7(" + lastBumpers + " bumpers)"
                 : "§7No completed ball yet";
         ex.text(this.font, last, contentX(), contentY() + 120, COLOR_TEXT_WHITE);
 

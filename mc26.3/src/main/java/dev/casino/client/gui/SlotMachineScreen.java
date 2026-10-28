@@ -2,9 +2,7 @@ package dev.casino.client.gui;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import dev.casino.game.SlotMachineEngine;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -28,20 +26,20 @@ public class SlotMachineScreen extends BaseCasinoScreen {
     protected void initGameWidgets() {
         onStateUpdated();
 
-        // Bet selectors
+        // Chip denominations, top-left.
         int betY = contentY();
         addRenderableWidget(SpriteButton.of(contentX(), betY, 26, 16, "10", b -> betAmount = 10));
-        addRenderableWidget(SpriteButton.of(contentX() + 30, betY, 26, 16, "20", b -> betAmount = 20));
-        addRenderableWidget(SpriteButton.of(contentX() + 60, betY, 30, 16, "50", b -> betAmount = 50));
-        addRenderableWidget(SpriteButton.of(contentX() + 94, betY, 34, 16, "100", b -> betAmount = 100));
+        addRenderableWidget(SpriteButton.of(contentX() + 30, betY, 26, 16, "50", b -> betAmount = 50));
+        addRenderableWidget(SpriteButton.of(contentX() + 60, betY, 30, 16, "100", b -> betAmount = 100));
 
         // Spin action button
-        int actY = contentY() + 24;
-        addRenderableWidget(Button.builder(Component.literal("§e§lSPIN"), b -> {
-            JsonObject json = new JsonObject();
-            json.addProperty("bet", betAmount);
-            sendAction("SPIN", GSON.toJson(json));
-        }).bounds(contentX(), actY, 110, 24).build());
+        int actY = contentY() + 20;
+        addRenderableWidget(SpriteButton.primary(contentX() + contentW() - 92, actY, 80, 16, "SPIN",
+                b -> {
+                    JsonObject json = new JsonObject();
+                    json.addProperty("bet", betAmount);
+                    sendAction("SPIN", GSON.toJson(json));
+                }));
     }
 
     @Override
@@ -90,7 +88,7 @@ public class SlotMachineScreen extends BaseCasinoScreen {
         // Payout result banner
         int bannerY = contentY() + 114;
         if (lastWon) {
-            extractor.text(this.font, "§a§lSlot win +§e" + lastPayout + " §aChips!", contentX(), bannerY, COLOR_TEXT_GREEN);
+            extractor.text(this.font, "§a§lWon +§e" + lastPayout + " §aChips!", contentX(), bannerY, COLOR_TEXT_GREEN);
         } else if (lastPayout == 0 && !spinning) {
             extractor.text(this.font, "§cNo win.", contentX(), bannerY, COLOR_TEXT_RED);
         }
@@ -115,7 +113,8 @@ public class SlotMachineScreen extends BaseCasinoScreen {
                 }
                 // reel divider line between strips
                 if (r < 2 && row == 0) {
-                    extractor.fill(reelX0 + (r + 1) * reelW - 1, reelBaseY, reelX0 + (r + 1) * reelW, reelBaseY + reelH, 0x40000000);
+                    extractor.fill(reelX0 + (r + 1) * reelW - 1, reelBaseY,
+                            reelX0 + (r + 1) * reelW, reelBaseY + reelH, 0x40000000);
                 }
             }
         }
