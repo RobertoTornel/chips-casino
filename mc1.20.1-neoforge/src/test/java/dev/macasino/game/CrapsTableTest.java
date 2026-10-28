@@ -1,4 +1,4 @@
-package dev.casino.game;
+package dev.macasino.game;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -131,11 +131,12 @@ class CrapsTableTest {
         table.placeBet(p, BET);
         int total = -1;
         int attempts = 0;
-        while (total != 2 && total != 3 && total != 12 && attempts < 10000) {
+        do {
             total = table.roll(p);
             attempts++;
-        }
-        assertTrue(total == 2 || total == 3 || total == 12, "eventually roll craps, got " + total);
+        } while ((total != 2 && total != 3 && total != 12) && attempts < 10000);
+        assertTrue(total == 2 || total == 3 || total == 12,
+                "eventually roll craps, got " + total + " after " + attempts + " attempts");
         assertEquals(0L, table.getLastPayout(p), "craps loses everything");
         assertFalse(table.isInPointPhase(p), "craps does not enter point phase");
     }
